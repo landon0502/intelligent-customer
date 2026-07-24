@@ -1,0 +1,10 @@
+{
+  "extends": "@intelligent-customer/typescript-config/react-library.json",
+  "compilerOptions": {
+    "paths": {
+      "@intelligent-customer/ui/*": ["./src/*"]
+    }
+  },
+  "include": ["."],
+  "exclude": ["node_modules", "dist"]
+}

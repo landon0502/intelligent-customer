@@ -1,0 +1,4 @@
+{
+  "extends": "@intelligent-customer/typescript-config/base.json"
+}
+

@@ -1,0 +1,38 @@
+services:
+  # web:
+  #   build: ./apps/web
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     - api
+
+
+  ai-service:
+    build: ./apps/service
+    depends_on:
+      - redis
+      - mysql
+    networks:
+      - internal
+
+  mysql:
+    image: mysql:8.0
+    restart: always
+    command: --character-set-server=utf8mb4
+      --collation-server=utf8mb4_general_ci
+    environment:
+      MYSQL_ROOT_PASSWORD: "00000000"
+      MYSQL_DATABASE: intelligent-customer
+      TZ: Asia/Shanghai
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+
+volumes:
+  mysql_data:
