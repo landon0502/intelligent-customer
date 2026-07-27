@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>基于人工智能的客户服务机器人 — 项目设计方案与需求原型</title>
+<style>
+  :root {
+    --primary: #1677ff;
+    --primary-light: #e6f4ff;
+    --primary-dark: #0958d9;
+    --success: #52c41a;
+    --warning: #faad14;
+    --error: #ff4d4f;
+    --text: #1f1f1f;
+    --text-secondary: #666;
+    --border: #e8e8e8;
+    --bg: #f5f5f5;
+    --bg-white: #fff;
+    --shadow: 0 2px 8px rgba(0,0,0,0.08);
+    --radius: 8px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; color: var(--text); background: var(--bg); line-height:1.6; }
+
+  /* 导航 */
+  .nav { position:fixed; top:0; left:0; right:0; background:var(--bg-white); border-bottom:1px solid var(--border); z-index:100; box-shadow:var(--shadow); }
+  .nav-inner { max-width:1200px; margin:0 auto; display:flex; align-items:center; height:56px; padding:0 24px; }
+  .nav-logo { font-size:16px; font-weight:600; color:var(--primary); margin-right:32px; white-space:nowrap; }
+  .nav-tabs { display:flex; gap:4px; overflow-x:auto; }
+  .nav-tab { padding:8px 16px; border-radius:6px; cursor:pointer; font-size:14px; color:var(--text-secondary); transition:all .2s; white-space:nowrap; border:none; background:none; }
+  .nav-tab:hover { background:var(--primary-light); color:var(--primary); }
+  .nav-tab.active { background:var(--primary); color:#fff; }
+
+  /* 内容区 */
+  .content { margin-top:56px; padding:24px; max-width:1200px; margin-left:auto; margin-right:auto; }
+  .page { display:none; }
+  .page.active { display:block; }
+
+  /* 通用组件 */
+  .card { background:var(--bg-white); border-radius:var(--radius); padding:24px; box-shadow:var(--shadow); margin-bottom:20px; }
+  .card-title { font-size:18px; font-weight:600; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--border); }
+  h2 { font-size:22px; font-weight:700; margin:32px 0 16px; }
+  h3 { font-size:16px; font-weight:600; margin:20px 0 12px; }
+  p { margin-bottom:12px; }
+  .tag { display:inline-block; padding:2px 8px; border-radius:4px; font-size:12px; margin-right:6px; }
+  .tag-blue { background:var(--primary-light); color:var(--primary); }
+  .tag-green { background:#f6ffed; color:var(--success); }
+  .tag-orange { background:#fff7e6; color:var(--warning); }
+  .tag-red { background:#fff2f0; color:var(--error); }
+
+  /* 表格 */
+  table { width:100%; border-collapse:collapse; font-size:14px; }
+  th { background:#fafafa; text-align:left; padding:10px 12px; border:1px solid var(--border); font-weight:600; }
+  td { padding:10px 12px; border:1px solid var(--border); }
+
+  /* 架构图 */
+  .arch-box { text-align:center; padding:16px 20px; border:2px solid var(--primary); border-radius:var(--radius); background:var(--primary-light); font-size:13px; font-weight:500; }
+  .arch-row { display:flex; gap:16px; justify-content:center; margin-bottom:16px; flex-wrap:wrap; }
+  .arch-sub { text-align:center; padding:10px 14px; border:1px solid var(--border); border-radius:6px; background:#fff; font-size:12px; min-width:100px; }
+  .arch-arrow { text-align:center; color:var(--primary); font-size:20px; margin:8px 0; }
+  .arch-layer-label { font-size:13px; font-weight:600; color:var(--primary); margin-bottom:8px; text-align:center; }
+
+  /* ===== 原型样式 ===== */
+  .proto-frame { border:1px solid var(--border); border-radius:var(--radius); background:#fff; overflow:hidden; margin-bottom:24px; }
+  .proto-header { background:var(--primary); color:#fff; padding:10px 16px; font-size:13px; display:flex; align-items:center; justify-content:space-between; }
+  .proto-body { padding:0; }
+
+  /* 登录原型 */
+  .login-wrap { display:flex; justify-content:center; align-items:center; min-height:400px; background:linear-gradient(135deg,#667eea,#764ba2); }
+  .login-card { background:#fff; border-radius:12px; padding:36px; width:360px; box-shadow:0 8px 32px rgba(0,0,0,.15); }
+  .login-title { text-align:center; font-size:22px; font-weight:700; margin-bottom:8px; }
+  .login-sub { text-align:center; color:var(--text-secondary); font-size:13px; margin-bottom:24px; }
+  .form-label { font-size:13px; font-weight:500; margin-bottom:4px; display:block; }
+  .form-input { width:100%; padding:8px 12px; border:1px solid var(--border); border-radius:6px; font-size:14px; margin-bottom:16px; outline:none; transition:border .2s; }
+  .form-input:focus { border-color:var(--primary); }
+  .btn-primary { width:100%; padding:10px; background:var(--primary); color:#fff; border:none; border-radius:6px; font-size:14px; cursor:pointer; font-weight:500; }
+  .btn-primary:hover { background:var(--primary-dark); }
+
+  /* 主界面原型 */
+  .main-layout { display:flex; height:560px; }
+  .sidebar { width:260px; border-right:1px solid var(--border); display:flex; flex-direction:column; background:#fafafa; }
+  .sidebar-header { padding:12px 16px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+  .sidebar-title { font-size:14px; font-weight:600; }
+  .btn-new { padding:4px 12px; background:var(--primary); color:#fff; border:none; border-radius:4px; font-size:12px; cursor:pointer; }
+  .conv-list { flex:1; overflow-y:auto; padding:8px; }
+  .conv-item { padding:10px 12px; border-radius:6px; cursor:pointer; margin-bottom:4px; font-size:13px; transition:background .2s; }
+  .conv-item:hover { background:#e6e6e6; }
+  .conv-item.active { background:var(--primary-light); }
+  .conv-item-title { font-weight:500; margin-bottom:2px; }
+  .conv-item-time { font-size:11px; color:var(--text-secondary); }
+
+  /* 聊天区 */
+  .chat-area { flex:1; display:flex; flex-direction:column; }
+  .chat-topbar { padding:12px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:8px; }
+  .chat-topbar-title { font-size:15px; font-weight:600; }
+  .chat-messages { flex:1; overflow-y:auto; padding:20px; background:#f9f9f9; }
+  .msg { display:flex; margin-bottom:16px; }
+  .msg-user { justify-content:flex-end; }
+  .msg-assistant { justify-content:flex-start; }
+  .msg-bubble { max-width:70%; padding:10px 14px; border-radius:12px; font-size:14px; line-height:1.6; }
+  .msg-user .msg-bubble { background:var(--primary); color:#fff; border-bottom-right-radius:4px; }
+  .msg-assistant .msg-bubble { background:#fff; border:1px solid var(--border); border-bottom-left-radius:4px; }
+  .msg-source { margin-top:6px; font-size:11px; color:var(--primary); cursor:pointer; }
+  .msg-tool { margin-top:4px; font-size:11px; color:var(--success); }
+  .chat-input { padding:12px 20px; border-top:1px solid var(--border); display:flex; gap:8px; align-items:flex-end; background:#fff; }
+  .chat-textarea { flex:1; padding:8px 12px; border:1px solid var(--border); border-radius:6px; font-size:14px; resize:none; height:40px; outline:none; font-family:inherit; }
+  .chat-textarea:focus { border-color:var(--primary); }
+  .btn-send { padding:8px 20px; background:var(--primary); color:#fff; border:none; border-radius:6px; font-size:14px; cursor:pointer; white-space:nowrap; }
+  .btn-send:disabled { background:#ccc; cursor:not-allowed; }
+
+  /* 知识库管理原型 */
+  .kb-layout { padding:24px; }
+  .kb-topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+  .kb-search { padding:8px 12px; border:1px solid var(--border); border-radius:6px; width:240px; font-size:13px; }
+  .btn-upload { padding:6px 16px; background:var(--primary); color:#fff; border:none; border-radius:6px; font-size:13px; cursor:pointer; }
+
+  /* 流程图 */
+  .flow { display:flex; align-items:center; justify-content:center; gap:8px; padding:16px; flex-wrap:wrap; }
+  .flow-node { padding:10px 16px; border:1px solid var(--primary); border-radius:20px; background:var(--primary-light); font-size:12px; white-space:nowrap; }
+  .flow-arrow { color:var(--primary); font-size:18px; }
+
+  /* ER图 */
+  .er-table { border:2px solid var(--primary); border-radius:var(--radius); overflow:hidden; width:200px; margin:12px; display:inline-block; vertical-align:top; }
+  .er-table-name { background:var(--primary); color:#fff; padding:6px 12px; font-size:13px; font-weight:600; text-align:center; }
+  .er-field { padding:4px 12px; font-size:12px; border-bottom:1px solid #eee; }
+  .er-field-pk { font-weight:600; }
+  .er-field-fk { color:var(--primary); }
+
+  /* 状态图 */
+  .state-node { display:inline-block; padding:8px 16px; border:2px solid; border-radius:8px; font-size:12px; font-weight:500; margin:4px; text-align:center; }
+  .state-start { border-color:var(--success); background:#f6ffed; }
+  .state-process { border-color:var(--primary); background:var(--primary-light); }
+  .state-decision { border-color:var(--warning); background:#fff7e6; transform:rotate(0deg); }
+  .state-end { border-color:var(--error); background:#fff2f0; }
+
+  .two-col { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  @media(max-width:768px) { .two-col { grid-template-columns:1fr; } }
+
+  /* 打字动画 */
+  .typing { display:inline-block; width:6px; height:14px; background:var(--primary); animation:blink 1s infinite; margin-left:2px; vertical-align:middle; }
+  @keyframes blink { 0%,50%{opacity:1} 51%,100%{opacity:0} }
+
+  /* 补充样式 */
+  .badge { display:inline-block; padding:2px 6px; border-radius:10px; font-size:11px; font-weight:500; }
+  .badge-green { background:#f6ffed; color:var(--success); border:1px solid #b7eb8f; }
+  .badge-orange { background:#fff7e6; color:var(--warning); border:1px solid #ffe58f; }
+  .badge-red { background:#fff2f0; color:var(--error); border:1px solid #ffccc7; }
+  .badge-blue { background:var(--primary-light); color:var(--primary); border:1px solid #91caff; }
+
+  .section-divider { height:1px; background:var(--border); margin:32px 0; }
+
+  .indent-list { padding-left:20px; }
+  .indent-list li { margin-bottom:6px; font-size:14px; }
+</style>
+</head>
+<body>
+
+<!-- 导航 -->
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-logo">🤖 AI客服机器人 · 设计方案</div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="showPage('overview')">项目概览</button>
+      <button class="nav-tab" onclick="showPage('arch')">系统架构</button>
+      <button class="nav-tab" onclick="showPage('database')">数据库设计</button>
+      <button class="nav-tab" onclick="showPage('api')">接口设计</button>
+      <button class="nav-tab" onclick="showPage('proto-login')">原型·登录</button>
+      <button class="nav-tab" onclick="showPage('proto-chat')">原型·聊天</button>
+      <button class="nav-tab" onclick="showPage('proto-kb')">原型·知识库</button>
+      <button class="nav-tab" onclick="showPage('proto-agent')">原型·Agent</button>
+      <button class="nav-tab" onclick="showPage('tech')">技术方案</button>
+    </div>
+  </div>
+</nav>
+
+<div class="content">
+
+<!-- ==================== 项目概览 ==================== -->
+<div class="page active" id="page-overview">
+  <div class="card">
+    <div class="card-title">项目概览</div>
+    <p>本项目面向企业在线客服场景，设计并实现一个融合大语言模型（LLM）、检索增强生成（RAG）和智能体（Agent）技术的客户服务机器人系统。实现从"你问我答"到<strong>"能理解、能检索、能办事"</strong>的智能客服能力跃升。</p>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">功能需求</div>
+      <h3>👥 用户管理</h3>
+      <ul class="indent-list">
+        <li>用户注册与登录，JWT令牌鉴权</li>
+        <li>角色区分：普通用户 / 管理员</li>
+        <li>普通用户：发起对话、查看历史会话</li>
+        <li>管理员：知识库文档管理 + 系统配置</li>
+      </ul>
+      <h3>💬 会话管理</h3>
+      <ul class="indent-list">
+        <li>创建新对话会话，独立上下文</li>
+        <li>会话列表展示、切换、删除</li>
+        <li>消息持久化，刷新后继续对话</li>
+      </ul>
+      <h3>🧠 智能对话（核心）</h3>
+      <ul class="indent-list">
+        <li>闲聊类 → 对话链直接回复</li>
+        <li>知识类 → RAG检索后生成回答</li>
+        <li>操作类 → Agent调用工具处理</li>
+        <li>流式输出，逐字生成</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title">功能需求（续）</div>
+      <h3>📚 知识库管理</h3>
+      <ul class="indent-list">
+        <li>文档上传（PDF / Word / TXT）</li>
+        <li>自动解析 → 文本分块 → 向量化 → 入库</li>
+        <li>文档列表、处理状态、删除</li>
+        <li>检索测试：验证索引质量</li>
+      </ul>
+      <h3>📋 对话记录查看</h3>
+      <ul class="indent-list">
+        <li>历史对话内容、时间戳</li>
+        <li>RAG回答标注引用来源</li>
+      </ul>
+      <div style="margin-top:20px;"></div>
+      <h3>⚡ 非功能需求</h3>
+      <table>
+        <tr><th>指标</th><th>要求</th></tr>
+        <tr><td>响应速度</td><td>简单对话 ≤2s，RAG问答 ≤5s</td></tr>
+        <tr><td>并发能力</td><td>≥50 用户同时在线</td></tr>
+        <tr><td>可扩展性</td><td>新增模型/工具只需配置注册</td></tr>
+        <tr><td>安全性</td><td>密码加密、JWT鉴权、数据隔离</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">技术选型</div>
+    <table>
+      <tr><th>类别</th><th>技术</th><th>说明</th></tr>
+      <tr><td>前端框架</td><td>React 18 + Ant Design 5</td><td>组件化开发，Axios通信</td></tr>
+      <tr><td>后端框架</td><td>Python FastAPI</td><td>原生异步，SQLAlchemy 2.x ORM</td></tr>
+      <tr><td>AI框架</td><td>LangChain 1.x + LangGraph</td><td>LCEL编排，状态图Agent</td></tr>
+      <tr><td>LLM</td><td>DeepSeek（API调用）</td><td>国产模型，中文优化，流式输出</td></tr>
+      <tr><td>向量数据库</td><td>Chroma</td><td>轻量开源，本地部署，LangChain集成</td></tr>
+      <tr><td>关系数据库</td><td>MySQL 8.x</td><td>结构化数据存储</td></tr>
+      <tr><td>文档解析</td><td>LangChain DocumentLoaders</td><td>PDF/Word/TXT</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ==================== 系统架构 ==================== -->
+<div class="page" id="page-arch">
+  <div class="card">
+    <div class="card-title">系统总体架构（四层分离）</div>
+    <div style="padding:16px 0;">
+      <!-- 前端层 -->
+      <div class="arch-layer-label">前端交互层（React + Ant Design）</div>
+      <div class="arch-row">
+        <div class="arch-sub">💬 聊天窗口<br><small>消息气泡·流式输出·SSE</small></div>
+        <div class="arch-sub">📚 知识库管理<br><small>上传·列表·检索测试</small></div>
+        <div class="arch-sub">⚙️ 系统管理<br><small>登录·权限·配置</small></div>
+      </div>
+      <div class="arch-arrow">⬇ RESTful API ⬆</div>
+
+      <!-- 后端层 -->
+      <div class="arch-layer-label">后端业务服务层（Python FastAPI）</div>
+      <div class="arch-row">
+        <div class="arch-sub">👥 用户管理<br><small>注册·登录·JWT</small></div>
+        <div class="arch-sub">💬 会话管理<br><small>创建·切换·持久化</small></div>
+        <div class="arch-sub">📄 文档管理<br><small>上传·解析·索引</small></div>
+        <div class="arch-sub">🔀 AI调度<br><small>路由·流式转发</small></div>
+      </div>
+      <div class="arch-arrow">⬇ 内部服务调用 ⬆</div>
+
+      <!-- AI层 -->
+      <div class="arch-layer-label">AI服务层（LangChain 1.x 统一编排）</div>
+      <div class="arch-row">
+        <div class="arch-sub">🔗 对话链<br><small>LCEL编排</small></div>
+        <div class="arch-sub">🔍 RAG问答链<br><small>检索+生成</small></div>
+        <div class="arch-sub">🤖 Agent工作流<br><small>LangGraph状态图</small></div>
+      </div>
+      <div class="arch-arrow">⬇ 读写 ⬆</div>
+
+      <!-- 数据层 -->
+      <div class="arch-layer-label">数据存储层</div>
+      <div class="arch-row">
+        <div class="arch-sub">🗄️ MySQL<br><small>结构化数据</small></div>
+        <div class="arch-sub">📐 Chroma<br><small>向量数据</small></div>
+        <div class="arch-sub">📁 文件系统<br><small>原始文档</small></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">AI服务层内部流程</div>
+      <div style="padding:12px 0;">
+        <div class="flow">
+          <div class="flow-node">用户输入</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node" style="border-color:var(--warning);background:#fff7e6;">意图路由</div>
+        </div>
+        <div style="display:flex;justify-content:center;gap:24px;margin-top:12px;flex-wrap:wrap;">
+          <div style="text-align:center;">
+            <div style="color:var(--primary);margin-bottom:4px;">简单问答</div>
+            <div class="flow-node">对话链(LLM)</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node" style="border-color:var(--success);background:#f6ffed;">回复</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="color:var(--primary);margin-bottom:4px;">知识查询</div>
+            <div class="flow-node">RAG链(检索+LLM)</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node" style="border-color:var(--success);background:#f6ffed;">回复+来源</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="color:var(--primary);margin-bottom:4px;">业务操作</div>
+            <div class="flow-node">Agent(工具调用)</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node" style="border-color:var(--success);background:#f6ffed;">操作结果</div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:12px;">
+          <div style="color:var(--error);margin-bottom:4px;">无法判断</div>
+          <div class="flow-node" style="border-color:var(--error);background:#fff2f0;">追问澄清 → 重新路由</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Agent工作流状态图（LangGraph）</div>
+      <div style="padding:12px 0;text-align:center;">
+        <div class="state-node state-start">开始</div>
+        <div style="font-size:18px;color:var(--primary);">↓</div>
+        <div class="state-node state-process">意图识别</div>
+        <div style="font-size:18px;color:var(--primary);">↓</div>
+        <div class="state-node state-decision">条件分支</div>
+        <div style="display:flex;justify-content:center;gap:20px;margin-top:8px;flex-wrap:wrap;">
+          <div style="text-align:center;">
+            <div style="font-size:14px;color:var(--primary);">↓ 简单问答</div>
+            <div class="state-node state-process">对话链</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:14px;color:var(--primary);">↓ 知识查询</div>
+            <div class="state-node state-process">RAG检索</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:14px;color:var(--primary);">↓ 业务操作</div>
+            <div class="state-node state-process">工具调用</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:14px;color:var(--error);">↓ 无法判断</div>
+            <div class="state-node state-decision">追问澄清</div>
+            <div style="font-size:12px;color:var(--error);">↺ 回到意图识别</div>
+          </div>
+        </div>
+        <div style="font-size:18px;color:var(--success);margin-top:12px;">↓</div>
+        <div class="state-node state-end">返回结果</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">数据流转示意</div>
+    <div class="flow">
+      <div class="flow-node">前端发送消息</div><div class="flow-arrow">→</div>
+      <div class="flow-node">RESTful API</div><div class="flow-arrow">→</div>
+      <div class="flow-node">后端鉴权+会话加载</div><div class="flow-arrow">→</div>
+      <div class="flow-node">AI服务层处理</div><div class="flow-arrow">→</div>
+      <div class="flow-node">SSE流式推送</div><div class="flow-arrow">→</div>
+      <div class="flow-node">前端实时渲染</div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 数据库设计 ==================== -->
+<div class="page" id="page-database">
+  <div class="card">
+    <div class="card-title">数据库ER关系</div>
+    <div style="display:flex;justify-content:center;flex-wrap:wrap;padding:12px 0;">
+      <div class="er-table">
+        <div class="er-table-name">users 用户表</div>
+        <div class="er-field er-field-pk">🔑 id INT PK</div>
+        <div class="er-field">username VARCHAR(50)</div>
+        <div class="er-field">password_hash VARCHAR(255)</div>
+        <div class="er-field">role ENUM('user','admin')</div>
+        <div class="er-field">created_at DATETIME</div>
+      </div>
+      <div class="er-table">
+        <div class="er-table-name">conversations 会话表</div>
+        <div class="er-field er-field-pk">🔑 id INT PK</div>
+        <div class="er-field er-field-fk">🔗 user_id INT FK→users</div>
+        <div class="er-field">title VARCHAR(100)</div>
+        <div class="er-field">status ENUM</div>
+        <div class="er-field">created_at / updated_at</div>
+      </div>
+      <div class="er-table">
+        <div class="er-table-name">messages 消息表</div>
+        <div class="er-field er-field-pk">🔑 id INT PK</div>
+        <div class="er-field er-field-fk">🔗 conversation_id FK→conversations</div>
+        <div class="er-field">role ENUM</div>
+        <div class="er-field">content TEXT</div>
+        <div class="er-field">sources JSON</div>
+        <div class="er-field">created_at DATETIME</div>
+      </div>
+      <div class="er-table">
+        <div class="er-table-name">documents 文档表</div>
+        <div class="er-field er-field-pk">🔑 id INT PK</div>
+        <div class="er-field">filename VARCHAR(255)</div>
+        <div class="er-field">file_path / file_type</div>
+        <div class="er-field">chunk_count INT</div>
+        <div class="er-field">status ENUM</div>
+        <div class="er-field er-field-fk">🔗 uploaded_by FK→users</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">users 用户表</div>
+      <table>
+        <tr><th>字段</th><th>类型</th><th>说明</th></tr>
+        <tr><td>id</td><td>INT, PK, AUTO</td><td>用户ID</td></tr>
+        <tr><td>username</td><td>VARCHAR(50), UNIQUE</td><td>用户名</td></tr>
+        <tr><td>password_hash</td><td>VARCHAR(255)</td><td>bcrypt加密哈希</td></tr>
+        <tr><td>role</td><td>ENUM('user','admin')</td><td>角色</td></tr>
+        <tr><td>created_at</td><td>DATETIME</td><td>创建时间</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title">conversations 会话表</div>
+      <table>
+        <tr><th>字段</th><th>类型</th><th>说明</th></tr>
+        <tr><td>id</td><td>INT, PK, AUTO</td><td>会话ID</td></tr>
+        <tr><td>user_id</td><td>INT, FK</td><td>所属用户</td></tr>
+        <tr><td>title</td><td>VARCHAR(100)</td><td>会话标题</td></tr>
+        <tr><td>status</td><td>ENUM('active','closed')</td><td>状态</td></tr>
+        <tr><td>created_at</td><td>DATETIME</td><td>创建时间</td></tr>
+        <tr><td>updated_at</td><td>DATETIME</td><td>更新时间</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">messages 消息表</div>
+      <table>
+        <tr><th>字段</th><th>类型</th><th>说明</th></tr>
+        <tr><td>id</td><td>INT, PK, AUTO</td><td>消息ID</td></tr>
+        <tr><td>conversation_id</td><td>INT, FK</td><td>所属会话</td></tr>
+        <tr><td>role</td><td>ENUM('user','assistant','system')</td><td>角色</td></tr>
+        <tr><td>content</td><td>TEXT</td><td>消息内容</td></tr>
+        <tr><td>sources</td><td>JSON</td><td>引用来源（RAG回答时）</td></tr>
+        <tr><td>created_at</td><td>DATETIME</td><td>创建时间</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title">documents 文档表</div>
+      <table>
+        <tr><th>字段</th><th>类型</th><th>说明</th></tr>
+        <tr><td>id</td><td>INT, PK, AUTO</td><td>文档ID</td></tr>
+        <tr><td>filename</td><td>VARCHAR(255)</td><td>文件名</td></tr>
+        <tr><td>file_path</td><td>VARCHAR(500)</td><td>存储路径</td></tr>
+        <tr><td>file_type</td><td>VARCHAR(20)</td><td>文件类型</td></tr>
+        <tr><td>chunk_count</td><td>INT</td><td>分块数量</td></tr>
+        <tr><td>status</td><td>ENUM('processing','ready','failed')</td><td>处理状态</td></tr>
+        <tr><td>uploaded_by</td><td>INT, FK</td><td>上传者</td></tr>
+        <tr><td>uploaded_at</td><td>DATETIME</td><td>上传时间</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 接口设计 ==================== -->
+<div class="page" id="page-api">
+  <div class="card">
+    <div class="card-title">RESTful API 接口设计</div>
+
+    <h3>用户鉴权 /api/auth</h3>
+    <table>
+      <tr><th>方法</th><th>路径</th><th>说明</th><th>请求体</th><th>返回</th></tr>
+      <tr><td><span class="tag tag-green">POST</span></td><td>/api/auth/register</td><td>用户注册</td><td>{username, password}</td><td>{user_id, token}</td></tr>
+      <tr><td><span class="tag tag-green">POST</span></td><td>/api/auth/login</td><td>用户登录</td><td>{username, password}</td><td>{token, role}</td></tr>
+      <tr><td><span class="tag tag-blue">GET</span></td><td>/api/auth/me</td><td>获取当前用户</td><td>—</td><td>{id, username, role}</td></tr>
+    </table>
+
+    <h3>会话管理 /api/conversations</h3>
+    <table>
+      <tr><th>方法</th><th>路径</th><th>说明</th><th>请求体</th><th>返回</th></tr>
+      <tr><td><span class="tag tag-blue">GET</span></td><td>/api/conversations</td><td>获取会话列表</td><td>—</td><td>[{id, title, updated_at}]</td></tr>
+      <tr><td><span class="tag tag-green">POST</span></td><td>/api/conversations</td><td>创建新会话</td><td>{title?}</td><td>{id, title}</td></tr>
+      <tr><td><span class="tag tag-blue">GET</span></td><td>/api/conversations/{id}/messages</td><td>获取会话消息</td><td>—</td><td>[{role, content, sources}]</td></tr>
+      <tr><td><span class="tag tag-red">DELETE</span></td><td>/api/conversations/{id}</td><td>删除会话</td><td>—</td><td>{success}</td></tr>
+    </table>
+
+    <h3>对话 /api/chat</h3>
+    <table>
+      <tr><th>方法</th><th>路径</th><th>说明</th><th>请求体</th><th>返回</th></tr>
+      <tr><td><span class="tag tag-green">POST</span></td><td>/api/chat/send</td><td>发送消息（SSE流式）</td><td>{conversation_id, message}</td><td>SSE: text/event-stream</td></tr>
+    </table>
+
+    <h3>知识库 /api/knowledge</h3>
+    <table>
+      <tr><th>方法</th><th>路径</th><th>说明</th><th>请求体</th><th>返回</th></tr>
+      <tr><td><span class="tag tag-green">POST</span></td><td>/api/knowledge/upload</td><td>上传文档</td><td>multipart/form-data</td><td>{document_id, status}</td></tr>
+      <tr><td><span class="tag tag-blue">GET</span></td><td>/api/knowledge/documents</td><td>获取文档列表</td><td>—</td><td>[{id, filename, status, chunk_count}]</td></tr>
+      <tr><td><span class="tag tag-red">DELETE</span></td><td>/api/knowledge/documents/{id}</td><td>删除文档</td><td>—</td><td>{success}</td></tr>
+      <tr><td><span class="tag tag-green">POST</span></td><td>/api/knowledge/query</td><td>检索测试</td><td>{question}</td><td>{chunks, answer, sources}</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ==================== 原型：登录 ==================== -->
+<div class="page" id="page-proto-login">
+  <div class="card">
+    <div class="card-title">原型：用户登录页面</div>
+    <div class="proto-frame">
+      <div class="proto-header">
+        <span>🖥️ 浏览器预览</span>
+        <span style="font-size:11px;opacity:.7;">http://localhost:3000/login</span>
+      </div>
+      <div class="login-wrap">
+        <div class="login-card">
+          <div class="login-title">🤖 AI智能客服</div>
+          <div class="login-sub">企业客户服务机器人系统</div>
+          <label class="form-label">用户名</label>
+          <input class="form-input" type="text" placeholder="请输入用户名" value="admin">
+          <label class="form-label">密码</label>
+          <input class="form-input" type="password" placeholder="请输入密码" value="••••••••">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;font-size:12px;">
+            <label style="color:var(--text-secondary);"><input type="checkbox" checked> 记住我</label>
+            <a href="#" style="color:var(--primary);text-decoration:none;">忘记密码？</a>
+          </div>
+          <button class="btn-primary">登 录</button>
+          <div style="text-align:center;margin-top:12px;font-size:12px;color:var(--text-secondary);">
+            还没有账号？<a href="#" style="color:var(--primary);">立即注册</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p style="color:var(--text-secondary);font-size:13px;margin-top:8px;">登录成功后JWT令牌存入localStorage，后续请求通过Axios拦截器自动携带Authorization头。未登录访问系统时自动跳转此页。</p>
+  </div>
+</div>
+
+<!-- ==================== 原型：聊天 ==================== -->
+<div class="page" id="page-proto-chat">
+  <div class="card">
+    <div class="card-title">原型：聊天主界面</div>
+    <div class="proto-frame">
+      <div class="proto-header">
+        <span>🖥️ 浏览器预览 — 普通用户视角</span>
+        <span style="font-size:11px;opacity:.7;">http://localhost:3000/chat</span>
+      </div>
+      <div class="main-layout">
+        <!-- 会话列表 -->
+        <div class="sidebar">
+          <div class="sidebar-header">
+            <span class="sidebar-title">💬 会话列表</span>
+            <button class="btn-new">+ 新建</button>
+          </div>
+          <div class="conv-list">
+            <div class="conv-item active">
+              <div class="conv-item-title">退货政策咨询</div>
+              <div class="conv-item-time">刚刚 · 3条消息</div>
+            </div>
+            <div class="conv-item">
+              <div class="conv-item-title">订单物流查询</div>
+              <div class="conv-item-time">10分钟前</div>
+            </div>
+            <div class="conv-item">
+              <div class="conv-item-title">产品参数了解</div>
+              <div class="conv-item-time">1小时前</div>
+            </div>
+            <div class="conv-item">
+              <div class="conv-item-title">修改收货地址</div>
+              <div class="conv-item-time">昨天 15:30</div>
+            </div>
+            <div class="conv-item">
+              <div class="conv-item-title">配送范围咨询</div>
+              <div class="conv-item-time">昨天 10:12</div>
+            </div>
+          </div>
+        </div>
+        <!-- 聊天区 -->
+        <div class="chat-area">
+          <div class="chat-topbar">
+            <span class="chat-topbar-title">退货政策咨询</span>
+            <span class="badge badge-blue">RAG增强</span>
+          </div>
+          <div class="chat-messages">
+            <!-- 用户消息 -->
+            <div class="msg msg-user">
+              <div class="msg-bubble">你好，请问你们的退货政策是什么？</div>
+            </div>
+            <!-- RAG回复 -->
+            <div class="msg msg-assistant">
+              <div class="msg-bubble">
+                您好！根据我们的退货政策，商品签收后7天内可以申请无理由退货，需保证商品未使用且包装完整。退款将在收到退货商品后3个工作日内原路返回。
+                <div class="msg-source">📎 来源：退货政策.pdf 第2段 | 配送说明.pdf 第1段</div>
+              </div>
+            </div>
+            <!-- 用户追问 -->
+            <div class="msg msg-user">
+              <div class="msg-bubble">那如果商品有质量问题呢？</div>
+            </div>
+            <!-- RAG追问回复 -->
+            <div class="msg msg-assistant">
+              <div class="msg-bubble">
+                如果商品存在质量问题，可以在签收后15天内申请退货，不受"7天无理由"限制。请提供商品照片和订单号，我们会优先处理。<span class="typing"></span>
+                <div class="msg-source">📎 来源：退货政策.pdf 第3段</div>
+              </div>
+            </div>
+          </div>
+          <div class="chat-input">
+            <textarea class="chat-textarea" placeholder="输入消息，Enter发送..."></textarea>
+            <button class="btn-send">发送</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p style="color:var(--text-secondary);font-size:13px;margin-top:8px;">💬 用户消息靠右蓝色气泡 | 🤖 助手消息靠左白色气泡 | 📎 RAG回答附引用来源 | ✨ 流式输出逐字生成（打字光标动画）</p>
+  </div>
+</div>
+
+<!-- ==================== 原型：知识库 ==================== -->
+<div class="page" id="page-proto-kb">
+  <div class="card">
+    <div class="card-title">原型：知识库管理页面（管理员）</div>
+    <div class="proto-frame">
+      <div class="proto-header">
+        <span>🖥️ 浏览器预览 — 管理员视角</span>
+        <span style="font-size:11px;opacity:.7;">http://localhost:3000/knowledge</span>
+      </div>
+      <div class="kb-layout">
+        <div class="kb-topbar">
+          <div>
+            <span style="font-size:18px;font-weight:600;">📚 知识库管理</span>
+            <span style="font-size:12px;color:var(--text-secondary);margin-left:12px;">共 5 份文档 · 127 个文本块</span>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input class="kb-search" placeholder="🔍 搜索文档...">
+            <button class="btn-upload">📤 上传文档</button>
+          </div>
+        </div>
+        <table>
+          <tr>
+            <th>文件名</th><th>类型</th><th>分块数</th><th>处理状态</th><th>上传者</th><th>上传时间</th><th>操作</th>
+          </tr>
+          <tr>
+            <td>📄 退货政策.pdf</td><td><span class="tag tag-red">PDF</span></td><td>32</td>
+            <td><span class="badge badge-green">✓ 就绪</span></td>
+            <td>admin</td><td>2026-07-20 10:30</td><td><a href="#" style="color:var(--error);font-size:12px;">删除</a></td>
+          </tr>
+          <tr>
+            <td>📄 产品介绍.docx</td><td><span class="tag tag-blue">Word</span></td><td>28</td>
+            <td><span class="badge badge-green">✓ 就绪</span></td>
+            <td>admin</td><td>2026-07-20 10:28</td><td><a href="#" style="color:var(--error);font-size:12px;">删除</a></td>
+          </tr>
+          <tr>
+            <td>📄 配送说明.pdf</td><td><span class="tag tag-red">PDF</span></td><td>24</td>
+            <td><span class="badge badge-green">✓ 就绪</span></td>
+            <td>admin</td><td>2026-07-19 16:45</td><td><a href="#" style="color:var(--error);font-size:12px;">删除</a></td>
+          </tr>
+          <tr>
+            <td>📄 常见问题.txt</td><td><span class="tag tag-orange">TXT</span></td><td>18</td>
+            <td><span class="badge badge-green">✓ 就绪</span></td>
+            <td>admin</td><td>2026-07-19 14:20</td><td><a href="#" style="color:var(--error);font-size:12px;">删除</a></td>
+          </tr>
+          <tr>
+            <td>📄 会员权益说明.pdf</td><td><span class="tag tag-red">PDF</span></td><td>—</td>
+            <td><span class="badge badge-orange">⏳ 处理中</span></td>
+            <td>admin</td><td>2026-07-24 09:15</td><td><a href="#" style="color:var(--error);font-size:12px;">删除</a></td>
+          </tr>
+        </table>
+
+        <div style="margin-top:24px;padding:20px;background:#fafafa;border-radius:8px;border:1px solid var(--border);">
+          <h3 style="margin:0 0 12px;">🔍 知识库检索测试</h3>
+          <div style="display:flex;gap:8px;margin-bottom:12px;">
+            <input class="form-input" style="margin:0;flex:1;" placeholder="输入测试问题，如：退货需要多长时间？" value="退货需要多长时间？">
+            <button class="btn-primary" style="width:auto;padding:8px 20px;">检索测试</button>
+          </div>
+          <div style="background:#fff;border-radius:6px;padding:12px;border:1px solid var(--border);">
+            <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">检索结果（相似度 ≥ 0.6）：</div>
+            <div style="padding:8px;background:var(--primary-light);border-radius:4px;font-size:13px;margin-bottom:6px;">
+              <strong>退货政策.pdf [块#3]</strong>：退款将在收到退货商品后3个工作日内原路返回... <span style="color:var(--primary);">相似度: 0.92</span>
+            </div>
+            <div style="padding:8px;background:var(--primary-light);border-radius:4px;font-size:13px;margin-bottom:6px;">
+              <strong>退货政策.pdf [块#1]</strong>：商品签收后7天内可以申请无理由退货... <span style="color:var(--primary);">相似度: 0.87</span>
+            </div>
+            <div style="padding:8px;background:var(--primary-light);border-radius:4px;font-size:13px;">
+              <strong>配送说明.pdf [块#2]</strong>：退货商品请使用原包装寄回... <span style="color:var(--primary);">相似度: 0.71</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 原型：Agent ==================== -->
+<div class="page" id="page-proto-agent">
+  <div class="card">
+    <div class="card-title">原型：Agent工具调用对话</div>
+    <div class="proto-frame">
+      <div class="proto-header">
+        <span>🖥️ 浏览器预览 — Agent场景</span>
+        <span style="font-size:11px;opacity:.7;">http://localhost:3000/chat</span>
+      </div>
+      <div class="main-layout">
+        <div class="sidebar">
+          <div class="sidebar-header">
+            <span class="sidebar-title">💬 会话列表</span>
+            <button class="btn-new">+ 新建</button>
+          </div>
+          <div class="conv-list">
+            <div class="conv-item active">
+              <div class="conv-item-title">订单查询+退货办理</div>
+              <div class="conv-item-time">刚刚 · Agent调用</div>
+            </div>
+          </div>
+        </div>
+        <div class="chat-area">
+          <div class="chat-topbar">
+            <span class="chat-topbar-title">订单查询+退货办理</span>
+            <span class="badge" style="background:#fff7e6;color:var(--warning);border:1px solid #ffe58f;">🤖 Agent</span>
+          </div>
+          <div class="chat-messages">
+            <div class="msg msg-user">
+              <div class="msg-bubble">帮我查一下订单 ORD-20260720 的状态</div>
+            </div>
+            <div class="msg msg-assistant">
+              <div class="msg-bubble">
+                <div class="msg-tool">🔧 调用工具：order_query(order_id="ORD-20260720")</div>
+                好的，已为您查询到订单信息：<br><br>
+                <strong>订单号：</strong>ORD-20260720<br>
+                <strong>状态：</strong>已签收<br>
+                <strong>商品：</strong>智能音箱 Pro<br>
+                <strong>签收时间：</strong>2026-07-22 14:30
+              </div>
+            </div>
+            <div class="msg msg-user">
+              <div class="msg-bubble">这个商品我不想要了，能帮我退货吗？</div>
+            </div>
+            <div class="msg msg-assistant">
+              <div class="msg-bubble">
+                <div class="msg-tool">🔧 调用工具：knowledge_base_query(query="退货政策")</div>
+                <div class="msg-tool" style="margin-top:4px;">🔧 调用工具：business_action(action="apply_return", order_id="ORD-20260720")</div>
+                根据退货政策，您的订单在签收7天内，可以申请无理由退货。已为您提交退货申请：<br><br>
+                <strong>退货单号：</strong>RET-20260724001<br>
+                <strong>预计退款：</strong>¥299.00<br>
+                <strong>退款时间：</strong>收到退货商品后3个工作日内<br><br>
+                请将商品寄回至：北京市朝阳区xx路xx号，使用原包装即可。<span class="typing"></span>
+                <div class="msg-source">📎 来源：退货政策.pdf</div>
+              </div>
+            </div>
+          </div>
+          <div class="chat-input">
+            <textarea class="chat-textarea" placeholder="输入消息，Enter发送..."></textarea>
+            <button class="btn-send">发送</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p style="color:var(--text-secondary);font-size:13px;margin-top:8px;">🤖 Agent自动识别意图 → 调用对应工具（知识库查询/订单查询/业务办理）→ 返回结构化结果。当意图不明确时触发追问澄清。</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Agent工具集</div>
+    <table>
+      <tr><th>工具</th><th>触发条件</th><th>输入</th><th>输出</th><th>当前状态</th></tr>
+      <tr><td>🔍 knowledge_base_query</td><td>用户询问业务规则、产品信息</td><td>用户问题</td><td>检索到的文档片段</td><td><span class="badge badge-green">已实现</span></td></tr>
+      <tr><td>📦 order_query</td><td>用户提供订单号或问物流状态</td><td>订单号</td><td>订单状态信息</td><td><span class="badge badge-orange">模拟接口</span></td></tr>
+      <tr><td>⚡ business_action</td><td>用户要求执行退货、修改地址等</td><td>操作类型+参数</td><td>操作结果确认</td><td><span class="badge badge-orange">模拟接口</span></td></tr>
+      <tr><td>👤 transfer_human</td><td>Agent判断无法处理</td><td>—</td><td>转人工通知</td><td><span class="badge badge-green">已实现</span></td></tr>
+      <tr><td>❓ clarify</td><td>意图识别为"无法判断"</td><td>—</td><td>追问语句</td><td><span class="badge badge-green">已实现</span></td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ==================== 技术方案 ==================== -->
+<div class="page" id="page-tech">
+  <div class="card">
+    <div class="card-title">关键技术方案</div>
+
+    <h3>1. 流式输出方案</h3>
+    <div class="flow">
+      <div class="flow-node">用户发送消息</div><div class="flow-arrow">→</div>
+      <div class="flow-node">FastAPI StreamingResponse</div><div class="flow-arrow">→</div>
+      <div class="flow-node">async生成器逐块推送</div><div class="flow-arrow">→</div>
+      <div class="flow-node">SSE (text/event-stream)</div><div class="flow-arrow">→</div>
+      <div class="flow-node">前端EventSource接收</div><div class="flow-arrow">→</div>
+      <div class="flow-node">实时追加到消息气泡</div>
+    </div>
+    <p>FastAPI使用StreamingResponse配合async生成器，将LangChain的流式迭代器逐块推送给前端。前端通过EventSource API建立SSE连接，每收到一个文本片段就追加渲染，直到收到结束标记关闭连接。</p>
+
+    <div class="section-divider"></div>
+
+    <h3>2. RAG知识库流程</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div>
+        <h3 style="color:var(--primary);">离线：知识库构建</h3>
+        <div class="flow" style="flex-direction:column;align-items:flex-start;">
+          <div class="flow-node">📄 文档上传</div><div class="flow-arrow">↓</div>
+          <div class="flow-node">📖 DocumentLoader解析</div><div class="flow-arrow">↓</div>
+          <div class="flow-node">✂️ TextSplitter分块(512/64)</div><div class="flow-arrow">↓</div>
+          <div class="flow-node">📐 Embedding向量化</div><div class="flow-arrow">↓</div>
+          <div class="flow-node">💾 Chroma入库+元数据</div>
+        </div>
+      </div>
+      <div>
+        <h3 style="color:var(--success);">在线：检索问答</h3>
+        <div class="flow" style="flex-direction:column;align-items:flex-start;">
+          <div class="flow-node">❓ 用户提问</div><div class="flow-arrow">↓</div>
+          <div class="flow-node">📐 问题向量化</div><div class="flow-arrow">↓</div>
+          <div class="flow-node">🔍 Chroma相似度检索(Top-K=4)</div><div class="flow-arrow">↓</div>
+          <div class="flow-node">📝 提示模板组装(问题+检索结果)</div><div class="flow-arrow">↓</div>
+          <div class="flow-node">🧠 LLM生成回答+引用来源</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <h3>3. 知识库更新策略</h3>
+    <p>文档上传后触发异步处理：解析→分块→向量化→入库。Chroma支持增量添加，新文档向量直接追加到已有集合，无需重建索引。文档删除时通过元数据过滤移除对应向量。文档处理完成后立即更新集合，用户下次提问即可检索到新内容。</p>
+
+    <div class="section-divider"></div>
+
+    <h3>4. 对话历史管理</h3>
+    <p>采用<strong>滑动窗口策略</strong>，保留最近10轮对话。历史消息存储在MySQL中，每次对话开始时从数据库加载注入LangChain的ConversationBufferWindowMemory。窗口外的历史不注入当前上下文（避免Token超限），但用户可随时查看完整对话记录。</p>
+
+    <div class="section-divider"></div>
+
+    <h3>5. Agent意图识别与工具决策</h3>
+    <p>Agent通过提示模板中明确描述各工具的适用场景来引导LLM决策。当意图不明确时触发追问澄清，连续两次无法判断后建议转人工客服，避免无效循环。</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">开发计划</div>
+    <table>
+      <tr><th>阶段</th><th>内容</th><th>周期</th></tr>
+      <tr><td>第一阶段</td><td>需求确认、架构设计、数据库设计</td><td>第1-2周</td></tr>
+      <tr><td>第二阶段</td><td>后端基础框架搭建、用户与会话模块开发</td><td>第3-4周</td></tr>
+      <tr><td>第三阶段</td><td>AI服务层开发（对话链、RAG链、Agent工作流）</td><td>第5-7周</td></tr>
+      <tr><td>第四阶段</td><td>前端界面开发、前后端联调</td><td>第8-9周</td></tr>
+      <tr><td>第五阶段</td><td>系统测试、问题修复、论文撰写</td><td>第10-12周</td></tr>
+    </table>
+  </div>
+</div>
+
+</div><!-- /content -->
+
+<script>
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  // 找到对应的tab
+  const tabs = document.querySelectorAll('.nav-tab');
+  const tabMap = {
+    'overview':0, 'arch':1, 'database':2, 'api':3,
+    'proto-login':4, 'proto-chat':5, 'proto-kb':6, 'proto-agent':7, 'tech':8
+  };
+  if(tabMap[id] !== undefined) tabs[tabMap[id]].classList.add('active');
+  window.scrollTo(0,0);
+}
+</script>
+
+</body>
+</html>

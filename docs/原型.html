@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 客户服务机器人 — 需求原型</title>
+<style>
+/* ===== CSS Reset & Variables ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --primary: #1677ff; --primary-hover: #4096ff; --primary-bg: #e6f4ff;
+  --success: #52c41a; --warning: #faad14; --error: #ff4d4f;
+  --text: #1f1f1f; --text-secondary: #666; --text-tertiary: #999;
+  --bg: #f5f5f5; --bg-white: #fff; --border: #e8e8e8; --border-light: #f0f0f0;
+  --shadow: 0 2px 8px rgba(0,0,0,0.08); --shadow-lg: 0 4px 16px rgba(0,0,0,0.12);
+  --radius: 8px; --radius-lg: 12px;
+  --sidebar-w: 220px; --header-h: 56px;
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+html, body { height: 100%; font-family: var(--font); font-size: 14px; color: var(--text); background: var(--bg); }
+a { color: var(--primary); text-decoration: none; }
+button { font-family: var(--font); cursor: pointer; border: none; outline: none; }
+input, textarea, select { font-family: var(--font); font-size: 14px; }
+
+/* ===== Layout ===== */
+.app { display: flex; height: 100vh; }
+.sidebar { width: var(--sidebar-w); background: #001529; color: #fff; display: flex; flex-direction: column; flex-shrink: 0; transition: transform 0.3s; }
+.sidebar-logo { height: var(--header-h); display: flex; align-items: center; padding: 0 20px; font-size: 16px; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.sidebar-logo .logo-icon { width: 28px; height: 28px; background: var(--primary); border-radius: 6px; display: flex; align-items: center; justify-content: center; margin-right: 10px; font-size: 16px; }
+.sidebar-menu { flex: 1; padding: 8px 0; overflow-y: auto; }
+.menu-item { display: flex; align-items: center; padding: 10px 20px; color: rgba(255,255,255,0.65); cursor: pointer; transition: all 0.2s; margin: 2px 8px; border-radius: 6px; font-size: 14px; }
+.menu-item:hover { color: #fff; background: rgba(255,255,255,0.08); }
+.menu-item.active { color: #fff; background: var(--primary); }
+.menu-item .icon { width: 20px; margin-right: 10px; text-align: center; }
+.menu-group { padding: 8px 20px 4px; color: rgba(255,255,255,0.35); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+.sidebar-footer { padding: 12px 20px; border-top: 1px solid rgba(255,255,255,0.1); }
+.sidebar-footer .user-info { display: flex; align-items: center; gap: 8px; }
+.sidebar-footer .avatar { width: 32px; height: 32px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+.sidebar-footer .user-name { font-size: 13px; }
+.sidebar-footer .logout-btn { color: rgba(255,255,255,0.45); font-size: 12px; cursor: pointer; margin-top: 4px; }
+.sidebar-footer .logout-btn:hover { color: #fff; }
+
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.header { height: var(--header-h); background: var(--bg-white); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; flex-shrink: 0; }
+.header-title { font-size: 16px; font-weight: 500; }
+.header-actions { display: flex; align-items: center; gap: 12px; }
+.content { flex: 1; overflow-y: auto; padding: 24px; }
+
+/* ===== Login Page ===== */
+.login-page { display: flex; align-items: center; justify-content: center; height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.login-card { width: 400px; background: var(--bg-white); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); padding: 40px; }
+.login-card h1 { text-align: center; font-size: 24px; margin-bottom: 8px; color: var(--text); }
+.login-card .subtitle { text-align: center; color: var(--text-secondary); margin-bottom: 32px; font-size: 14px; }
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; margin-bottom: 6px; font-weight: 500; }
+.form-input { width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; transition: border-color 0.2s; }
+.form-input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-bg); }
+.btn { padding: 8px 20px; border-radius: 6px; font-size: 14px; font-weight: 500; transition: all 0.2s; }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-hover); }
+.btn-block { width: 100%; padding: 10px; }
+.login-switch { text-align: center; margin-top: 16px; color: var(--text-secondary); font-size: 13px; }
+.login-switch a { font-weight: 500; }
+
+/* ===== Chat Layout ===== */
+.chat-layout { display: flex; height: 100%; overflow: hidden; }
+.chat-sessions { width: 260px; background: var(--bg-white); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
+.session-header { padding: 16px; border-bottom: 1px solid var(--border); }
+.session-header h3 { font-size: 14px; margin-bottom: 8px; }
+.new-session-btn { width: 100%; padding: 8px; background: var(--primary-bg); color: var(--primary); border: 1px dashed var(--primary); border-radius: 6px; font-size: 13px; }
+.new-session-btn:hover { background: #d6efff; }
+.session-list { flex: 1; overflow-y: auto; padding: 8px; }
+.session-item { padding: 10px 12px; border-radius: 6px; cursor: pointer; margin-bottom: 4px; transition: background 0.2s; }
+.session-item:hover { background: var(--border-light); }
+.session-item.active { background: var(--primary-bg); }
+.session-item .session-title { font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.session-item .session-time { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
+.session-item .session-delete { float: right; color: var(--text-tertiary); font-size: 12px; display: none; }
+.session-item:hover .session-delete { display: inline; }
+
+.chat-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.chat-messages { flex: 1; overflow-y: auto; padding: 20px 24px; }
+.message { display: flex; margin-bottom: 16px; }
+.message.user { justify-content: flex-end; }
+.message-bubble { max-width: 70%; padding: 10px 14px; border-radius: 12px; font-size: 14px; line-height: 1.6; word-break: break-word; }
+.message.user .message-bubble { background: var(--primary); color: #fff; border-bottom-right-radius: 4px; }
+.message.assistant .message-bubble { background: var(--bg-white); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+.message .message-time { font-size: 11px; color: var(--text-tertiary); margin-top: 4px; }
+.message.user .message-time { text-align: right; }
+.tool-status { display: flex; align-items: center; gap: 8px; padding: 8px 14px; background: #fffbe6; border: 1px solid #ffe58f; border-radius: 8px; margin-bottom: 12px; font-size: 13px; color: #ad6800; max-width: 70%; }
+.tool-status .spinner { width: 14px; height: 14px; border: 2px solid #ffe58f; border-top-color: #ad6800; border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.tool-result { padding: 8px 14px; background: #f6ffed; border: 1px solid #b7eb8f; border-radius: 8px; margin-bottom: 12px; font-size: 13px; color: #389e0d; max-width: 70%; }
+
+.chat-input { padding: 16px 24px; border-top: 1px solid var(--border); background: var(--bg-white); }
+.chat-input-wrapper { display: flex; gap: 8px; align-items: flex-end; }
+.chat-textarea { flex: 1; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; resize: none; min-height: 40px; max-height: 120px; font-size: 14px; line-height: 1.5; }
+.chat-textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-bg); }
+.send-btn { padding: 8px 20px; background: var(--primary); color: #fff; border-radius: 8px; font-size: 14px; white-space: nowrap; }
+.send-btn:hover { background: var(--primary-hover); }
+.send-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+/* ===== Knowledge Base Page ===== */
+.kb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+.kb-card { background: var(--bg-white); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; cursor: pointer; transition: all 0.2s; }
+.kb-card:hover { box-shadow: var(--shadow); border-color: var(--primary); }
+.kb-card h3 { font-size: 16px; margin-bottom: 8px; }
+.kb-card .kb-desc { color: var(--text-secondary); font-size: 13px; margin-bottom: 12px; }
+.kb-card .kb-meta { display: flex; gap: 16px; font-size: 12px; color: var(--text-tertiary); }
+.kb-detail { background: var(--bg-white); border-radius: var(--radius); padding: 24px; }
+.kb-detail-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.kb-detail-header h2 { font-size: 20px; }
+.doc-table { width: 100%; border-collapse: collapse; }
+.doc-table th, .doc-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border-light); font-size: 13px; }
+.doc-table th { background: #fafafa; font-weight: 500; color: var(--text-secondary); }
+.status-badge { padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+.status-completed { background: #f6ffed; color: #52c41a; }
+.status-processing { background: #fffbe6; color: #faad14; }
+.status-pending { background: #f0f0f0; color: #999; }
+.status-failed { background: #fff2f0; color: #ff4d4f; }
+.upload-area { border: 2px dashed var(--border); border-radius: var(--radius); padding: 40px; text-align: center; cursor: pointer; transition: border-color 0.2s; margin-bottom: 20px; }
+.upload-area:hover { border-color: var(--primary); }
+.upload-area .icon { font-size: 40px; color: var(--text-tertiary); margin-bottom: 8px; }
+.upload-progress { margin-top: 12px; }
+.progress-bar { height: 6px; background: var(--border-light); border-radius: 3px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--primary); border-radius: 3px; transition: width 0.3s; }
+
+/* ===== Admin Tables ===== */
+.data-table { width: 100%; background: var(--bg-white); border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); border-collapse: separate; border-spacing: 0; }
+.data-table th, .data-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border-light); font-size: 13px; }
+.data-table th { background: #fafafa; font-weight: 500; color: var(--text-secondary); font-size: 13px; }
+.data-table tr:last-child td { border-bottom: none; }
+.role-tag { padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; }
+.role-admin { background: #fff0f6; color: #eb2f96; }
+.role-user { background: #e6f4ff; color: #1677ff; }
+.switch { position: relative; display: inline-block; width: 36px; height: 20px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.switch-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #ccc; border-radius: 20px; transition: 0.3s; }
+.switch-slider:before { content: ""; position: absolute; height: 16px; width: 16px; left: 2px; bottom: 2px; background: white; border-radius: 50%; transition: 0.3s; }
+.switch input:checked + .switch-slider { background: var(--primary); }
+.switch input:checked + .switch-slider:before { transform: translateX(16px); }
+
+/* ===== Config Page ===== */
+.config-section { background: var(--bg-white); border-radius: var(--radius); padding: 24px; margin-bottom: 16px; border: 1px solid var(--border); }
+.config-section h3 { font-size: 16px; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border-light); }
+.config-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; }
+.config-row label { font-size: 14px; color: var(--text); }
+.config-row .config-value { width: 200px; }
+.config-input { padding: 6px 10px; border: 1px solid var(--border); border-radius: 6px; width: 100%; font-size: 13px; }
+.config-input:focus { border-color: var(--primary); outline: none; }
+
+/* ===== Modal ===== */
+.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+.modal { background: var(--bg-white); border-radius: var(--radius-lg); width: 480px; box-shadow: var(--shadow-lg); }
+.modal-header { padding: 16px 24px; border-bottom: 1px solid var(--border); font-size: 16px; font-weight: 500; }
+.modal-body { padding: 24px; }
+.modal-footer { padding: 12px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
+
+/* ===== Utility ===== */
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.page-header h2 { font-size: 20px; }
+.empty-state { text-align: center; padding: 60px 20px; color: var(--text-tertiary); }
+.empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+.breadcrumb { font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; }
+.breadcrumb a { color: var(--primary); }
+.tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-right: 4px; }
+.tag-blue { background: #e6f4ff; color: #1677ff; }
+.tag-green { background: #f6ffed; color: #52c41a; }
+.tag-orange { background: #fff7e6; color: #fa8c16; }
+.hidden { display: none !important; }
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .sidebar { position: fixed; left: 0; top: 0; bottom: 0; z-index: 100; transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .chat-sessions { width: 200px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== App Shell ===== -->
+<div id="app"></div>
+
+<script>
+// ===== State Management =====
+const state = {
+  currentPage: 'login',
+  isLoggedIn: false,
+  currentUser: null,
+  role: 'admin', // 'user' or 'admin'
+  sessions: [
+    { id: 's1', title: '退货政策咨询', time: '10:30', messages: [
+      { role: 'user', content: '退货政策是什么？', time: '10:30' },
+      { role: 'assistant', content: '根据我们的退货政策：\n\n1. **7天无理由退货**：商品签收后7天内可申请无理由退货\n2. **15天换货**：商品签收后15天内出现质量问题可申请换货\n3. **退货流程**：联系客服 → 提交退货申请 → 审核通过 → 寄回商品 → 退款\n\n> [信息来源：退货政策.pdf - 第1段]', time: '10:30', toolCalls: [{tool:'knowledge_search', status:'done', summary:'检索到退货政策文档'}] }
+    ]},
+    { id: 's2', title: '订单查询', time: '09:15', messages: [
+      { role: 'user', content: '我的订单ORD001到哪了？', time: '09:15' },
+      { role: 'assistant', content: '您好！订单 **ORD001** 的当前状态如下：\n\n- **状态**：已发货\n- **承运商**：顺丰速运\n- **运单号**：SF1234567890\n- **预计到达**：2026-07-28\n\n如有其他问题，随时联系我！', time: '09:15', toolCalls: [{tool:'order_query', status:'done', summary:'查询到订单ORD001已发货'}] }
+    ]},
+    { id: 's3', title: '商品咨询', time: '昨天', messages: [
+      { role: 'user', content: '智能手机X1有什么配置？', time: '昨天' },
+      { role: 'assistant', content: '**智能手机X1** 的详细信息：\n\n| 项目 | 详情 |\n|------|------|\n| 价格 | 2999元 |\n| 屏幕 | 6.7英寸 |\n| 内存 | 8GB |\n| 存储 | 256GB |\n| 电池 | 5000mAh |\n| 库存 | 有货 |\n\n需要了解更多信息吗？', time: '昨天', toolCalls: [{tool:'product_info', status:'done', summary:'查询到智能手机X1详情'}] }
+    ]}
+  ],
+  currentSessionId: 's1',
+  knowledgeBases: [
+    { id: 'kb1', name: '退货政策知识库', desc: '包含退货、换货、售后相关政策文档', docCount: 3, created: '2026-07-20', documents: [
+      { id: 'd1', name: '退货政策.pdf', type: 'PDF', chunks: 12, status: 'completed', time: '2026-07-20' },
+      { id: 'd2', name: '售后服务指南.docx', type: 'Word', chunks: 8, status: 'completed', time: '2026-07-21' },
+      { id: 'd3', name: '常见问题.txt', type: 'TXT', chunks: 5, status: 'completed', time: '2026-07-22' }
+    ]},
+    { id: 'kb2', name: '产品手册知识库', desc: '所有产品的规格参数和使用说明', docCount: 2, created: '2026-07-18', documents: [
+      { id: 'd4', name: '手机产品手册.md', type: 'Markdown', chunks: 15, status: 'completed', time: '2026-07-18' },
+      { id: 'd5', name: '耳机产品手册.md', type: 'Markdown', chunks: 6, status: 'completed', time: '2026-07-19' }
+    ]}
+  ],
+  currentKbId: null,
+  users: [
+    { id: 'u1', username: 'admin', role: 'admin', active: true, created: '2026-07-01' },
+    { id: 'u2', username: '张三', role: 'user', active: true, created: '2026-07-10' },
+    { id: 'u3', username: '李四', role: 'user', active: true, created: '2026-07-15' },
+    { id: 'u4', username: '王五', role: 'user', active: false, created: '2026-07-20' }
+  ],
+  tools: [
+    { name: 'knowledge_search', desc: '从知识库检索相关内容', enabled: true },
+    { name: 'order_query', desc: '查询订单状态', enabled: true },
+    { name: 'product_info', desc: '查询商品详情', enabled: true },
+    { name: 'return_policy', desc: '查询退换货政策', enabled: true }
+  ],
+  configs: {
+    llm_model: 'deepseek-chat', llm_temperature: '0.7', llm_max_tokens: '2000',
+    rag_top_k: '3', rag_chunk_size: '500', rag_chunk_overlap: '50',
+    context_max_tokens: '4000'
+  }
+};
+
+// ===== AI Mock Responses =====
+const mockResponses = {
+  greeting: ['您好！我是AI客服助手，有什么可以帮助您的吗？😊', '你好！欢迎咨询，请问有什么问题？', '您好，很高兴为您服务！请问需要什么帮助？'],
+  knowledge: [
+    '根据知识库中的信息，为您找到以下内容：\n\n退货政策如下：\n1. **7天无理由退货**：商品签收后7天内可申请无理由退货\n2. **15天换货**：商品签收后15天内出现质量问题可申请换货\n3. **退货流程**：联系客服 → 提交退货申请 → 审核通过 → 寄回商品 → 退款\n\n> [信息来源：退货政策.pdf - 第1段]',
+    '根据知识库检索结果：\n\n**售后服务指南**：\n- 质保期内免费维修\n- 非人为损坏可免费更换配件\n- 超过质保期按成本价维修\n\n> [信息来源：售后服务指南.docx - 第2段]'
+  ],
+  order: '订单查询结果：\n\n- **订单号**：ORD001\n- **状态**：已发货\n- **承运商**：顺丰速运\n- **运单号**：SF1234567890\n- **预计到达**：2026-07-28',
+  product: '商品信息如下：\n\n| 项目 | 详情 |\n|------|------|\n| 名称 | 智能手机X1 |\n| 价格 | 2999元 |\n| 屏幕 | 6.7英寸 |\n| 内存 | 8GB |\n| 存储 | 256GB |\n| 电池 | 5000mAh |',
+  default: '感谢您的咨询！我理解您的问题，让我为您解答。\n\n根据目前的信息，我建议您可以：\n1. 查看我们的知识库获取详细政策信息\n2. 查询具体订单状态\n3. 了解产品详细信息\n\n请问需要我帮您查询哪方面的信息？'
+};
+
+function getAIResponse(msg) {
+  const lower = msg.toLowerCase();
+  if (/你好|hello|hi|嗨|您好/.test(lower)) return { text: mockResponses.greeting[Math.floor(Math.random()*mockResponses.greeting.length)], tool: null };
+  if (/退货|换货|售后|政策/.test(lower)) return { text: mockResponses.knowledge[Math.floor(Math.random()*mockResponses.knowledge.length)], tool: { name: 'knowledge_search', display: '正在检索知识库...', summary: '检索到退货/售后相关文档' } };
+  if (/订单|物流|快递|发货|签收/.test(lower)) return { text: mockResponses.order, tool: { name: 'order_query', display: '正在查询订单...', summary: '查询到订单状态信息' } };
+  if (/商品|产品|手机|耳机|价格|规格|配置/.test(lower)) return { text: mockResponses.product, tool: { name: 'product_info', display: '正在查询商品信息...', summary: '查询到商品详情' } };
+  return { text: mockResponses.default, tool: null };
+}
+
+// ===== Simple Markdown Renderer =====
+function renderMarkdown(text) {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/`([^`]+)`/g, '<code style="background:#f5f5f5;padding:2px 4px;border-radius:3px;font-size:12px;">$1</code>')
+    .replace(/^> (.+)$/gm, '<blockquote style="border-left:3px solid #ddd;padding-left:12px;color:#666;margin:8px 0;">$1</blockquote>')
+    .replace(/\|(.+)\|/g, (match) => {
+      const cells = match.split('|').filter(c => c.trim());
+      return '<tr>' + cells.map(c => '<td style="padding:4px 8px;border:1px solid #eee;">' + c.trim() + '</td>').join('') + '</tr>';
+    })
+    .replace(/^- (.+)$/gm, '<li style="margin-left:16px;">$1</li>')
+    .replace(/^(\d+)\. (.+)$/gm, '<li style="margin-left:16px;">$2</li>')
+    .replace(/\n/g, '<br>');
+}
+
+// ===== Render Functions =====
+function render() {
+  const app = document.getElementById('app');
+  if (!state.isLoggedIn) { app.innerHTML = renderLogin(); return; }
+  app.innerHTML = `<div class="app">${renderSidebar()}<div class="main">${renderHeader()}<div class="content" id="page-content">${renderPage()}</div></div></div>`;
+  bindEvents();
+}
+
+function renderLogin() {
+  const isRegister = state.currentPage === 'register';
+  return `<div class="login-page"><div class="login-card">
+    <h1>🤖 AI 客服机器人</h1>
+    <p class="subtitle">基于 LLM + RAG + Agent 的智能客服系统</p>
+    <div id="login-form">
+      <div class="form-group"><label>用户名</label><input class="form-input" id="login-user" placeholder="请输入用户名" value="admin"></div>
+      <div class="form-group"><label>密码</label><input class="form-input" id="login-pass" type="password" placeholder="请输入密码" value="123456"></div>
+      ${isRegister ? '<div class="form-group"><label>确认密码</label><input class="form-input" id="login-pass2" type="password" placeholder="请再次输入密码"></div>' : ''}
+      <button class="btn btn-primary btn-block" onclick="handleLogin()">${isRegister ? '注 册' : '登 录'}</button>
+      <div class="login-switch">${isRegister ? '已有账号？<a href="#" onclick="state.currentPage=\'login\';render();return false;">返回登录</a>' : '没有账号？<a href="#" onclick="state.currentPage=\'register\';render();return false;">立即注册</a>'}</div>
+    </div>
+  </div></div>`;
+}
+
+function renderSidebar() {
+  const isAdmin = state.role === 'admin';
+  const menuItems = [
+    { icon: '💬', label: '智能对话', page: 'chat' },
+    ...(isAdmin ? [
+      { type: 'group', label: '管理' },
+      { icon: '📚', label: '知识库管理', page: 'knowledge' },
+      { icon: '👥', label: '用户管理', page: 'users' },
+      { icon: '⚙️', label: '系统配置', page: 'config' },
+      { icon: '🔧', label: '工具配置', page: 'tools' },
+    ] : [])
+  ];
+  return `<div class="sidebar">
+    <div class="sidebar-logo"><div class="logo-icon">🤖</div>AI 客服</div>
+    <div class="sidebar-menu">
+      ${menuItems.map(m => m.type === 'group' ? `<div class="menu-group">${m.label}</div>` : `<div class="menu-item ${state.currentPage===m.page?'active':''}" data-page="${m.page}"><span class="icon">${m.icon}</span>${m.label}</div>`).join('')}
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-info"><div class="avatar">👤</div><div><div class="user-name">${state.currentUser||'用户'}</div><div style="font-size:11px;color:rgba(255,255,255,0.45)">${state.role==='admin'?'管理员':'普通用户'}</div></div></div>
+      <div class="logout-btn" onclick="handleLogout()">退出登录</div>
+    </div>
+  </div>`;
+}
+
+function renderHeader() {
+  const titles = { chat:'智能对话', knowledge:'知识库管理', users:'用户管理', config:'系统配置', tools:'工具配置' };
+  return `<div class="header"><div class="header-title">${titles[state.currentPage]||''}</div><div class="header-actions"><span style="color:var(--text-secondary);font-size:13px;">需求原型 v1.0</span></div></div>`;
+}
+
+function renderPage() {
+  switch(state.currentPage) {
+    case 'chat': return renderChat();
+    case 'knowledge': return renderKnowledge();
+    case 'users': return renderUsers();
+    case 'config': return renderConfig();
+    case 'tools': return renderToolsPage();
+    default: return '';
+  }
+}
+
+// ===== Chat Page =====
+function renderChat() {
+  const session = state.sessions.find(s => s.id === state.currentSessionId);
+  const msgs = session ? session.messages : [];
+  return `<div class="chat-layout">
+    <div class="chat-sessions">
+      <div class="session-header"><h3>会话列表</h3><button class="new-session-btn" onclick="newSession()">+ 新建会话</button></div>
+      <div class="session-list">${state.sessions.map(s => `<div class="session-item ${s.id===state.currentSessionId?'active':''}" onclick="switchSession('${s.id}')"><span class="session-delete" onclick="event.stopPropagation();deleteSession('${s.id}')">✕</span><div class="session-title">${s.title}</div><div class="session-time">${s.time}</div></div>`).join('')}</div>
+    </div>
+    <div class="chat-main">
+      <div class="chat-messages" id="chat-messages">${msgs.map(m => renderMessage(m)).join('')}</div>
+      <div class="chat-input"><div class="chat-input-wrapper"><textarea class="chat-textarea" id="msg-input" placeholder="输入消息，Enter 发送，Shift+Enter 换行..." rows="1" onkeydown="handleInputKey(event)"></textarea><button class="send-btn" id="send-btn" onclick="sendMessage()">发 送</button></div></div>
+    </div>
+  </div>`;
+}
+
+function renderMessage(m) {
+  let toolHtml = '';
+  if (m.toolCalls) {
+    toolHtml = m.toolCalls.map(tc => {
+      if (tc.status === 'calling') return `<div class="tool-status"><div class="spinner"></div>${tc.display || '正在调用工具...'}</div>`;
+      return `<div class="tool-result">✓ ${tc.summary || '工具调用完成'}</div>`;
+    }).join('');
+  }
+  return `<div class="message ${m.role}">${toolHtml}<div class="message-bubble">${m.role === 'assistant' ? renderMarkdown(m.content) : m.content.replace(/\n/g,'<br>')}</div></div>`;
+}
+
+// ===== Knowledge Page =====
+function renderKnowledge() {
+  if (state.currentKbId) return renderKbDetail();
+  return `<div class="page-header"><h2>知识库管理</h2><button class="btn btn-primary" onclick="showCreateKbModal()">+ 创建知识库</button></div>
+  <div class="kb-grid">${state.knowledgeBases.map(kb => `<div class="kb-card" onclick="state.currentKbId='${kb.id}';render()">
+    <h3>${kb.name}</h3><div class="kb-desc">${kb.desc}</div><div class="kb-meta"><span>📄 ${kb.docCount} 个文档</span><span>📅 ${kb.created}</span></div>
+  </div>`).join('')}</div>`;
+}
+
+function renderKbDetail() {
+  const kb = state.knowledgeBases.find(k => k.id === state.currentKbId);
+  if (!kb) return '';
+  return `<div class="breadcrumb"><a href="#" onclick="state.currentKbId=null;render();return false;">知识库管理</a> / ${kb.name}</div>
+  <div class="kb-detail">
+    <div class="kb-detail-header"><h2>${kb.name}</h2><button class="btn btn-primary" onclick="simulateUpload()">📤 上传文档</button></div>
+    <div class="upload-area" id="upload-area" onclick="simulateUpload()"><div class="icon">📁</div><div>点击或拖拽文件到此区域上传</div><div style="font-size:12px;color:var(--text-tertiary);margin-top:4px;">支持 PDF、TXT、Word、Markdown 格式</div></div>
+    <table class="doc-table"><thead><tr><th>文件名</th><th>格式</th><th>分片数</th><th>状态</th><th>上传时间</th><th>操作</th></tr></thead>
+    <tbody>${kb.documents.map(d => `<tr><td>${d.name}</td><td><span class="tag tag-blue">${d.type}</span></td><td>${d.chunks}</td><td><span class="status-badge status-${d.status}">${{completed:'已索引',processing:'处理中',pending:'排队中',failed:'失败'}[d.status]}</span></td><td>${d.time}</td><td><a href="#" style="color:var(--error);font-size:12px;" onclick="deleteDoc('${kb.id}','${d.id}');return false;">删除</a></td></tr>`).join('')}</tbody></table>
+  </div>`;
+}
+
+// ===== Users Page =====
+function renderUsers() {
+  return `<div class="page-header"><h2>用户管理</h2></div>
+  <table class="data-table"><thead><tr><th>用户名</th><th>角色</th><th>状态</th><th>注册时间</th><th>操作</th></tr></thead>
+  <tbody>${state.users.map(u => `<tr><td>${u.username}</td><td><span class="role-tag role-${u.role}" onclick="toggleRole('${u.id}')" style="cursor:pointer">${u.role==='admin'?'管理员':'普通用户'}</span></td><td><span class="status-badge ${u.active?'status-completed':'status-failed'}">${u.active?'正常':'禁用'}</span></td><td>${u.created}</td><td><button class="btn" style="padding:4px 12px;font-size:12px;${u.active?'color:var(--error)':'color:var(--success)'}" onclick="toggleUserActive('${u.id}')">${u.active?'禁用':'启用'}</button></td></tr>`).join('')}</tbody></table>`;
+}
+
+// ===== Config Page =====
+function renderConfig() {
+  const c = state.configs;
+  return `<div class="page-header"><h2>系统配置</h2></div>
+  <div class="config-section"><h3>🤖 LLM 模型参数</h3>
+    <div class="config-row"><label>模型名称</label><div class="config-value"><input class="config-input" value="${c.llm_model}" onchange="state.configs.llm_model=this.value"></div></div>
+    <div class="config-row"><label>温度 (Temperature)</label><div class="config-value"><input class="config-input" type="number" step="0.1" min="0" max="2" value="${c.llm_temperature}" onchange="state.configs.llm_temperature=this.value"></div></div>
+    <div class="config-row"><label>最大输出 Token</label><div class="config-value"><input class="config-input" type="number" value="${c.llm_max_tokens}" onchange="state.configs.llm_max_tokens=this.value"></div></div>
+  </div>
+  <div class="config-section"><h3>🔍 RAG 检索参数</h3>
+    <div class="config-row"><label>Top-K 检索数量</label><div class="config-value"><input class="config-input" type="number" min="1" max="10" value="${c.rag_top_k}" onchange="state.configs.rag_top_k=this.value"></div></div>
+    <div class="config-row"><label>分块大小 (Chunk Size)</label><div class="config-value"><input class="config-input" type="number" value="${c.rag_chunk_size}" onchange="state.configs.rag_chunk_size=this.value"></div></div>
+    <div class="config-row"><label>分块重叠 (Overlap)</label><div class="config-value"><input class="config-input" type="number" value="${c.rag_chunk_overlap}" onchange="state.configs.rag_chunk_overlap=this.value"></div></div>
+  </div>
+  <div class="config-section"><h3>📝 上下文管理</h3>
+    <div class="config-row"><label>最大上下文 Token</label><div class="config-value"><input class="config-input" type="number" value="${c.context_max_tokens}" onchange="state.configs.context_max_tokens=this.value"></div></div>
+  </div>
+  <div style="margin-top:16px"><button class="btn btn-primary" onclick="alert('配置已保存！')">保存配置</button></div>`;
+}
+
+// ===== Tools Page =====
+function renderToolsPage() {
+  return `<div class="page-header"><h2>工具配置</h2></div>
+  <div class="config-section"><h3>🔧 Agent 工具管理</h3>
+    <table class="data-table" style="margin-top:12px"><thead><tr><th>工具名称</th><th>描述</th><th>状态</th><th>操作</th></tr></thead>
+    <tbody>${state.tools.map(t => `<tr><td><code style="background:#f5f5f5;padding:2px 6px;border-radius:3px;">${t.name}</code></td><td>${t.desc}</td><td><span class="status-badge ${t.enabled?'status-completed':'status-failed'}">${t.enabled?'已启用':'已禁用'}</span></td><td><label class="switch"><input type="checkbox" ${t.enabled?'checked':''} onchange="toggleTool('${t.name}',this.checked)"><span class="switch-slider"></span></label></td></tr>`).join('')}</tbody></table>
+  </div>`;
+}
+
+// ===== Event Handlers =====
+function handleLogin() {
+  const user = document.getElementById('login-user').value;
+  const pass = document.getElementById('login-pass').value;
+  if (!user || !pass) { alert('请输入用户名和密码'); return; }
+  state.isLoggedIn = true;
+  state.currentUser = user;
+  state.role = user === 'admin' ? 'admin' : 'user';
+  state.currentPage = 'chat';
+  render();
+}
+
+function handleLogout() {
+  state.isLoggedIn = false;
+  state.currentUser = null;
+  state.currentPage = 'login';
+  render();
+}
+
+function newSession() {
+  const id = 's' + Date.now();
+  state.sessions.unshift({ id, title: '新会话', time: '刚刚', messages: [] });
+  state.currentSessionId = id;
+  render();
+}
+
+function switchSession(id) {
+  state.currentSessionId = id;
+  render();
+  scrollChatToBottom();
+}
+
+function deleteSession(id) {
+  state.sessions = state.sessions.filter(s => s.id !== id);
+  if (state.currentSessionId === id) {
+    state.currentSessionId = state.sessions.length ? state.sessions[0].id : null;
+  }
+  render();
+}
+
+function scrollChatToBottom() {
+  setTimeout(() => {
+    const el = document.getElementById('chat-messages');
+    if (el) el.scrollTop = el.scrollHeight;
+  }, 50);
+}
+
+function handleInputKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+function sendMessage() {
+  const input = document.getElementById('msg-input');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+
+  const session = state.sessions.find(s => s.id === state.currentSessionId);
+  if (!session) return;
+
+  // Add user message
+  const now = new Date();
+  const timeStr = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+  session.messages.push({ role: 'user', content: text, time: timeStr });
+  if (session.title === '新会话') session.title = text.slice(0, 20) + (text.length > 20 ? '...' : '');
+  session.time = timeStr;
+  render();
+  scrollChatToBottom();
+
+  // Simulate AI response
+  const response = getAIResponse(text);
+  const toolCalls = [];
+
+  if (response.tool) {
+    // Show tool calling status
+    toolCalls.push({ ...response.tool, status: 'calling' });
+    session.messages.push({ role: 'assistant', content: '', time: timeStr, toolCalls });
+    render();
+    scrollChatToBottom();
+
+    setTimeout(() => {
+      // Tool completed
+      toolCalls[0].status = 'done';
+      render();
+      scrollChatToBottom();
+
+      // Stream AI response
+      setTimeout(() => {
+        streamResponse(session, response.text, timeStr, toolCalls);
+      }, 400);
+    }, 1200);
+  } else {
+    streamResponse(session, response.text, timeStr, []);
+  }
+}
+
+function streamResponse(session, fullText, time, toolCalls) {
+  // Remove placeholder message if exists
+  const lastMsg = session.messages[session.messages.length - 1];
+  if (lastMsg && lastMsg.content === '' && lastMsg.toolCalls) {
+    session.messages.pop();
+  }
+
+  session.messages.push({ role: 'assistant', content: '', time, toolCalls: toolCalls.length ? toolCalls : undefined });
+  const msgIdx = session.messages.length - 1;
+  let charIdx = 0;
+
+  function typeChar() {
+    if (charIdx < fullText.length) {
+      const chunk = Math.min(2, fullText.length - charIdx);
+      session.messages[msgIdx].content = fullText.slice(0, charIdx + chunk);
+      charIdx += chunk;
+      // Update only the message area
+      const msgEl = document.getElementById('chat-messages');
+      if (msgEl) {
+        const lastBubble = msgEl.querySelector('.message.assistant:last-child .message-bubble');
+        if (lastBubble) lastBubble.innerHTML = renderMarkdown(session.messages[msgIdx].content);
+      }
+      scrollChatToBottom();
+      setTimeout(typeChar, 30);
+    }
+  }
+  typeChar();
+}
+
+function showCreateKbModal() {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `<div class="modal"><div class="modal-header">创建知识库</div><div class="modal-body"><div class="form-group"><label>知识库名称</label><input class="form-input" id="kb-name" placeholder="请输入知识库名称"></div><div class="form-group"><label>描述</label><textarea class="form-input" id="kb-desc" rows="3" placeholder="请输入描述"></textarea></div></div><div class="modal-footer"><button class="btn" onclick="this.closest('.modal-overlay').remove()">取消</button><button class="btn btn-primary" onclick="createKb()">创建</button></div></div>`;
+  document.body.appendChild(overlay);
+}
+
+function createKb() {
+  const name = document.getElementById('kb-name').value;
+  const desc = document.getElementById('kb-desc').value;
+  if (!name) { alert('请输入知识库名称'); return; }
+  state.knowledgeBases.push({ id: 'kb'+Date.now(), name, desc, docCount: 0, created: new Date().toISOString().slice(0,10), documents: [] });
+  document.querySelector('.modal-overlay').remove();
+  render();
+}
+
+function simulateUpload() {
+  const kb = state.knowledgeBases.find(k => k.id === state.currentKbId);
+  if (!kb) return;
+  const fakeNames = ['产品FAQ.pdf', '使用手册.docx', '服务条款.txt', '技术文档.md'];
+  const fakeName = fakeNames[Math.floor(Math.random()*fakeNames.length)];
+  const fakeType = fakeName.split('.').pop().toUpperCase();
+  const docId = 'd' + Date.now();
+
+  // Add with pending status
+  const doc = { id: docId, name: fakeName, type: fakeType, chunks: 0, status: 'pending', time: new Date().toISOString().slice(0,10) };
+  kb.documents.push(doc);
+  kb.docCount = kb.documents.length;
+  render();
+
+  // Simulate processing
+  setTimeout(() => { doc.status = 'processing'; render(); }, 500);
+  setTimeout(() => { doc.status = 'completed'; doc.chunks = Math.floor(Math.random()*15)+3; render(); }, 2500);
+}
+
+function deleteDoc(kbId, docId) {
+  const kb = state.knowledgeBases.find(k => k.id === kbId);
+  if (!kb) return;
+  kb.documents = kb.documents.filter(d => d.id !== docId);
+  kb.docCount = kb.documents.length;
+  render();
+}
+
+function toggleRole(userId) {
+  const user = state.users.find(u => u.id === userId);
+  if (user) { user.role = user.role === 'admin' ? 'user' : 'admin'; render(); }
+}
+
+function toggleUserActive(userId) {
+  const user = state.users.find(u => u.id === userId);
+  if (user) { user.active = !user.active; render(); }
+}
+
+function toggleTool(name, enabled) {
+  const tool = state.tools.find(t => t.name === name);
+  if (tool) tool.enabled = enabled;
+}
+
+function bindEvents() {
+  document.querySelectorAll('.menu-item').forEach(el => {
+    el.addEventListener('click', () => {
+      const page = el.dataset.page;
+      if (page) { state.currentPage = page; state.currentKbId = null; render(); }
+    });
+  });
+}
+
+// ===== Init =====
+render();
+</script>
+</body>
+</html>

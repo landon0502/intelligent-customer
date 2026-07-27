@@ -126,46 +126,48 @@ export default function LoginPage() {
             </form>
           ) : (
             <form onSubmit={registerForm.handleSubmit(handleRegister)}>
-              <div className="space-y-2">
-                <Label htmlFor="reg-username">用户名</Label>
-                <Input
-                  id="reg-username"
-                  placeholder="请输入用户名"
-                  {...registerForm.register("username")}
-                />
-                {registerForm.formState.errors.username && (
-                  <p className="text-sm text-destructive">
-                    {registerForm.formState.errors.username.message}
-                  </p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="reg-password">密码</Label>
-                <Input
-                  id="reg-password"
-                  type="password"
-                  placeholder="请输入密码"
-                  {...registerForm.register("password")}
-                />
-                {registerForm.formState.errors.password && (
-                  <p className="text-sm text-destructive">
-                    {registerForm.formState.errors.password.message}
-                  </p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="reg-confirm">确认密码</Label>
-                <Input
-                  id="reg-confirm"
-                  type="password"
-                  placeholder="请再次输入密码"
-                  {...registerForm.register("confirmPassword")}
-                />
-                {registerForm.formState.errors.confirmPassword && (
-                  <p className="text-sm text-destructive">
-                    {registerForm.formState.errors.confirmPassword.message}
-                  </p>
-                )}
+              <div className="flex flex-col gap-6">
+                <div className="grid gap-2">
+                  <Label htmlFor="reg-username">用户名</Label>
+                  <Input
+                    id="reg-username"
+                    placeholder="请输入用户名"
+                    {...registerForm.register("username")}
+                  />
+                  {registerForm.formState.errors.username && (
+                    <p className="text-sm text-destructive">
+                      {registerForm.formState.errors.username.message}
+                    </p>
+                  )}
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="reg-password">密码</Label>
+                  <Input
+                    id="reg-password"
+                    type="password"
+                    placeholder="请输入密码"
+                    {...registerForm.register("password")}
+                  />
+                  {registerForm.formState.errors.password && (
+                    <p className="text-sm text-destructive">
+                      {registerForm.formState.errors.password.message}
+                    </p>
+                  )}
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="reg-confirm">确认密码</Label>
+                  <Input
+                    id="reg-confirm"
+                    type="password"
+                    placeholder="请再次输入密码"
+                    {...registerForm.register("confirmPassword")}
+                  />
+                  {registerForm.formState.errors.confirmPassword && (
+                    <p className="text-sm text-destructive">
+                      {registerForm.formState.errors.confirmPassword.message}
+                    </p>
+                  )}
+                </div>
               </div>
             </form>
           )}
@@ -185,9 +187,9 @@ export default function LoginPage() {
             <button
               type="button"
               className="text-primary underline-offset-4 hover:underline"
-              onClick={() => setMode("register")}
+              onClick={() => setMode(mode === "login" ? "register" : "login")}
             >
-              {{ login: "登录", register: "注册" }[mode]}
+              {{ login: "注册", register: "登录" }[mode]}
             </button>
           </p>
         </CardFooter>
