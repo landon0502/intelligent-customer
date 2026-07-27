@@ -105,7 +105,7 @@ git commit -m "fix: align backend success code to 0 for frontend FetchClient com
 - Consumes: 无
 - Produces: `settings.JWT_SECRET`, `settings.JWT_EXPIRE_MINUTES`, `settings.ADMIN_PASSWORD` 可供后续 task 使用
 
-- [ ] **Step 1: 在 pyproject.toml 添加依赖**
+- [x] **Step 1: 在 pyproject.toml 添加依赖**
 
 在 `dependencies` 列表中添加以下包（保留已有依赖不变）：
 
@@ -130,11 +130,11 @@ dependencies = [
 ]
 ```
 
-- [ ] **Step 2: 安装依赖**
+- [x] **Step 2: 安装依赖**
 
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/service && uv sync`
 
-- [ ] **Step 3: 在 .env 添加 JWT 和 admin 配置**
+- [x] **Step 3: 在 .env 添加 JWT 和 admin 配置**
 
 在 `.env` 文件末尾追加：
 
@@ -144,7 +144,7 @@ JWT_EXPIRE_MINUTES=10080
 ADMIN_PASSWORD=admin123456
 ```
 
-- [ ] **Step 4: 在 config.py 添加对应字段**
+- [x] **Step 4: 在 config.py 添加对应字段**
 
 在 `Settings` 类中，`LOG_LEVEL` 字段之后添加：
 
@@ -157,12 +157,12 @@ ADMIN_PASSWORD=admin123456
     ADMIN_PASSWORD: str = os.getenv("ADMIN_PASSWORD", "admin123456")
 ```
 
-- [ ] **Step 5: 验证配置可读取**
+- [x] **Step 5: 验证配置可读取**
 
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/service && uv run python -c "from app.core.config import settings; print(f'JWT_SECRET={settings.JWT_SECRET}, JWT_EXPIRE={settings.JWT_EXPIRE_MINUTES}, ADMIN_PW={settings.ADMIN_PASSWORD}')"`
 Expected: 输出配置的值，无报错
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add apps/service/pyproject.toml apps/service/uv.lock apps/service/.env apps/service/app/core/config.py
@@ -184,7 +184,7 @@ git commit -m "feat: add JWT, SQLAlchemy, and bcrypt dependencies with config"
 - Consumes: `settings.database_url`（来自 Task 2）
 - Produces: `get_db()` 依赖注入函数，`User` ORM 模型（含 `id`, `username`, `password_hash`, `role`, `created_at` 字段），`Base` 声明基类
 
-- [ ] **Step 1: 创建 db 包**
+- [x] **Step 1: 创建 db 包**
 
 ```python
 # apps/service/app/db/__init__.py
@@ -210,7 +210,7 @@ async def get_db() -> AsyncSession:
         yield session
 ```
 
-- [ ] **Step 2: 创建 models 包和 User 模型**
+- [x] **Step 2: 创建 models 包和 User 模型**
 
 ```python
 # apps/service/app/models/__init__.py
@@ -239,7 +239,7 @@ class User(Base):
     )
 ```
 
-- [ ] **Step 3: 编写 User 模型测试**
+- [x] **Step 3: 编写 User 模型测试**
 
 ```python
 # apps/service/tests/test_user_model.py
@@ -258,7 +258,7 @@ def test_user_model_default_role():
     assert user.role == "user"
 ```
 
-- [ ] **Step 4: 运行模型测试**
+- [x] **Step 4: 运行模型测试**
 
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/service && uv run python -m pytest tests/test_user_model.py -v`
 Expected: ALL PASS
@@ -284,7 +284,7 @@ git commit -m "feat: add async database session and User ORM model"
 - Consumes: `settings.JWT_SECRET`, `settings.JWT_EXPIRE_MINUTES`（来自 Task 2）
 - Produces: `create_token(user_id, username, role) -> str`，`verify_token(token) -> dict`，`hash_password(password) -> str`，`verify_password(plain, hashed) -> bool`
 
-- [ ] **Step 1: 编写 JWT 工具失败测试**
+- [x] **Step 1: 编写 JWT 工具失败测试**
 
 ```python
 # apps/service/tests/test_jwt_utils.py
@@ -306,12 +306,12 @@ def test_verify_invalid_token_raises():
         verify_token("invalid.token.here")
 ```
 
-- [ ] **Step 2: 运行 JWT 测试确认失败**
+- [x] **Step 2: 运行 JWT 测试确认失败**
 
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/service && uv run python -m pytest tests/test_jwt_utils.py -v`
 Expected: FAIL — module not found
 
-- [ ] **Step 3: 实现 JWT 工具**
+- [x] **Step 3: 实现 JWT 工具**
 
 ```python
 # apps/service/app/utils/jwt.py
@@ -344,12 +344,12 @@ def verify_token(token: str) -> dict:
         raise ValueError("无效的 Token")
 ```
 
-- [ ] **Step 4: 运行 JWT 测试确认通过**
+- [x] **Step 4: 运行 JWT 测试确认通过**
 
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/service && uv run python -m pytest tests/test_jwt_utils.py -v`
 Expected: ALL PASS
 
-- [ ] **Step 5: 编写密码工具失败测试**
+- [x] **Step 5: 编写密码工具失败测试**
 
 ```python
 # apps/service/tests/test_password_utils.py
@@ -367,12 +367,12 @@ def test_verify_wrong_password():
     assert verify_password("wrongpassword", hashed) is False
 ```
 
-- [ ] **Step 6: 运行密码测试确认失败**
+- [x] **Step 6: 运行密码测试确认失败**
 
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/service && uv run python -m pytest tests/test_password_utils.py -v`
 Expected: FAIL — module not found
 
-- [ ] **Step 7: 实现密码工具**
+- [x] **Step 7: 实现密码工具**
 
 ```python
 # apps/service/app/utils/password.py
@@ -391,12 +391,12 @@ def verify_password(plain: str, hashed: str) -> bool:
     return _pwd_context.verify(plain, hashed)
 ```
 
-- [ ] **Step 8: 运行密码测试确认通过**
+- [x] **Step 8: 运行密码测试确认通过**
 
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/service && uv run python -m pytest tests/test_password_utils.py -v`
 Expected: ALL PASS
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add apps/service/app/utils/jwt.py apps/service/app/utils/password.py apps/service/tests/test_jwt_utils.py apps/service/tests/test_password_utils.py
@@ -419,7 +419,7 @@ git commit -m "feat: add JWT and password utility modules"
 - Consumes: `User` 模型（来自 Task 3），`verify_password`/`hash_password`（来自 Task 4），`create_token`（来自 Task 4），`get_db`（来自 Task 3），`settings.ADMIN_PASSWORD`（来自 Task 2）
 - Produces: `authenticate_user(db, username, password) -> User`，`register_user(db, username, password) -> User`，`get_user_by_username(db, username) -> User | None`，`seed_admin_user(db)`，`get_current_user(token, db) -> User`
 
-- [ ] **Step 1: 编写认证服务失败测试**
+- [x] **Step 1: 编写认证服务失败测试**
 
 ```python
 # apps/service/tests/test_auth_service.py
@@ -478,7 +478,7 @@ async def test_authenticate_user_not_found_returns_none():
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/service && uv run python -m pytest tests/test_auth_service.py -v`
 Expected: FAIL — module not found
 
-- [ ] **Step 3: 创建 services 包和认证服务**
+- [x] **Step 3: 创建 services 包和认证服务**
 
 ```python
 # apps/service/app/services/__init__.py
@@ -537,7 +537,7 @@ async def seed_admin_user(db: AsyncSession) -> None:
         await db.commit()
 ```
 
-- [ ] **Step 4: 创建 JWT 认证依赖**
+- [x] **Step 4: 创建 JWT 认证依赖**
 
 ```python
 # apps/service/app/core/security.py
@@ -573,12 +573,12 @@ async def get_current_user(
     return user
 ```
 
-- [ ] **Step 5: 运行认证服务测试确认通过**
+- [x] **Step 5: 运行认证服务测试确认通过**
 
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/service && uv run python -m pytest tests/test_auth_service.py -v`
 Expected: ALL PASS
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add apps/service/app/services/ apps/service/app/core/security.py apps/service/tests/test_auth_service.py
@@ -599,7 +599,7 @@ git commit -m "feat: add auth service and JWT security dependency"
 - Consumes: `authenticate_user`, `register_user`, `seed_admin_user`（来自 Task 5），`create_token`（来自 Task 4），`get_current_user`（来自 Task 5），`get_db`（来自 Task 3），`success`/`error`（来自 Task 1），`Base`（来自 Task 3）
 - Produces: `POST /api/auth/login`，`POST /api/auth/register`，`GET /api/auth/me` 端点
 
-- [ ] **Step 1: 编写认证路由测试**
+- [x] **Step 1: 编写认证路由测试**
 
 ```python
 # apps/service/tests/test_auth_routes.py
@@ -708,7 +708,7 @@ async def test_me_without_token():
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/service && uv run python -m pytest tests/test_auth_routes.py -v`
 Expected: FAIL — router not found
 
-- [ ] **Step 3: 创建认证路由**
+- [x] **Step 3: 创建认证路由**
 
 ```python
 # apps/service/app/routers/auth.py
@@ -788,7 +788,7 @@ async def me(current_user: User = Depends(get_current_user)):
     })
 ```
 
-- [ ] **Step 4: 更新 routers/__init__.py 导出 auth_router**
+- [x] **Step 4: 更新 routers/__init__.py 导出 auth_router**
 
 ```python
 # apps/service/app/routers/__init__.py
@@ -796,7 +796,7 @@ from app.routers.health import router as health_router
 from app.routers.auth import router as auth_router
 ```
 
-- [ ] **Step 5: 更新 main.py 注册路由、CORS、lifespan 初始化**
+- [x] **Step 5: 更新 main.py 注册路由、CORS、lifespan 初始化**
 
 ```python
 # apps/service/app/main.py
@@ -850,7 +850,7 @@ app.include_router(health_router)
 app.include_router(auth_router)
 ```
 
-- [ ] **Step 6: 运行所有后端测试确认通过**
+- [x] **Step 6: 运行所有后端测试确认通过**
 
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/service && uv run python -m pytest tests/ -v`
 
@@ -859,7 +859,7 @@ Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/service &&
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/service && uv run python -m pytest tests/test_response_utils.py tests/test_user_model.py tests/test_jwt_utils.py tests/test_password_utils.py tests/test_auth_service.py -v`
 Expected: ALL PASS
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add apps/service/app/routers/auth.py apps/service/app/routers/__init__.py apps/service/app/main.py apps/service/tests/test_auth_routes.py
@@ -881,7 +881,7 @@ git commit -m "feat: add auth routes and integrate with main app (CORS, lifespan
 - Consumes: `fetchClient`（来自 `apps/web/lib/fetch/index.ts`），`tokenManager`（来自 `apps/web/lib/fetch/token-manager.ts`）
 - Produces: `loginApi(username, password)`，`registerApi(username, password)`，`getMeApi()`，`useAuthStore()` Zustand store（含 `user`, `isAuthenticated`, `loading`, `login`, `register`, `fetchUser`, `logout`, `initAuth`）
 
-- [ ] **Step 1: 创建 auth service**
+- [x] **Step 1: 创建 auth service**
 
 ```typescript
 // apps/web/services/auth.ts
@@ -918,7 +918,7 @@ export async function getMeApi() {
 }
 ```
 
-- [ ] **Step 2: 编写 auth store 测试**
+- [x] **Step 2: 编写 auth store 测试**
 
 ```typescript
 // apps/web/__tests__/auth-store.test.ts
@@ -1007,12 +1007,12 @@ describe("authStore", () => {
 });
 ```
 
-- [ ] **Step 3: 运行 store 测试确认失败**
+- [x] **Step 3: 运行 store 测试确认失败**
 
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/web && pnpm test -- --run __tests__/auth-store.test.ts`
 Expected: FAIL — module not found
 
-- [ ] **Step 4: 创建 auth store**
+- [x] **Step 4: 创建 auth store**
 
 ```typescript
 // apps/web/store/auth.ts
@@ -1083,12 +1083,12 @@ export const useAuthStore = create<AuthState>((set) => ({
 }));
 ```
 
-- [ ] **Step 5: 运行 store 测试确认通过**
+- [x] **Step 5: 运行 store 测试确认通过**
 
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/web && pnpm test -- --run __tests__/auth-store.test.ts`
 Expected: ALL PASS
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add apps/web/services/auth.ts apps/web/store/auth.ts apps/web/__tests__/auth-store.test.ts
@@ -1107,7 +1107,7 @@ git commit -m "feat: add frontend auth service and Zustand auth store"
 - Consumes: `tokenManager`（来自 `apps/web/lib/fetch/token-manager.ts`），`FetchError`/`ErrorType`（来自 `@intelligent-customer/fetch-client`），现有 `fetchClient` 实例
 - Produces: 401 拦截器注册到 `fetchClient`，AuthError/TokenExpired 时自动清除 token 并跳转 `/login`
 
-- [ ] **Step 1: 编写 401 拦截器测试**
+- [x] **Step 1: 编写 401 拦截器测试**
 
 ```typescript
 // apps/web/__tests__/interceptor-401.test.ts
@@ -1166,7 +1166,7 @@ describe("401 interceptor", () => {
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/web && pnpm test -- --run __tests__/interceptor-401.test.ts`
 Expected: FAIL — handleAuthError not exported
 
-- [ ] **Step 3: 在 lib/fetch/index.ts 中添加 401 拦截器**
+- [x] **Step 3: 在 lib/fetch/index.ts 中添加 401 拦截器**
 
 在现有的 `fetchClient` 定义和拦截器之后，添加 401 认证拦截器。完整的修改后文件：
 
@@ -1239,7 +1239,7 @@ export async function createServerClient(): Promise<FetchClient> {
 export { fetchClient };
 ```
 
-- [ ] **Step 4: 运行拦截器测试确认通过**
+- [x] **Step 4: 运行拦截器测试确认通过**
 
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/web && pnpm test -- --run __tests__/interceptor-401.test.ts`
 Expected: ALL PASS
@@ -1265,15 +1265,15 @@ git commit -m "feat: add 401 auth error interceptor with redirect and dedup"
 - Consumes: `useAuthStore`（来自 Task 7），shadcn Card/Input/Button 组件
 - Produces: 登录/注册页面组件，含表单校验（zod），登录/注册模式切换
 
-- [ ] **Step 1: 安装需要的 shadcn 组件**
+- [x] **Step 1: 安装需要的 shadcn 组件**
 
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/web && pnpm dlx shadcn@latest add card input label form`
 
-- [ ] **Step 2: 安装 react-hook-form 和 zod 依赖（如果尚未安装）**
+- [x] **Step 2: 安装 react-hook-form 和 zod 依赖（如果尚未安装）**
 
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/web && pnpm add react-hook-form @hookform/resolvers zod`
 
-- [ ] **Step 3: 实现登录/注册页面**
+- [x] **Step 3: 实现登录/注册页面**
 
 ```tsx
 // apps/web/app/login/page.tsx
@@ -1484,7 +1484,7 @@ export default function LoginPage() {
 }
 ```
 
-- [ ] **Step 4: 验证页面可编译**
+- [x] **Step 4: 验证页面可编译**
 
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/web && pnpm build 2>&1 | head -50`
 Expected: 无编译错误（可能有其他页面的 warning，但 login 页面不应有错误）
@@ -1509,7 +1509,7 @@ git commit -m "feat: implement login/register page with form validation and mode
 - Consumes: Cookie `auth_token`（由 `tokenManager` 设置）
 - Produces: 未登录访问非 /login 页面时重定向到 /login；已登录访问 /login 时重定向到 /
 
-- [ ] **Step 1: 创建 middleware**
+- [x] **Step 1: 创建 middleware**
 
 ```typescript
 // apps/web/middleware.ts
@@ -1537,12 +1537,12 @@ export const config = {
 };
 ```
 
-- [ ] **Step 2: 验证 middleware 不影响构建**
+- [x] **Step 2: 验证 middleware 不影响构建**
 
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/web && pnpm build 2>&1 | tail -20`
 Expected: 构建成功
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add apps/web/middleware.ts
@@ -1560,7 +1560,7 @@ git commit -m "feat: add Next.js middleware for auth route guard"
 - Consumes: `useAuthStore`（来自 Task 7），`Button` 组件
 - Produces: 首页包含用户名显示和退出登录按钮
 
-- [ ] **Step 1: 更新首页**
+- [x] **Step 1: 更新首页**
 
 ```tsx
 // apps/web/app/page.tsx
@@ -1608,12 +1608,12 @@ export default function Page() {
 }
 ```
 
-- [ ] **Step 2: 验证构建**
+- [x] **Step 2: 验证构建**
 
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/web && pnpm build 2>&1 | tail -20`
 Expected: 构建成功
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add apps/web/app/page.tsx
@@ -1633,7 +1633,7 @@ git commit -m "feat: add logout button and user info to home page"
 - Consumes: 后端运行在 `http://localhost:8001`
 - Produces: `NEXT_PUBLIC_API_URL` 和 `NEXT_PUBLIC_API_BASE_URL` 环境变量，使 `lib/fetch/config.ts` 的 `BASE_URL` 正确指向后端
 
-- [ ] **Step 1: 创建 .env.local**
+- [x] **Step 1: 创建 .env.local**
 
 ```
 # apps/web/.env.local
@@ -1643,12 +1643,12 @@ NEXT_PUBLIC_API_BASE_URL=
 
 注意：`NEXT_PUBLIC_API_BASE_URL` 留空，因为后端路由已经包含 `/api/auth/...` 前缀，不需要额外的 base path。如果 `NEXT_PUBLIC_API_URL` 末尾不带斜杠且 `NEXT_PUBLIC_API_BASE_URL` 为空，拼接后为 `http://localhost:8001`，前端请求 `/api/auth/login` 即访问 `http://localhost:8001/api/auth/login`。
 
-- [ ] **Step 2: 验证配置生效**
+- [x] **Step 2: 验证配置生效**
 
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/web && pnpm build 2>&1 | tail -10`
 Expected: 构建成功，无环境变量缺失报错
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add apps/web/.env.local
@@ -1666,19 +1666,19 @@ git commit -m "feat: add frontend env config for API base URL"
 - Consumes: 所有前序 Task 的产物
 - Produces: 确认完整认证流程可工作
 
-- [ ] **Step 1: 启动后端服务**
+- [x] **Step 1: 启动后端服务**
 
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/service && uv run python main.py`
 
 验证：控制台输出"启动完成"，无报错
 
-- [ ] **Step 2: 启动前端开发服务器**
+- [x] **Step 2: 启动前端开发服务器**
 
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/web && pnpm dev`
 
 验证：控制台输出 localhost URL
 
-- [ ] **Step 3: 验证注册流程**
+- [x] **Step 3: 验证注册流程**
 
 1. 浏览器打开 `http://localhost:3000`，应被重定向到 `/login`
 2. 点击"注册"切换到注册模式
@@ -1686,30 +1686,30 @@ Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/web && pnp
 4. 点击"注册"
 5. 验证：注册成功后跳转到首页，显示"你好，testuser（user）"
 
-- [ ] **Step 4: 验证退出登录**
+- [x] **Step 4: 验证退出登录**
 
 1. 在首页点击"退出登录"按钮
 2. 验证：跳转回 `/login` 页面
 
-- [ ] **Step 5: 验证登录流程**
+- [x] **Step 5: 验证登录流程**
 
 1. 在登录页输入 `testuser` / `password123`
 2. 点击"登录"
 3. 验证：登录成功后跳转到首页
 
-- [ ] **Step 6: 验证 admin 默认用户**
+- [x] **Step 6: 验证 admin 默认用户**
 
 1. 退出登录
 2. 使用 `admin` / `admin123456` 登录
 3. 验证：登录成功，首页显示"你好，admin（admin）"
 
-- [ ] **Step 7: 验证表单校验**
+- [x] **Step 7: 验证表单校验**
 
 1. 在登录页输入空用户名 → 验证显示"请输入用户名"
 2. 输入密码 `123` → 验证显示"密码至少6位"
 3. 切换到注册模式，两次密码不一致 → 验证显示"两次密码不一致"
 
-- [ ] **Step 8: 验证错误登录**
+- [x] **Step 8: 验证错误登录**
 
 1. 输入正确用户名但错误密码 → 验证显示错误 toast
 2. 输入不存在的用户名 → 验证显示错误 toast（不暴露用户是否存在）
