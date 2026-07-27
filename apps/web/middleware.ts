@@ -1,16 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 
+const PUBLIC_PATHS = ["/login", "/register"];
+
 export function middleware(request: NextRequest) {
   const token = request.cookies.get("auth_token")?.value;
   const { pathname } = request.nextUrl;
 
-  // 已登录访问 /login → 重定向到首页
-  if (token && pathname === "/login") {
+  const isPublic = PUBLIC_PATHS.includes(pathname);
+
+  // 已登录访问公开页面（/login、/register）→ 重定向到首页
+  if (token && isPublic) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  // 未登录访问非 /login 页面 → 重定向到登录页
-  if (!token && pathname !== "/login") {
+  // 未登录访问非公开页面 → 重定向到登录页
+  if (!token && !isPublic) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
