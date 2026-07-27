@@ -10,14 +10,14 @@ from pydantic import BaseModel
 class ApiResponse(BaseModel):
     """标准响应模型 —— 用于 Swagger 文档生成"""
 
-    code: int = 200
+    code: int = 0
     message: str = "success"
     data: Any = None
 
 
 def success(data: Any = None, message: str = "success") -> dict:
     """成功响应快捷函数"""
-    return {"code": 200, "message": message, "data": data}
+    return {"code": 0, "message": message, "data": data}
 
 
 def error(code: int = 400, message: str = "error", data: Any = None) -> dict:
