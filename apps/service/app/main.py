@@ -4,9 +4,13 @@
 """
 import logging
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-from app.routers import health_router
+from app.routers import health_router, auth_router
 from app.core.config import settings
+from app.db.session import engine, Base
+from app.services.auth import seed_admin_user
+from app.db.session import async_session_factory
 
 # 日志
 logging.basicConfig(
@@ -21,14 +25,16 @@ logger = logging.getLogger("ai-service")
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     """启动时初始化连接池及 Provider 注册，关闭时释放资源"""
-    logger.info("启动中...  Provider 注册")
-    # init_providers()
-    logger.info("启动中...  Redis 连接池初始化")
-    # await redis_client.connect()
+    logger.info("启动中...  创建数据库表")
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    logger.info("启动中...  初始化 admin 用户")
+    async with async_session_factory() as session:
+        await seed_admin_user(session)
     logger.info("启动完成  %s:%s", settings.APP_HOST, settings.APP_PORT)
     yield
-    logger.info("关闭中...  Redis 连接池释放")
-    # await redis_client.disconnect()
+    logger.info("关闭中...")
+    await engine.dispose()
     logger.info("已关闭")
 
 # ==== FastAPI 实例 ====
@@ -39,5 +45,14 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.CORS_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # 路由
 app.include_router(health_router)
+app.include_router(auth_router)
