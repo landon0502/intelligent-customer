@@ -63,6 +63,13 @@ class Settings:
     # ========== 日志 ==========
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
 
+    # ========== JWT ==========
+    JWT_SECRET: str = os.getenv("JWT_SECRET", "change-me-in-production")
+    JWT_EXPIRE_MINUTES: int = int(os.getenv("JWT_EXPIRE_MINUTES", "10080"))
+
+    # ========== Admin ==========
+    ADMIN_PASSWORD: str = os.getenv("ADMIN_PASSWORD", "admin123456")
+
 
 # 全局单例
 settings = Settings()

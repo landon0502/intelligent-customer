@@ -16,4 +16,14 @@ dependencies = [
     "rich>=15.0.0",
     "streamlit>=1.60.0",
     "uvicorn>=0.51.0",
+    "sqlalchemy[asyncio]>=2.0.0",
+    "asyncmy>=0.2.9",
+    "pyjwt>=2.8.0",
+    "passlib[bcrypt]>=1.7.4",
+    "python-multipart>=0.0.6",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
 ]
