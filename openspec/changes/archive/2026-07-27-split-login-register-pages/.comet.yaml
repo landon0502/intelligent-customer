@@ -18,8 +18,8 @@ verification_report: docs/superpowers/reports/2026-07-27-split-login-register-pa
 branch_status: handled
 created_at: 2026-07-27
 verified_at: 2026-07-27
-archive_confirmation: pending
-archived: false
+archive_confirmation: confirmed
+archived: true
 direct_override: null
 handoff_context: null
 handoff_hash: null
