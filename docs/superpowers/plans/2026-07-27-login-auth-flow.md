@@ -40,7 +40,7 @@ base-ref: e6b1542cdd7c0a5700513127ae2499a6009c6723
 - Consumes: 无外部依赖
 - Produces: `success()` 返回 `{"code": 0, "message": ..., "data": ...}`，`error()` 签名不变
 
-- [ ] **Step 1: 编写失败测试**
+- [x] **Step 1: 编写失败测试**
 
 ```python
 # apps/service/tests/test_response_utils.py
@@ -64,12 +64,12 @@ def test_error_returns_given_code():
     assert result["data"] is None
 ```
 
-- [ ] **Step 2: 运行测试确认失败**
+- [x] **Step 2: 运行测试确认失败**
 
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/service && uv run python -m pytest tests/test_response_utils.py -v`
 Expected: `test_success_returns_code_zero` FAIL（当前 success 返回 code=200）
 
-- [ ] **Step 3: 修改 success() 使其返回 code=0**
+- [x] **Step 3: 修改 success() 使其返回 code=0**
 
 ```python
 # apps/service/app/utils/response.py
@@ -78,12 +78,12 @@ def success(data: Any = None, message: str = "success") -> dict:
     return {"code": 0, "message": message, "data": data}
 ```
 
-- [ ] **Step 4: 运行测试确认通过**
+- [x] **Step 4: 运行测试确认通过**
 
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/service && uv run python -m pytest tests/test_response_utils.py -v`
 Expected: ALL PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/service/app/utils/response.py apps/service/tests/test_response_utils.py
@@ -263,7 +263,7 @@ def test_user_model_default_role():
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/service && uv run python -m pytest tests/test_user_model.py -v`
 Expected: ALL PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/service/app/db/ apps/service/app/models/ apps/service/tests/test_user_model.py
@@ -473,7 +473,7 @@ async def test_authenticate_user_not_found_returns_none():
     assert user is None
 ```
 
-- [ ] **Step 2: 运行测试确认失败**
+- [x] **Step 2: 运行测试确认失败**
 
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/service && uv run python -m pytest tests/test_auth_service.py -v`
 Expected: FAIL — module not found
@@ -703,7 +703,7 @@ async def test_me_without_token():
         assert resp.status_code == 401
 ```
 
-- [ ] **Step 2: 运行测试确认失败**
+- [x] **Step 2: 运行测试确认失败**
 
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/service && uv run python -m pytest tests/test_auth_routes.py -v`
 Expected: FAIL — router not found
@@ -1161,7 +1161,7 @@ describe("401 interceptor", () => {
 });
 ```
 
-- [ ] **Step 2: 运行测试确认失败**
+- [x] **Step 2: 运行测试确认失败**
 
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/web && pnpm test -- --run __tests__/interceptor-401.test.ts`
 Expected: FAIL — handleAuthError not exported
@@ -1244,7 +1244,7 @@ export { fetchClient };
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/web && pnpm test -- --run __tests__/interceptor-401.test.ts`
 Expected: ALL PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/lib/fetch/index.ts apps/web/__tests__/interceptor-401.test.ts
@@ -1489,7 +1489,7 @@ export default function LoginPage() {
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/web && pnpm build 2>&1 | head -50`
 Expected: 无编译错误（可能有其他页面的 warning，但 login 页面不应有错误）
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/app/login/page.tsx apps/web/package.json apps/web/pnpm-lock.yaml packages/ui/src/components/
