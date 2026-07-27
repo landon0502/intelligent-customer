@@ -2,6 +2,7 @@
 change: login-auth-flow
 design-doc: docs/superpowers/specs/2026-07-27-login-auth-flow-design.md
 base-ref: e6b1542cdd7c0a5700513127ae2499a6009c6723
+archived-with: 2026-07-27-login-auth-flow
 ---
 
 # 登录认证流程 实施计划

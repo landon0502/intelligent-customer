@@ -2,6 +2,8 @@
 comet_change: login-auth-flow
 role: technical-design
 canonical_spec: openspec
+archived-with: 2026-07-27-login-auth-flow
+status: final
 ---
 
 # 登录认证流程 — 技术设计文档
