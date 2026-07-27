@@ -1,14 +1,19 @@
-import { Geist, Geist_Mono } from "next/font/google"
+import localFont from "next/font/local"
 
 import "@intelligent-customer/ui/globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@intelligent-customer/ui/lib/utils";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'})
+const geist = localFont({
+  src: "../fonts/geist-latin.woff2",
+  variable: "--font-sans",
+  weight: "100 900",
+})
 
-const fontMono = Geist_Mono({
-  subsets: ["latin"],
+const fontMono = localFont({
+  src: "../fonts/geist-mono-latin.woff2",
   variable: "--font-mono",
+  weight: "100 900",
 })
 
 export default function RootLayout({
