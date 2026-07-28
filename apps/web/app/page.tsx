@@ -26,7 +26,7 @@ export default function Page() {
       <p className="text-muted-foreground">{t("tagline")}</p>
       {user && (
         <p className="text-muted-foreground text-sm">
-          {user.username}（{user.role}）
+          {user.username}（{user.role === "admin" ? t("roleAdmin") : t("roleUser")}）
         </p>
       )}
     </div>
