@@ -60,13 +60,14 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-svh items-center justify-center p-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle>注册</CardTitle>
-          <CardDescription>创建新账户开始使用</CardDescription>
-        </CardHeader>
-        <form onSubmit={registerForm.handleSubmit(handleRegister)}>
+    <form onSubmit={registerForm.handleSubmit(handleRegister)}>
+      <div className="flex min-h-svh items-center justify-center p-4">
+        <Card className="w-full max-w-sm">
+          <CardHeader>
+            <CardTitle>注册</CardTitle>
+            <CardDescription>创建新账户开始使用</CardDescription>
+          </CardHeader>
+
           <CardContent className="space-y-4">
             <div className="grid gap-2">
               <Label htmlFor="reg-username">用户名</Label>
@@ -124,8 +125,8 @@ export default function RegisterPage() {
               </Link>
             </p>
           </CardFooter>
-        </form>
-      </Card>
-    </div>
+        </Card>
+      </div>
+    </form>
   )
 }
