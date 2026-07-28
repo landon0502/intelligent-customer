@@ -1,5 +1,4 @@
 import { fetchClient } from "@/lib/fetch"
-import type { ApiResponse } from "@intelligent-customer/fetch-client"
 
 export interface User {
   id: number
