@@ -35,4 +35,4 @@
 
 - [x] 6.1 更新 `apps/web/app/layout.tsx`，集成 NextIntlClientProvider 和 AppLayout
 - [x] 6.2 更新 `apps/web/app/page.tsx`，替换为使用新 Layout 的首页占位内容
-- [ ] 6.3 验证完整流程：登录 → 首页展示 Layout → 主题切换 → 语言切换 → 退出登录
+- [x] 6.3 验证完整流程：登录 → 首页展示 Layout → 主题切换 → 语言切换 → 退出登录
