@@ -28,8 +28,8 @@
 
 ## 5. 语言切换 UI
 
-- [ ] 5.1 创建 `apps/web/components/language-switcher.tsx`，实现语言切换 DropdownMenu，切换时更新 cookie 并刷新 locale
-- [ ] 5.2 在 AppHeader 右侧集成 LanguageSwitcher 组件（ThemeSwitcher 旁边）
+- [x] 5.1 创建 `apps/web/components/language-switcher.tsx`，实现语言切换 DropdownMenu，切换时更新 cookie 并刷新 locale
+- [x] 5.2 在 AppHeader 右侧集成 LanguageSwitcher 组件（ThemeSwitcher 旁边）
 
 ## 6. Layout 接入与首页更新
 
