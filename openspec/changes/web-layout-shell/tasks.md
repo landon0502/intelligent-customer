@@ -23,8 +23,8 @@
 
 ## 4. 主题切换 UI
 
-- [ ] 4.1 创建 `apps/web/components/theme-switcher.tsx`，实现主题切换 DropdownMenu（亮色/暗色/跟随系统），集成 next-themes 的 useTheme
-- [ ] 4.2 在 AppHeader 右侧集成 ThemeSwitcher 组件，根据当前主题显示太阳/月亮图标
+- [x] 4.1 创建 `apps/web/components/theme-switcher.tsx`，实现主题切换 DropdownMenu（亮色/暗色/跟随系统），集成 next-themes 的 useTheme
+- [x] 4.2 在 AppHeader 右侧集成 ThemeSwitcher 组件，根据当前主题显示太阳/月亮图标
 
 ## 5. 语言切换 UI
 
