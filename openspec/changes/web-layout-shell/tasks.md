@@ -9,9 +9,9 @@
 
 ## 2. shadcn 组件补充
 
-- [ ] 2.1 通过 `pnpm dlx shadcn@latest add dropdown-menu -c apps/web` 添加 DropdownMenu 组件
-- [ ] 2.2 通过 `pnpm dlx shadcn@latest add avatar -c apps/web` 添加 Avatar 组件
-- [ ] 2.3 通过 `pnpm dlx shadcn@latest add separator -c apps/web` 添加 Separator 组件
+- [x] 2.1 通过 `pnpm dlx shadcn@latest add dropdown-menu -c apps/web` 添加 DropdownMenu 组件
+- [x] 2.2 通过 `pnpm dlx shadcn@latest add avatar -c apps/web` 添加 Avatar 组件
+- [x] 2.3 通过 `pnpm dlx shadcn@latest add separator -c apps/web` 添加 Separator 组件
 - [ ] 2.4 通过 `pnpm dlx shadcn@latest add tooltip -c apps/web` 添加 Tooltip 组件（如 shadcn add 不可用，手动基于 @base-ui/react 实现）
 
 ## 3. 菜单配置与 Layout 组件实现
