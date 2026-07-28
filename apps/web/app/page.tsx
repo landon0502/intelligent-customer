@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
-import { Button } from "@intelligent-customer/ui/components/button";
+import { useTranslations } from "next-intl";
 import { useAuthStore } from "@/store/auth";
 
 export default function Page() {
-  const { user, initAuth, logout, loading } = useAuthStore();
+  const { user, initAuth, loading } = useAuthStore();
+  const t = useTranslations("common");
 
   useEffect(() => {
     initAuth();
@@ -14,29 +15,20 @@ export default function Page() {
   if (loading) {
     return (
       <div className="flex min-h-svh items-center justify-center">
-        <p className="text-muted-foreground">加载中...</p>
+        <p className="text-muted-foreground">{t("loading")}</p>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-svh p-6">
-      <div className="flex max-w-md min-w-0 flex-col gap-4 text-sm leading-loose">
-        <div>
-          <h1 className="font-medium">欢迎使用 AI 客服系统</h1>
-          {user && (
-            <p className="mt-2 text-muted-foreground">
-              你好，{user.username}（{user.role}）
-            </p>
-          )}
-          <Button className="mt-4" variant="outline" onClick={logout}>
-            退出登录
-          </Button>
-        </div>
-        <div className="text-muted-foreground font-mono text-xs">
-          (Press <kbd>d</kbd> to toggle dark mode)
-        </div>
-      </div>
+    <div className="flex flex-col items-center justify-center gap-2">
+      <h1 className="text-2xl font-medium">{t("appName")}</h1>
+      <p className="text-muted-foreground">{t("tagline")}</p>
+      {user && (
+        <p className="text-muted-foreground text-sm">
+          {user.username}（{user.role}）
+        </p>
+      )}
     </div>
   );
 }

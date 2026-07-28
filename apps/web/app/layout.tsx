@@ -1,7 +1,10 @@
 import localFont from "next/font/local"
+import { getLocale, getMessages } from "next-intl/server"
+import { NextIntlClientProvider } from "next-intl"
 
 import "@intelligent-customer/ui/globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
+import { AppLayout } from "@/components/app-layout"
 import { cn } from "@intelligent-customer/ui/lib/utils";
 
 const geist = localFont({
@@ -16,19 +19,26 @@ const fontMono = localFont({
   weight: "100 900",
 })
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const locale = await getLocale()
+  const messages = await getMessages()
+
   return (
     <html
-      lang="en"
+      lang={locale}
       suppressHydrationWarning
       className={cn("antialiased", fontMono.variable, "font-sans", geist.variable)}
     >
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <ThemeProvider>
+            <AppLayout>{children}</AppLayout>
+          </ThemeProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   )
