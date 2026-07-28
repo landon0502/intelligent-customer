@@ -1,6 +1,6 @@
 workflow: tweak
 language: zh-CN
-phase: build
+phase: verify
 context_compression: off
 build_mode: direct
 build_pause: null
@@ -8,14 +8,14 @@ subagent_dispatch: null
 tdd_mode: direct
 review_mode: off
 isolation: branch
-verify_mode: light
+verify_mode: full
 auto_transition: true
 base_ref: 8a77e01229fc779dcb029be5973318e9823bedd1
 design_doc: null
 plan: null
 verify_result: pending
-verification_report: null
-branch_status: pending
+verification_report: docs/superpowers/reports/2026-07-28-layout-refactor-verify.md
+branch_status: handled
 created_at: 2026-07-28
 verified_at: null
 archive_confirmation: null

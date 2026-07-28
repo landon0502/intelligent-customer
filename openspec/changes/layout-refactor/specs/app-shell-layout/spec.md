@@ -23,15 +23,15 @@ Sidebar 底部 SHALL 不再展示用户信息和退出登录操作。用户信�
 - **THEN** Sidebar 底部不展示用户头像、用户名、角色信息和退出登录操作
 
 ### Requirement: Header 页面标题与用户菜单
-Header 左侧 SHALL 展示当前页面的标题，标题文本通过 i18n 获取。Header 右上角 SHALL 展示用户头像 DropdownMenu，触发按钮只显示头像（圆形，显示用户名首字母），DropdownMenu 内第一项显示用户必要信息（用户名、角色），后续包含语言切换、主题切换、退出登录等操作项。
+Header 左侧 SHALL 展示当前页面的标题，标题文本通过 i18n 获取。Header 右上角 SHALL 展示语言切换按钮（独立 DropdownMenu，只显示 localeAbbr 文字）和用户头像 DropdownMenu。用户头像 DropdownMenu 触发按钮只显示头像（圆形，显示用户名首字母），DropdownMenu 内第一项显示用户必要信息（用户名、角色），后续包含主题切换、系统设置、退出登录等操作项。
 
 #### Scenario: 首页 Header 标题与用户菜单
 - **WHEN** 已认证用户访问首页
-- **THEN** Header 左侧展示"智能对话"标题，右侧展示用户头像按钮
+- **THEN** Header 左侧展示"智能对话"标题，右侧展示语言切换按钮和用户头像按钮
 
 #### Scenario: 用户头像 DropdownMenu 展开
 - **WHEN** 用户点击 Header 右上角头像按钮
-- **THEN** 展开下拉菜单，第一项显示用户名和角色（不可点击），后续为语言切换、主题切换、退出登录操作
+- **THEN** 展开下拉菜单，第一项显示用户名和角色（不可点击），后续为主题切换、系统设置、退出登录操作
 
 #### Scenario: 退出登录
 - **WHEN** 用户在 DropdownMenu 中点击"退出登录"
