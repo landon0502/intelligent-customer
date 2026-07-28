@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Globe, Check } from "lucide-react";
@@ -19,15 +20,22 @@ const localeAbbr: Record<string, string> = {
   "en-US": "EN",
 };
 
+function setLocaleCookie(locale: string) {
+  document.cookie = `NEXT_LOCALE=${locale};path=/;max-age=31536000`;
+}
+
 export function LanguageSwitcher() {
   const router = useRouter();
   const t = useTranslations("language");
   const currentLocale = useLocale();
 
-  function handleSelect(locale: string) {
-    document.cookie = `NEXT_LOCALE=${locale};path=/;max-age=31536000`;
-    router.refresh();
-  }
+  const handleSelect = useCallback(
+    (locale: string) => {
+      setLocaleCookie(locale);
+      router.refresh();
+    },
+    [router],
+  );
 
   return (
     <DropdownMenu>
