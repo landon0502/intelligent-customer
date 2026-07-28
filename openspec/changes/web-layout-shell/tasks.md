@@ -4,8 +4,8 @@
 - [x] 1.2 创建 `apps/web/i18n/request.ts`，实现 `getRequestConfig` 从 cookie 读取 locale 并加载对应 message 文件
 - [x] 1.3 创建 `apps/web/i18n/routing.ts`，定义支持的语言列表（zh-CN、en-US）和默认语言
 - [x] 1.4 更新 `apps/web/next.config.ts`，添加 `createNextIntlPlugin()` 集成
-- [ ] 1.5 重写 `apps/web/messages/zh-CN.json`，按 AI 客服系统组织翻译内容（common、layout、theme、language 命名空间）
-- [ ] 1.6 重写 `apps/web/messages/en-US.json`，与 zh-CN 对应的英文翻译
+- [x] 1.5 重写 `apps/web/messages/zh-CN.json`，按 AI 客服系统组织翻译内容（common、layout、theme、language 命名空间）
+- [x] 1.6 重写 `apps/web/messages/en-US.json`，与 zh-CN 对应的英文翻译
 
 ## 2. shadcn 组件补充
 
