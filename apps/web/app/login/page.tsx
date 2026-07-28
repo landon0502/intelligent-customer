@@ -54,13 +54,14 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-svh items-center justify-center p-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle>登录</CardTitle>
-          <CardDescription>输入用户名和密码登录系统</CardDescription>
-        </CardHeader>
-        <form onSubmit={loginForm.handleSubmit(handleLogin)}>
+    <form onSubmit={loginForm.handleSubmit(handleLogin)}>
+      <div className="flex min-h-svh items-center justify-center p-4">
+        <Card className="w-full max-w-sm">
+          <CardHeader>
+            <CardTitle>登录</CardTitle>
+            <CardDescription>输入用户名和密码登录系统</CardDescription>
+          </CardHeader>
+
           <CardContent className="space-y-4">
             <div className="grid gap-2">
               <Label htmlFor="login-username">用户名</Label>
@@ -90,7 +91,7 @@ export default function LoginPage() {
               )}
             </div>
           </CardContent>
-          <CardFooter className="flex flex-col gap-3">
+          <CardFooter className="mt-1 flex flex-col gap-3">
             <Button type="submit" className="w-full" disabled={submitting}>
               {submitting ? "登录中..." : "登录"}
             </Button>
@@ -104,8 +105,8 @@ export default function LoginPage() {
               </Link>
             </p>
           </CardFooter>
-        </form>
-      </Card>
-    </div>
+        </Card>
+      </div>
+    </form>
   )
 }
