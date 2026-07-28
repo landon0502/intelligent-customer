@@ -1,6 +1,6 @@
 ## 1. 依赖安装与 i18n 基础配置
 
-- [ ] 1.1 安装 next-intl 依赖（`pnpm add next-intl`），验证与 Next.js 16 兼容性
+- [x] 1.1 安装 next-intl 依赖（`pnpm add next-intl`），验证与 Next.js 16 兼容性
 - [ ] 1.2 创建 `apps/web/i18n/request.ts`，实现 `getRequestConfig` 从 cookie 读取 locale 并加载对应 message 文件
 - [ ] 1.3 创建 `apps/web/i18n/routing.ts`，定义支持的语言列表（zh-CN、en-US）和默认语言
 - [ ] 1.4 更新 `apps/web/next.config.ts`，添加 `createNextIntlPlugin()` 集成
