@@ -3,8 +3,7 @@
 import { useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { Globe, Check } from "lucide-react";
-import { Button } from "@intelligent-customer/ui/components/button";
+import { Check } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -40,14 +39,10 @@ export function LanguageSwitcher() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        render={
-          <Button variant="ghost" size="icon">
-            <Globe className="size-4" />
-            <span className="text-xs font-medium">{localeAbbr[currentLocale] ?? currentLocale}</span>
-            <span className="sr-only">{t("switch")}</span>
-          </Button>
-        }
-      />
+        className="inline-flex items-center justify-center h-8 w-8 text-xs font-medium rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
+      >
+        {localeAbbr[currentLocale] ?? currentLocale}
+      </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {localeOptions.map((locale) => (
           <DropdownMenuItem key={locale} onClick={() => handleSelect(locale)}>

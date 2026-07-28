@@ -18,7 +18,6 @@ export function AppSidebar() {
   const t = useTranslations("layout");
   const tCommon = useTranslations("common");
   const user = useAuthStore((s) => s.user);
-  const logout = useAuthStore((s) => s.logout);
 
   const filteredMenu = filterMenuByRole(
     menuConfig,
@@ -45,12 +44,6 @@ export function AppSidebar() {
 
   function isItem(entry: MenuEntry): entry is MenuItemConfig {
     return entry.type !== "group";
-  }
-
-  function getRoleLabel(role: string): string {
-    if (role === "admin") return tCommon("roleAdmin");
-    if (role === "user") return tCommon("roleUser");
-    return role;
   }
 
   return (
@@ -84,7 +77,7 @@ export function AppSidebar() {
               <Link
                 key={entry.key}
                 href={entry.href}
-                className={`flex items-center gap-3 px-5 py-2.5 rounded-md text-sm transition-colors ${
+                className={`flex items-center gap-3 px-5 py-2.5 text-sm transition-colors ${
                   isActive
                     ? "bg-sidebar-primary text-sidebar-primary-foreground"
                     : "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
@@ -99,27 +92,6 @@ export function AppSidebar() {
           return null;
         })}
       </nav>
-
-      {/* Bottom user area */}
-      {user && (
-        <div className="border-t border-sidebar-border px-5 py-3">
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-full bg-sidebar-accent flex items-center justify-center text-xs font-medium text-sidebar-accent-foreground shrink-0">
-              {user.username.charAt(0).toUpperCase()}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-sm font-medium truncate">{user.username}</div>
-              <div className="text-xs text-muted-foreground">{getRoleLabel(user.role)}</div>
-            </div>
-          </div>
-          <button
-            onClick={logout}
-            className="mt-2 text-xs text-muted-foreground hover:text-sidebar-foreground transition-colors"
-          >
-            {tCommon("logout")}
-          </button>
-        </div>
-      )}
     </aside>
   );
 }

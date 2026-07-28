@@ -4,7 +4,6 @@ import { NextIntlClientProvider } from "next-intl"
 
 import "@intelligent-customer/ui/globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
-import { AppLayout } from "@/components/app-layout"
 import { cn } from "@intelligent-customer/ui/lib/utils";
 
 const geist = localFont({
@@ -36,7 +35,7 @@ export default async function RootLayout({
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <ThemeProvider>
-            <AppLayout>{children}</AppLayout>
+            {children}
           </ThemeProvider>
         </NextIntlClientProvider>
       </body>

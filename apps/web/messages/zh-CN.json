@@ -4,6 +4,7 @@
     "tagline": "智能客服，贴心服务",
     "loading": "加载中...",
     "logout": "退出登录",
+    "settings": "系统设置",
     "roleAdmin": "管理员",
     "roleUser": "普通用户"
   },
