@@ -14,7 +14,7 @@ base_ref: cc86e0767b410e282b0f2d8b0485bd75f5384851
 design_doc: docs/superpowers/specs/2026-07-28-web-layout-shell-design.md
 plan: docs/superpowers/plans/2026-07-28-web-layout-shell.md
 verify_result: pending
-verification_report: null
+verification_report: docs/superpowers/reports/2026-07-28-web-layout-shell-verify.md
 branch_status: handled
 created_at: 2026-07-28
 verified_at: null
