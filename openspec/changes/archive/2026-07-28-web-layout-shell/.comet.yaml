@@ -1,6 +1,6 @@
 workflow: full
 language: zh-CN
-phase: verify
+phase: archive
 context_compression: off
 build_mode: subagent-driven-development
 build_pause: null
@@ -13,13 +13,13 @@ auto_transition: true
 base_ref: cc86e0767b410e282b0f2d8b0485bd75f5384851
 design_doc: docs/superpowers/specs/2026-07-28-web-layout-shell-design.md
 plan: docs/superpowers/plans/2026-07-28-web-layout-shell.md
-verify_result: pending
+verify_result: pass
 verification_report: docs/superpowers/reports/2026-07-28-web-layout-shell-verify.md
 branch_status: handled
 created_at: 2026-07-28
-verified_at: null
-archive_confirmation: null
-archived: false
+verified_at: 2026-07-28
+archive_confirmation: confirmed
+archived: true
 direct_override: null
 handoff_context: openspec/changes/web-layout-shell/.comet/handoff/design-context.json
 handoff_hash: 7d3539a03e0f820fcfe92ea8e1bb56a00f12656c30d56691fd7cc6994171ebef

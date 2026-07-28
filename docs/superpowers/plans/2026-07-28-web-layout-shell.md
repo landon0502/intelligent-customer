@@ -2,6 +2,7 @@
 change: web-layout-shell
 design-doc: docs/superpowers/specs/2026-07-28-web-layout-shell-design.md
 base-ref: cc86e0767b410e282b0f2d8b0485bd75f5384851
+archived-with: 2026-07-28-web-layout-shell
 ---
 
 # Web Layout Shell 实施计划
