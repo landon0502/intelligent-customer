@@ -19,7 +19,7 @@
 - [x] 3.1 创建 `apps/web/config/menu.ts`，导出菜单配置数组（含 key、labelKey、href、icon、roles、分组声明）
 - [x] 3.2 创建 `apps/web/components/app-sidebar.tsx`，实现 Sidebar 组件（Logo 区域、菜单列表渲染、角色过滤、底部用户信息、退出登录）
 - [x] 3.3 创建 `apps/web/components/app-header.tsx`，实现 Header 组件（页面标题、右侧操作区域占位）
-- [ ] 3.4 创建 `apps/web/components/app-layout.tsx`，组合 Sidebar + Header + Content 三栏布局
+- [x] 3.4 创建 `apps/web/components/app-layout.tsx`，组合 Sidebar + Header + Content 三栏布局
 
 ## 4. 主题切换 UI
 
