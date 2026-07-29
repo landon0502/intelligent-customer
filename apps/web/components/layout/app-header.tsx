@@ -1,12 +1,12 @@
-"use client";
+"use client"
 
-import { usePathname, useRouter } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
-import { useSyncExternalStore } from "react";
-import { useTheme } from "next-themes";
-import { titleKeyMap } from "@/config/menu";
-import { useAuthStore } from "@/store/auth";
-import { routing } from "@/i18n/routing";
+import { usePathname, useRouter } from "next/navigation"
+import { useLocale, useTranslations } from "next-intl"
+
+import { useTheme } from "next-themes"
+import { titleKeyMap } from "@/config/menu"
+import { useAuthStore } from "@/store/auth"
+import { routing } from "@/i18n/routing"
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -16,106 +16,104 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuLabel,
-} from "@intelligent-customer/ui/components/dropdown-menu";
-import { Sun, Moon, Monitor, Check, LogOut, Settings } from "lucide-react";
+  DropdownMenuGroup,
+} from "@intelligent-customer/ui/components/dropdown-menu"
+import { Sun, Moon, Monitor, Check, LogOut, Settings } from "lucide-react"
+import { useMounted } from "@/hooks"
 
-const localeOptions = routing.locales;
+const localeOptions = routing.locales
 
 const localeAbbr: Record<string, string> = {
   "zh-CN": "中",
   "en-US": "EN",
-};
+}
 
-const themeOptions = ["light", "dark", "system"] as const;
-
-const emptySubscribe = () => () => {};
+const themeOptions = ["light", "dark", "system"] as const
 
 function setLocaleCookie(locale: string) {
-  document.cookie = `NEXT_LOCALE=${locale};path=/;max-age=31536000`;
+  document.cookie = `NEXT_LOCALE=${locale};path=/;max-age=31536000`
+}
+
+function ThemeIcon({ theme }: { theme?: string }) {
+  return theme === "light" ? (
+    <Sun className="size-4" />
+  ) : theme === "dark" ? (
+    <Moon className="size-4" />
+  ) : (
+    <Monitor className="size-4" />
+  )
 }
 
 export function AppHeader() {
-  const pathname = usePathname();
-  const router = useRouter();
-  const currentLocale = useLocale();
-  const t = useTranslations("layout");
-  const tCommon = useTranslations("common");
-  const tTheme = useTranslations("theme");
-  const tLanguage = useTranslations("language");
-  const { theme, setTheme } = useTheme();
-  const user = useAuthStore((s) => s.user);
-  const logout = useAuthStore((s) => s.logout);
+  const pathname = usePathname()
+  const router = useRouter()
+  const currentLocale = useLocale()
+  const t = useTranslations("layout")
+  const tCommon = useTranslations("common")
+  const tTheme = useTranslations("theme")
+  const tLanguage = useTranslations("language")
+  const { theme, setTheme } = useTheme()
+  const user = useAuthStore((s) => s.user)
+  const logout = useAuthStore((s) => s.logout)
 
-  const mounted = useSyncExternalStore(
-    emptySubscribe,
-    () => true,
-    () => false,
-  );
-
-  const titleKey = titleKeyMap[pathname];
+  const mounted = useMounted()
+  const titleKey = titleKeyMap[pathname]
   const pageTitle = titleKey
     ? t(titleKey.replace("layout.", "") as Parameters<typeof t>[0])
-    : tCommon("appName");
+    : tCommon("appName")
 
   function getRoleLabel(role: string): string {
-    if (role === "admin") return tCommon("roleAdmin");
-    if (role === "user") return tCommon("roleUser");
-    return role;
+    if (role === "admin") return tCommon("roleAdmin")
+    if (role === "user") return tCommon("roleUser")
+    return role
   }
 
   const handleLocaleSelect = (locale: string) => {
-    setLocaleCookie(locale);
-    router.refresh();
-  };
+    setLocaleCookie(locale)
+    router.refresh()
+  }
 
   const handleLogout = () => {
-    logout();
-  };
+    logout()
+  }
 
   if (!user) {
     return (
-      <header className="h-14 bg-background border-b flex items-center px-6 shrink-0">
+      <header className="flex h-14 shrink-0 items-center border-b bg-background px-6">
         <h1 className="text-base font-semibold">{pageTitle}</h1>
       </header>
-    );
+    )
   }
 
   return (
-    <header className="h-14 bg-background border-b flex items-center justify-between px-6 shrink-0">
+    <header className="flex h-14 shrink-0 items-center justify-between border-b bg-background px-6">
       <h1 className="text-base font-semibold">{pageTitle}</h1>
       <div className="flex items-center gap-2">
         {/* Language switcher - text only */}
         <DropdownMenu>
-          <DropdownMenuTrigger
-            className="inline-flex items-center justify-center h-8 w-8 text-xs font-medium rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
-          >
+          <DropdownMenuTrigger className="inline-flex h-8 w-8 items-center justify-center rounded-md text-xs font-medium transition-colors hover:bg-accent hover:text-accent-foreground">
             {localeAbbr[currentLocale] ?? currentLocale}
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             {localeOptions.map((locale) => (
-              <DropdownMenuItem key={locale} onClick={() => handleLocaleSelect(locale)}>
+              <DropdownMenuItem
+                key={locale}
+                onClick={() => handleLocaleSelect(locale)}
+              >
                 {tLanguage(locale === "zh-CN" ? "zhCN" : "enUS")}
-                {currentLocale === locale && <Check className="size-4 ml-auto" />}
+                {currentLocale === locale && (
+                  <Check className="ml-auto size-4" />
+                )}
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* User avatar dropdown */}
         <DropdownMenu>
-          <DropdownMenuTrigger
-            className="inline-flex items-center justify-center rounded-full h-8 w-8 bg-accent text-accent-foreground text-xs font-medium hover:bg-accent/80 transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-          >
-            {user.username.charAt(0).toUpperCase()}
+          <DropdownMenuTrigger className="inline-flex h-8 w-8 items-center justify-center rounded-md text-xs font-medium transition-colors hover:bg-accent hover:text-accent-foreground">
+            <ThemeIcon theme={theme} />
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            {/* First item: user info (non-interactive) */}
-            <DropdownMenuLabel className="flex flex-col gap-0.5">
-              <span className="text-sm font-medium text-foreground">{user.username}</span>
-              <span className="text-xs text-muted-foreground">{getRoleLabel(user.role)}</span>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-
+          <DropdownMenuContent align="end">
             {/* Theme switcher */}
             {mounted && (
               <>
@@ -124,41 +122,55 @@ export function AppHeader() {
                   onValueChange={(value) => setTheme(value)}
                 >
                   {themeOptions.map((value) => {
-                    const icon =
-                      value === "light" ? (
-                        <Sun className="size-4" />
-                      ) : value === "dark" ? (
-                        <Moon className="size-4" />
-                      ) : (
-                        <Monitor className="size-4" />
-                      );
+                    const icon = <ThemeIcon theme={value} />
                     return (
                       <DropdownMenuRadioItem key={value} value={value}>
                         {icon}
                         {tTheme(value)}
                       </DropdownMenuRadioItem>
-                    );
+                    )
                   })}
                 </DropdownMenuRadioGroup>
-                <DropdownMenuSeparator />
               </>
             )}
+          </DropdownMenuContent>
+        </DropdownMenu>
 
-            {/* System settings (placeholder) */}
-            <DropdownMenuItem>
-              <Settings className="size-4" />
-              {tCommon("settings")}
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
+        {/* User avatar dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-accent text-xs font-medium text-accent-foreground transition-colors hover:bg-accent/80 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none">
+            {user.username.charAt(0).toUpperCase()}
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            {/* First item: user info (non-interactive) */}
+            <DropdownMenuGroup>
+              <DropdownMenuLabel className="flex flex-col gap-0.5">
+                <span className="text-sm font-medium text-foreground">
+                  {user.username}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {getRoleLabel(user.role)}
+                </span>
+              </DropdownMenuLabel>
 
-            {/* Logout */}
-            <DropdownMenuItem variant="destructive" onClick={handleLogout}>
-              <LogOut className="size-4" />
-              {tCommon("logout")}
-            </DropdownMenuItem>
+              <DropdownMenuSeparator />
+
+              {/* System settings (placeholder) */}
+              <DropdownMenuItem>
+                <Settings className="size-4" />
+                {tCommon("settings")}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+
+              {/* Logout */}
+              <DropdownMenuItem variant="destructive" onClick={handleLogout}>
+                <LogOut className="size-4" />
+                {tCommon("logout")}
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
     </header>
-  );
+  )
 }
