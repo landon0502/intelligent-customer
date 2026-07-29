@@ -332,7 +332,7 @@ cd /Users/superhuan/Documents/project/intelligent-customer && git add apps/web/c
 - Consumes: 无
 - Produces: `ChatInput` 组件，props: `onSend: (text: string) => void`, `disabled?: boolean`
 
-- [ ] **Step 1: 编写 ChatInput 组件测试**
+- [x] **Step 1: 编写 ChatInput 组件测试**
 
 创建 `apps/web/__tests__/chat-input.test.tsx`：
 
@@ -397,7 +397,7 @@ describe("ChatInput", () => {
 });
 ```
 
-- [ ] **Step 2: 运行测试确认失败**
+- [x] **Step 2: 运行测试确认失败**
 
 ```bash
 cd /Users/superhuan/Documents/project/intelligent-customer && pnpm --filter web test -- --run __tests__/chat-input.test.tsx
@@ -405,7 +405,7 @@ cd /Users/superhuan/Documents/project/intelligent-customer && pnpm --filter web 
 
 Expected: FAIL — module not found
 
-- [ ] **Step 3: 实现 ChatInput 组件**
+- [x] **Step 3: 实现 ChatInput 组件**
 
 创建 `apps/web/components/chat/chat-input.tsx`：
 
@@ -485,7 +485,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
 }
 ```
 
-- [ ] **Step 4: 运行测试确认通过**
+- [x] **Step 4: 运行测试确认通过**
 
 ```bash
 cd /Users/superhuan/Documents/project/intelligent-customer && pnpm --filter web test -- --run __tests__/chat-input.test.tsx
@@ -493,7 +493,7 @@ cd /Users/superhuan/Documents/project/intelligent-customer && pnpm --filter web 
 
 Expected: 5 tests PASS
 
-- [ ] **Step 5: 提交**
+- [x] **Step 5: 提交**
 
 ```bash
 cd /Users/superhuan/Documents/project/intelligent-customer && git add apps/web/components/chat/chat-input.tsx apps/web/__tests__/chat-input.test.tsx && git commit -m "feat(chat): add ChatInput component with auto-resize and keyboard handling"

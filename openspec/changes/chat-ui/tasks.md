@@ -11,7 +11,7 @@
 - [ ] 2.3 实现 `MessageArea` 消息展示区组件（滚动到底部、消息列表渲染）
 - [ ] 2.4 实现 `MessageBubble` 消息气泡组件（用户/助手样式区分、Markdown 渲染）
 - [ ] 2.5 实现 `ToolCallStatus` 工具调用状态组件（spinner 加载中、完成结果）
-- [ ] 2.6 实现 `ChatInput` 输入框组件（textarea 自适应高度、Enter 发送、Shift+Enter 换行、发送按钮）
+- [x] 2.6 实现 `ChatInput` 输入框组件（textarea 自适应高度、Enter 发送、Shift+Enter 换行、发送按钮）
 
 ## 3. 交互逻辑
 
