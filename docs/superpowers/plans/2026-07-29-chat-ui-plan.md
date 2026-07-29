@@ -510,7 +510,7 @@ cd /Users/superhuan/Documents/project/intelligent-customer && git add apps/web/c
 - Consumes: `ToolCall` 类型（来自 Task 1 的 `apps/web/config/mock-chat.ts`）
 - Produces: `ToolCallStatus` 组件，props: `toolCalls: ToolCall[]`
 
-- [ ] **Step 1: 实现 ToolCallStatus 组件**
+- [x] **Step 1: 实现 ToolCallStatus 组件**
 
 创建 `apps/web/components/chat/tool-call-status.tsx`：
 
@@ -550,7 +550,7 @@ export function ToolCallStatus({ toolCalls }: ToolCallStatusProps) {
 }
 ```
 
-- [ ] **Step 2: 提交**
+- [x] **Step 2: 提交**
 
 ```bash
 cd /Users/superhuan/Documents/project/intelligent-customer && git add apps/web/components/chat/tool-call-status.tsx && git commit -m "feat(chat): add ToolCallStatus component with calling/done states"
