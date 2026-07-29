@@ -18,14 +18,14 @@
 ### Requirement: Sidebar 底部用户信息
 Sidebar 底部 SHALL 不再展示用户信息和退出登录操作。用户信息和退出登录 SHALL 移至 Header 右上角的 DropdownMenu 中。
 
-#### Scenario: Sidebar 底部无用户信息
+#### Scenario: 用户信息展示
 - **WHEN** 已认证用户查看 Sidebar 底部
 - **THEN** Sidebar 底部不展示用户头像、用户名、角色信息和退出登录操作
 
-### Requirement: Header 页面标题与用户菜单
+### Requirement: Header 页面标题
 Header 左侧 SHALL 展示当前页面的标题，标题文本通过 i18n 获取。Header 右上角 SHALL 展示语言切换按钮（独立 DropdownMenu，只显示 localeAbbr 文字）和用户头像 DropdownMenu。用户头像 DropdownMenu 触发按钮只显示头像（圆形，显示用户名首字母），DropdownMenu 内第一项显示用户必要信息（用户名、角色），后续包含主题切换、系统设置、退出登录等操作项。
 
-#### Scenario: 首页 Header 标题与用户菜单
+#### Scenario: 首页 Header 标题
 - **WHEN** 已认证用户访问首页
 - **THEN** Header 左侧展示"智能对话"标题，右侧展示语言切换按钮和用户头像按钮
 
@@ -37,7 +37,7 @@ Header 左侧 SHALL 展示当前页面的标题，标题文本通过 i18n 获取
 - **WHEN** 用户在 DropdownMenu 中点击"退出登录"
 - **THEN** 执行退出登录操作，跳转至登录页
 
-### Requirement: Layout 组件从 components/layout 目录组织
+### Requirement: Layout 组件从 components 目录抽离
 AppLayout、AppSidebar、AppHeader、ThemeSwitcher、LanguageSwitcher 等 Layout 组件 SHALL 位于 `apps/web/components/layout/` 目录下。`layout.tsx` 不再引入 AppLayout，由各页面按需引入。
 
 #### Scenario: 组件目录结构
