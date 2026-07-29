@@ -811,7 +811,7 @@ cd /Users/superhuan/Documents/project/intelligent-customer && git add apps/web/c
 - Consumes: `Session`, `Message`, `ToolCall` 类型 + `mockSessions`, `mockGetAIResponse`（来自 Task 1）；`SessionList`（Task 6）；`MessageArea`（Task 5）；`ChatInput`（Task 2）
 - Produces: `ChatPage` 组件（无 props，自包含状态管理）
 
-- [ ] **Step 1: 实现 ChatPage 组件**
+- [x] **Step 1: 实现 ChatPage 组件**
 
 创建 `apps/web/components/chat/chat-page.tsx`：
 
@@ -1002,7 +1002,7 @@ export function ChatPage() {
 }
 ```
 
-- [ ] **Step 2: 提交**
+- [x] **Step 2: 提交**
 
 ```bash
 cd /Users/superhuan/Documents/project/intelligent-customer && git add apps/web/components/chat/chat-page.tsx && git commit -m "feat(chat): add ChatPage with session management and streaming simulation"
