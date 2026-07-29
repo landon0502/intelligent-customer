@@ -659,7 +659,7 @@ cd /Users/superhuan/Documents/project/intelligent-customer && git add apps/web/c
 - Consumes: `Message` 类型（来自 Task 1）；`MessageBubble` 组件（来自 Task 4）
 - Produces: `MessageArea` 组件，props: `messages: Message[]`
 
-- [ ] **Step 1: 实现 MessageArea 组件**
+- [x] **Step 1: 实现 MessageArea 组件**
 
 创建 `apps/web/components/chat/message-area.tsx`：
 
@@ -704,7 +704,7 @@ export function MessageArea({ messages }: MessageAreaProps) {
 }
 ```
 
-- [ ] **Step 2: 提交**
+- [x] **Step 2: 提交**
 
 ```bash
 cd /Users/superhuan/Documents/project/intelligent-customer && git add apps/web/components/chat/message-area.tsx && git commit -m "feat(chat): add MessageArea with auto-scroll and empty state"
@@ -721,7 +721,7 @@ cd /Users/superhuan/Documents/project/intelligent-customer && git add apps/web/c
 - Consumes: `Session` 类型（来自 Task 1）
 - Produces: `SessionList` 组件，props: `sessions: Session[]`, `currentSessionId: string | null`, `onSelect: (id: string) => void`, `onNew: () => void`, `onDelete: (id: string) => void`
 
-- [ ] **Step 1: 实现 SessionList 组件**
+- [x] **Step 1: 实现 SessionList 组件**
 
 创建 `apps/web/components/chat/session-list.tsx`：
 
@@ -794,7 +794,7 @@ export function SessionList({
 }
 ```
 
-- [ ] **Step 2: 提交**
+- [x] **Step 2: 提交**
 
 ```bash
 cd /Users/superhuan/Documents/project/intelligent-customer && git add apps/web/components/chat/session-list.tsx && git commit -m "feat(chat): add SessionList with new/delete/select interactions"

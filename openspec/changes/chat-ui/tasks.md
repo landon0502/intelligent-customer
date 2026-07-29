@@ -7,8 +7,8 @@
 ## 2. 核心组件实现
 
 - [ ] 2.1 实现 `ChatPage` 页面容器组件（管理会话状态、当前会话 ID、消息列表）
-- [ ] 2.2 实现 `SessionList` 会话列表侧栏组件（会话项渲染、新建按钮、删除按钮、活跃高亮）
-- [ ] 2.3 实现 `MessageArea` 消息展示区组件（滚动到底部、消息列表渲染）
+- [x] 2.2 实现 `SessionList` 会话列表侧栏组件（会话项渲染、新建按钮、删除按钮、活跃高亮）
+- [x] 2.3 实现 `MessageArea` 消息展示区组件（滚动到底部、消息列表渲染）
 - [x] 2.4 实现 `MessageBubble` 消息气泡组件（用户/助手样式区分、Markdown 渲染）
 - [x] 2.5 实现 `ToolCallStatus` 工具调用状态组件（spinner 加载中、完成结果）
 - [x] 2.6 实现 `ChatInput` 输入框组件（textarea 自适应高度、Enter 发送、Shift+Enter 换行、发送按钮）
