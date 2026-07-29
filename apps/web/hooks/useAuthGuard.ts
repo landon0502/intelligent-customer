@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/stores";
+import { useAuthStore } from "@/store/auth";
 import { tokenManager } from "@/lib/fetch";
 
 type GuardState = "idle" | "loading" | "done";
