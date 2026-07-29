@@ -29,7 +29,7 @@
   },
   "chat": {
     "sessionList": "会话列表",
-    "newSession": "+ 新建会话",
+    "newSession": "新建会话",
     "placeholder": "输入消息，Enter 发送，Shift+Enter 换行...",
     "send": "发送",
     "emptySession": "选择或创建一个会话开始对话",

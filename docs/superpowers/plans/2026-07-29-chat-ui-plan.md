@@ -2,6 +2,7 @@
 change: chat-ui
 design-doc: docs/superpowers/specs/2026-07-29-chat-ui-design.md
 base-ref: c9a20e15ed8531cb168198c1b97778219dc0a102
+archived-with: 2026-07-29-chat-ui
 ---
 
 # Chat UI 实施计划
