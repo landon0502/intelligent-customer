@@ -567,7 +567,7 @@ cd /Users/superhuan/Documents/project/intelligent-customer && git add apps/web/c
 - Consumes: `Message` 类型（来自 Task 1）；`ToolCallStatus` 组件（来自 Task 3）
 - Produces: `MessageBubble` 组件，props: `message: Message`
 
-- [ ] **Step 1: 实现 MessageBubble 组件**
+- [x] **Step 1: 实现 MessageBubble 组件**
 
 创建 `apps/web/components/chat/message-bubble.tsx`：
 
@@ -642,7 +642,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
 }
 ```
 
-- [ ] **Step 2: 提交**
+- [x] **Step 2: 提交**
 
 ```bash
 cd /Users/superhuan/Documents/project/intelligent-customer && git add apps/web/components/chat/message-bubble.tsx && git commit -m "feat(chat): add MessageBubble with Markdown rendering and tool call display"
