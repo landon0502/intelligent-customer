@@ -48,6 +48,8 @@ AppLayout、AppSidebar、AppHeader、ThemeSwitcher、LanguageSwitcher 等 Layout
 - **WHEN** 查看 `apps/web/app/layout.tsx`
 - **THEN** 不包含 AppLayout 组件的引入和渲染
 
+## ADDED Requirements
+
 ### Requirement: 国际化切换按钮文字显示
 国际化切换按钮的触发元素 SHALL 只显示 `localeAbbr` 中的 value 值（如"中"/"EN"），不使用图标。
 
