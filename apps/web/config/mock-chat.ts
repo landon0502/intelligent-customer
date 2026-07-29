@@ -33,7 +33,7 @@ export function mockGetAIResponse(text: string): {
       "Hi！很高兴为您服务，请告诉我您的需求。",
     ];
     return {
-      content: greetings[Math.floor(Math.random() * greetings.length)],
+      content: greetings[Math.floor(Math.random() * greetings.length)]!,
     };
   }
 

@@ -19,7 +19,7 @@ export function ChatPage() {
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(
     mockSessions[0]?.id ?? null
   );
-  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(
     () => () => {

@@ -1,5 +1,6 @@
 "use client";
 
+import { Fragment } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { Message } from "@/config/mock-chat";
@@ -43,10 +44,10 @@ export function MessageBubble({ message }: MessageBubbleProps) {
       <div className="flex justify-end">
         <div className="bg-primary text-primary-foreground rounded-xl rounded-br-sm max-w-[70%] px-3.5 py-2.5">
           {message.content.split("\n").map((line, i) => (
-            <React.Fragment key={i}>
+            <Fragment key={i}>
               {i > 0 && <br />}
               {line}
-            </React.Fragment>
+            </Fragment>
           ))}
         </div>
       </div>
