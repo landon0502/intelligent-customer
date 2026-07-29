@@ -26,5 +26,13 @@
     "zhCN": "简体中文",
     "enUS": "English",
     "switch": "Switch Language"
+  },
+  "chat": {
+    "sessionList": "Sessions",
+    "newSession": "+ New Chat",
+    "placeholder": "Type a message, Enter to send, Shift+Enter for new line...",
+    "send": "Send",
+    "emptySession": "Select or create a session to start chatting",
+    "selectSession": "Select a session"
   }
 }
