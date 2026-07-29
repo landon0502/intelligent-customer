@@ -1020,7 +1020,7 @@ cd /Users/superhuan/Documents/project/intelligent-customer && git add apps/web/c
 **Interfaces:**
 - Consumes: `ChatPage` 组件（来自 Task 7）；`useAuthStore`（现有）；`AppLayout`（现有）
 
-- [ ] **Step 1: 添加 i18n 翻译键到 zh-CN.json**
+- [x] **Step 1: 添加 i18n 翻译键到 zh-CN.json**
 
 在 `apps/web/messages/zh-CN.json` 中，在 `"language"` 块之后追加 `"chat"` 键：
 
@@ -1064,7 +1064,7 @@ cd /Users/superhuan/Documents/project/intelligent-customer && git add apps/web/c
 }
 ```
 
-- [ ] **Step 2: 添加 i18n 翻译键到 en-US.json**
+- [x] **Step 2: 添加 i18n 翻译键到 en-US.json**
 
 在 `apps/web/messages/en-US.json` 中，在 `"language"` 块之后追加 `"chat"` 键：
 
@@ -1108,7 +1108,7 @@ cd /Users/superhuan/Documents/project/intelligent-customer && git add apps/web/c
 }
 ```
 
-- [ ] **Step 3: 改造 page.tsx**
+- [x] **Step 3: 改造 page.tsx**
 
 替换 `apps/web/app/page.tsx` 的内容为：
 
@@ -1147,7 +1147,7 @@ export default function Page() {
 }
 ```
 
-- [ ] **Step 4: 提交**
+- [x] **Step 4: 提交**
 
 ```bash
 cd /Users/superhuan/Documents/project/intelligent-customer && git add apps/web/app/page.tsx apps/web/messages/zh-CN.json apps/web/messages/en-US.json && git commit -m "feat(chat): integrate ChatPage into home route with i18n support"
