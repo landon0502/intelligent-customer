@@ -1,35 +1,40 @@
 "use client"
 
+import { useState } from "react"
 import { useTranslations } from "next-intl"
+import { ChevronRight } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuItem,
   SidebarMenuButton,
-  SidebarTrigger,
+  SidebarMenuItem,
 } from "@intelligent-customer/ui/components/sidebar"
 import { useAuthStore } from "@/store/auth"
 import {
   menuConfig,
   filterMenuByRole,
   type MenuItemConfig,
+  type MenuGroupConfig,
   type MenuRole,
 } from "@/config/menu"
 
-interface SidebarProps {
+interface AppSidebarProps {
   activeTab: string
   onTabChange?: (tab: string) => void
+  collapsible?: "icon" | "offcanvas"
 }
 
 export function AppSidebar({
   activeTab,
   onTabChange,
-}: SidebarProps) {
-  const t = useTranslations("common")
+  collapsible = "icon",
+}: AppSidebarProps) {
+  const t = useTranslations("layout")
   const user = useAuthStore((s) => s.user)
 
   const filteredMenu = filterMenuByRole(
@@ -37,54 +42,112 @@ export function AppSidebar({
     user?.role as MenuRole | undefined
   )
 
+  // 追踪每个分组的展开/收起状态
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(
+    () => {
+      const initial: Record<string, boolean> = {}
+      for (const entry of filteredMenu) {
+        if (entry.type === "group") {
+          initial[entry.key] = true // 默认展开
+        }
+      }
+      return initial
+    }
+  )
+
+  function toggleGroup(key: string) {
+    setExpandedGroups((prev) => ({ ...prev, [key]: !prev[key] }))
+  }
+
   function renderMenuItem(item: MenuItemConfig) {
     const Icon = item.icon
+    const isActive = item.href === activeTab
+    const label = t(item.labelKey.replace("layout.", "") as Parameters<typeof t>[0])
+
     return (
       <SidebarMenuItem key={item.key}>
         <SidebarMenuButton
-          isActive={item.href === activeTab}
+          isActive={isActive}
           onClick={() => onTabChange?.(item.href)}
-          tooltip={t(item.labelKey.replace("layout.", "") as Parameters<typeof t>[0])}
-          className="h-9"
+          tooltip={label}
         >
           <Icon className="size-4" />
-          <span>{t(item.labelKey.replace("layout.", "") as Parameters<typeof t>[0])}</span>
+          <span>{label}</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
     )
   }
 
+  function renderGroup(group: MenuGroupConfig) {
+    const isExpanded = expandedGroups[group.key] ?? true
+    const label = t(group.labelKey.replace("layout.", "") as Parameters<typeof t>[0])
+
+    return (
+      <SidebarGroup key={group.key}>
+        <SidebarGroupLabel
+          className="cursor-pointer select-none hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          onClick={() => toggleGroup(group.key)}
+        >
+          <ChevronRight
+            className={`size-4 transition-transform duration-200 ${
+              isExpanded ? "rotate-90" : ""
+            }`}
+          />
+          <span>{label}</span>
+        </SidebarGroupLabel>
+        <SidebarGroupContent>
+          <SidebarMenu>
+            {isExpanded &&
+              group.children?.map((child) => {
+                const Icon = child.icon
+                const isActive = child.href === activeTab
+                const childLabel = t(
+                  child.labelKey.replace("layout.", "") as Parameters<typeof t>[0]
+                )
+
+                return (
+                  <SidebarMenuItem key={child.key}>
+                    <SidebarMenuButton
+                      isActive={isActive}
+                      onClick={() => onTabChange?.(child.href)}
+                      tooltip={childLabel}
+                    >
+                      <Icon className="size-4" />
+                      <span>{childLabel}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )
+              })}
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+    )
+  }
+
   return (
-    <Sidebar collapsible="icon">
-      <SidebarHeader className="flex h-16 flex-row items-center gap-3 border-b border-sidebar-border px-3">
-        <div className="flex h-14 items-center gap-2 border-b border-sidebar-border px-5">
-          <span className="text-xl">🤖</span>
-          <span className="text-sm font-semibold">{t("appName")}</span>
-        </div>
+    <Sidebar collapsible={collapsible}>
+      <SidebarHeader className="h-16 flex items-center gap-2 border-b border-sidebar-border px-4">
+        <span className="text-xl">🤖</span>
+        <span className="text-sm font-semibold truncate group-data-[collapsible=icon]:hidden">
+          AI 客服系统
+        </span>
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarMenu className="gap-2">
-            {filteredMenu.map((entry) => {
-              if (entry.type === "group") {
-                return (
-                  <SidebarGroup key={entry.key}>
-                    <SidebarMenu className="gap-2">
-                      {entry.children?.map((child) => renderMenuItem(child))}
-                    </SidebarMenu>
-                  </SidebarGroup>
-                )
-              }
-              return renderMenuItem(entry)
-            })}
-          </SidebarMenu>
-        </SidebarGroup>
+        {filteredMenu.map((entry) => {
+          if (entry.type === "group") {
+            return renderGroup(entry)
+          }
+          // 顶级菜单项放在一个 SidebarGroup 中
+          return (
+            <SidebarGroup key={entry.key}>
+              <SidebarGroupContent>
+                <SidebarMenu>{renderMenuItem(entry)}</SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          )
+        })}
       </SidebarContent>
-
-      <SidebarFooter>
-        <SidebarTrigger />
-      </SidebarFooter>
     </Sidebar>
   )
 }
