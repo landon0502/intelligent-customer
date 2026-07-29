@@ -1163,7 +1163,7 @@ cd /Users/superhuan/Documents/project/intelligent-customer && git add apps/web/a
 **Interfaces:**
 - Consumes: 所有前序任务的产物
 
-- [ ] **Step 1: 运行 vitest 全量测试**
+- [x] **Step 1: 运行 vitest 全量测试**
 
 ```bash
 cd /Users/superhuan/Documents/project/intelligent-customer && pnpm --filter web test -- --run
@@ -1171,7 +1171,7 @@ cd /Users/superhuan/Documents/project/intelligent-customer && pnpm --filter web 
 
 Expected: 所有测试 PASS
 
-- [ ] **Step 2: 运行 Next.js 构建**
+- [x] **Step 2: 运行 Next.js 构建**
 
 ```bash
 cd /Users/superhuan/Documents/project/intelligent-customer && pnpm --filter web build
@@ -1179,7 +1179,7 @@ cd /Users/superhuan/Documents/project/intelligent-customer && pnpm --filter web 
 
 Expected: 构建成功，无类型错误
 
-- [ ] **Step 3: 运行 typecheck**
+- [x] **Step 3: 运行 typecheck**
 
 ```bash
 cd /Users/superhuan/Documents/project/intelligent-customer && pnpm --filter web typecheck
@@ -1187,6 +1187,6 @@ cd /Users/superhuan/Documents/project/intelligent-customer && pnpm --filter web 
 
 Expected: 无类型错误
 
-- [ ] **Step 4: 提交（如有修复）**
+- [x] **Step 4: 提交（如有修复）**
 
 仅在修复了构建/测试问题时提交。如果全部通过则跳过此步骤。
