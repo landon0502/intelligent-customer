@@ -23,6 +23,8 @@ dependencies = [
     "bcrypt<4.1",
     "python-multipart>=0.0.6",
     "cryptography>=49.0.0",
+    "sse-starlette>=3.4.6",
+    "langchain-openai>=1.4.1",
 ]
 
 [dependency-groups]

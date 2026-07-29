@@ -3,7 +3,7 @@
 """
 from fastapi import APIRouter
 
-from app.utils.response import success
+from utils.response import success
 
 router = APIRouter(tags=["health"])
 

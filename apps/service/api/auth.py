@@ -1,13 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel, field_validator
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.session import get_db
-from app.models.user import User
-from app.services.auth import authenticate_user, register_user, get_user_by_username
-from app.utils.jwt import create_token
-from app.utils.response import success, error
-from app.core.security import get_current_user
+from database import session
+from schemas.user import User
+from services.auth import authenticate_user, register_user, get_user_by_username
+from utils.jwt import create_token
+from utils.response import success, error
+from auth.security import get_current_user
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -41,7 +41,7 @@ class RegisterRequest(BaseModel):
 
 
 @router.post("/login")
-async def login(req: LoginRequest, db: AsyncSession = Depends(get_db)):
+async def login(req: LoginRequest, db: AsyncSession = Depends(session.get_db)):
     user = await authenticate_user(db, req.username, req.password)
     if not user:
         return error(code=30001, message="用户名或密码错误")
@@ -53,7 +53,7 @@ async def login(req: LoginRequest, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/register")
-async def register(req: RegisterRequest, db: AsyncSession = Depends(get_db)):
+async def register(req: RegisterRequest, db: AsyncSession = Depends(session.get_db)):
     existing = await get_user_by_username(db, req.username)
     if existing:
         return error(code=30002, message="用户名已存在")
