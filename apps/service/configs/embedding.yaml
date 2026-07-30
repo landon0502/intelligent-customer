@@ -1,0 +1,12 @@
+# Embedding 模型配置
+
+models:
+  zhipu:
+    model: embedding-3
+    provider: openai
+    dimensions: 2048
+
+  bge:
+    model: bge-large-zh
+    provider: local
+    dimensions: 1024
