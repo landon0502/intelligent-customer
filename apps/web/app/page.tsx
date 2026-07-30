@@ -1,32 +1,17 @@
-"use client";
+"use client"
 
-import { useEffect } from "react";
-import { useTranslations } from "next-intl";
-import { useAuthStore } from "@/store/auth";
-import { AppLayout } from "@/components/layout/app-layout";
-import { ChatPage } from "@/components/chat/chat-page";
-
-export default function Page() {
-  const { initAuth, loading } = useAuthStore();
-  const t = useTranslations("common");
-
+import { useEffect } from "react"
+import { Spinner } from "@intelligent-customer/ui/components/spinner"
+export default function HomePage() {
   useEffect(() => {
-    initAuth();
-  }, [initAuth]);
-
-  if (loading) {
-    return (
-      <AppLayout>
-        <div className="flex items-center justify-center h-full">
-          <p className="text-muted-foreground">{t("loading")}</p>
-        </div>
-      </AppLayout>
-    );
-  }
+    window.location.href = "/home"
+  }, [])
 
   return (
-    <AppLayout>
-      <ChatPage />
-    </AppLayout>
-  );
+    <div className="flex min-h-screen items-center justify-center">
+      <div className="relative text-center">
+        <Spinner></Spinner>
+      </div>
+    </div>
+  )
 }
