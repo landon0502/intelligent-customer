@@ -8,11 +8,13 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
 } from "@intelligent-customer/ui/components/sidebar"
 import { useAuthStore } from "@/store/auth"
 import {
@@ -35,6 +37,7 @@ export function AppSidebar({
   collapsible = "icon",
 }: AppSidebarProps) {
   const t = useTranslations("layout")
+  const tCommon = useTranslations("common")
   const user = useAuthStore((s) => s.user)
 
   const filteredMenu = filterMenuByRole(
@@ -62,7 +65,9 @@ export function AppSidebar({
   function renderMenuItem(item: MenuItemConfig) {
     const Icon = item.icon
     const isActive = item.href === activeTab
-    const label = t(item.labelKey.replace("layout.", "") as Parameters<typeof t>[0])
+    const label = t(
+      item.labelKey.replace("layout.", "") as Parameters<typeof t>[0]
+    )
 
     return (
       <SidebarMenuItem key={item.key}>
@@ -80,44 +85,52 @@ export function AppSidebar({
 
   function renderGroup(group: MenuGroupConfig) {
     const isExpanded = expandedGroups[group.key] ?? true
-    const label = t(group.labelKey.replace("layout.", "") as Parameters<typeof t>[0])
+    const label = t(
+      group.labelKey.replace("layout.", "") as Parameters<typeof t>[0]
+    )
 
     return (
       <SidebarGroup key={group.key}>
-        <SidebarGroupLabel
-          className="cursor-pointer select-none hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-          onClick={() => toggleGroup(group.key)}
-        >
-          <ChevronRight
-            className={`size-4 transition-transform duration-200 ${
-              isExpanded ? "rotate-90" : ""
-            }`}
-          />
-          <span>{label}</span>
-        </SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu>
-            {isExpanded &&
-              group.children?.map((child) => {
-                const Icon = child.icon
-                const isActive = child.href === activeTab
-                const childLabel = t(
-                  child.labelKey.replace("layout.", "") as Parameters<typeof t>[0]
-                )
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                onClick={() => toggleGroup(group.key)}
+                tooltip={label}
+              >
+                <ChevronRight
+                  className={`size-4 transition-transform duration-200 ${
+                    isExpanded ? "rotate-90" : ""
+                  }`}
+                />
+                <span>{label}</span>
+              </SidebarMenuButton>
+              {isExpanded && (
+                <SidebarMenuSub>
+                  {group.children?.map((child) => {
+                    const Icon = child.icon
+                    const isActive = child.href === activeTab
+                    const childLabel = t(
+                      child.labelKey.replace("layout.", "") as Parameters<
+                        typeof t
+                      >[0]
+                    )
 
-                return (
-                  <SidebarMenuItem key={child.key}>
-                    <SidebarMenuButton
-                      isActive={isActive}
-                      onClick={() => onTabChange?.(child.href)}
-                      tooltip={childLabel}
-                    >
-                      <Icon className="size-4" />
-                      <span>{childLabel}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )
-              })}
+                    return (
+                      <SidebarMenuSubItem key={child.key}>
+                        <SidebarMenuSubButton
+                          isActive={isActive}
+                          onClick={() => onTabChange?.(child.href)}
+                        >
+                          <Icon className="size-4" />
+                          <span>{childLabel}</span>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    )
+                  })}
+                </SidebarMenuSub>
+              )}
+            </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroupContent>
       </SidebarGroup>
@@ -126,10 +139,10 @@ export function AppSidebar({
 
   return (
     <Sidebar collapsible={collapsible}>
-      <SidebarHeader className="h-16 flex items-center gap-2 border-b border-sidebar-border px-4">
+      <SidebarHeader className="flex h-14 flex-row items-center justify-center gap-2 border-b border-sidebar-border px-4">
         <span className="text-xl">🤖</span>
-        <span className="text-sm font-semibold truncate group-data-[collapsible=icon]:hidden">
-          AI 客服系统
+        <span className="truncate text-sm font-semibold group-data-[collapsible=icon]:hidden">
+          {tCommon("appName")}
         </span>
       </SidebarHeader>
 
