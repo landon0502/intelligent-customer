@@ -116,8 +116,9 @@ class ComponentRegistry:
     async def ensure_initialized(self, name: str) -> Any:
         """确保组件已初始化（懒加载）。
 
-        首次调用时从 Provider 读取配置并创建组件实例，
-        后续调用直接返回已有实例。
+        按注册顺序初始化目标组件及其所有前置组件。
+        注册顺序保证依赖组件先初始化：agent_llm 在 agent 之前，
+        embeddings 在 vectorstore 之前。
 
         Args:
             name: 组件名称
@@ -132,14 +133,21 @@ class ComponentRegistry:
         if slot is None:
             raise KeyError(f"Component '{name}' not registered")
         if not slot._initialized:
-            config = await self._provider.get_category(slot._config_category)
-            slot.create(config)
+            # 按注册顺序初始化所有未初始化的前置组件（包括自身）
+            for comp_name in self._order:
+                comp_slot = self._slots[comp_name]
+                if not comp_slot._initialized:
+                    config = await self._provider.get_category(comp_slot._config_category)
+                    comp_slot.create(config)
+                if comp_name == name:
+                    break
         return slot.get()
 
     async def refresh(self, name: str) -> bool:
         """刷新单个组件。
 
         读取最新配置，创建新实例并替换。失败时保留旧实例。
+        刷新前先确保该组件已初始化（懒加载场景）。
 
         Args:
             name: 组件名称
@@ -150,6 +158,10 @@ class ComponentRegistry:
         slot = self._slots.get(name)
         if slot is None:
             return False
+        # 确保组件已初始化（处理首次 refresh 前未 ensure_initialized 的情况）
+        if not slot._initialized:
+            await self.ensure_initialized(name)
+            return True  # 首次初始化成功即视为刷新成功
         try:
             config = await self._provider.get_category(slot._config_category)
             new_instance = slot._factory(config)
