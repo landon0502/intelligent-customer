@@ -151,11 +151,18 @@ async def get_config_value(db: AsyncSession, key: str) -> str | None:
     return config.value if config else None
 
 
-async def update_configs(db: AsyncSession, configs: list[dict]) -> None:
+async def update_configs(
+    db: AsyncSession, configs: list[dict], registry=None
+) -> dict[str, dict[str, bool]]:
     """批量更新配置项，并触发动态生效。
 
     Args:
+        db: 数据库会话
         configs: 配置项列表，每项包含 key 和 value
+        registry: ComponentRegistry 实例（用于动态刷新组件）
+
+    Returns:
+        刷新结果 {category: {component_name: success}}
     """
     changed_categories: set[str] = set()
 
@@ -188,41 +195,51 @@ async def update_configs(db: AsyncSession, configs: list[dict]) -> None:
     await db.commit()
 
     # 动态生效
-    if changed_categories:
-        await _apply_config_changes(changed_categories)
+    refresh_result: dict[str, dict[str, bool]] = {}
+    if changed_categories and registry is not None:
+        refresh_result = await _apply_config_changes(changed_categories, registry)
+
+    return refresh_result
 
 
-async def _apply_config_changes(categories: set[str]) -> None:
-    """配置变更后，通过 Registry 重建对应组件。"""
-    try:
-        from app.main import app
-        registry = app.state.registry
-    except Exception:
-        logger.warning("无法获取 Registry，跳过配置动态生效")
-        return
+async def _apply_config_changes(
+    categories: set[str], registry
+) -> dict[str, dict[str, bool]]:
+    """配置变更后，通过 Registry 事务性刷新对应组件。
 
-    if "llm" in categories:
-        registry.rebuild("agent_llm")
-        # 重建 Agent：旧的 Agent 持有旧的 LLM 实例，必须重建
-        _rebuild_agent(categories)
-        logger.info("LLM 配置已变更，Agent 已重建")
+    Args:
+        categories: 变更的分类集合
+        registry: ComponentRegistry 实例
 
+    Returns:
+        {category: {component_name: success}} 刷新结果
+    """
+    result: dict[str, dict[str, bool]] = {}
+
+    for category in categories:
+        refresh_result = await registry.refresh_category(category)
+        result[category] = refresh_result
+
+        if refresh_result:
+            success_names = [n for n, ok in refresh_result.items() if ok]
+            fail_names = [n for n, ok in refresh_result.items() if not ok]
+            if success_names:
+                logger.info(
+                    "分类 %s 刷新成功: %s", category, ", ".join(success_names)
+                )
+            if fail_names:
+                logger.warning(
+                    "分类 %s 刷新失败（旧组件继续服务）: %s",
+                    category, ", ".join(fail_names),
+                )
+
+    # 特殊处理：embedding 变更时额外刷新 vectorstore
     if "embedding" in categories:
-        registry.rebuild("embeddings")
-        registry.rebuild("vectorstore")
-        logger.info("Embedding 配置已变更，组件已重建")
+        vs_refresh = await registry.refresh("vectorstore")
+        result.setdefault("embedding", {})["vectorstore"] = vs_refresh
+        if vs_refresh:
+            logger.info("embedding 变更后 vectorstore 刷新成功")
+        else:
+            logger.warning("embedding 变更后 vectorstore 刷新失败（旧组件继续服务）")
 
-    if "vectorstore" in categories:
-        registry.rebuild("vectorstore")
-        logger.info("向量数据库配置已变更，组件已重建")
-
-
-def _rebuild_agent(categories: set[str]) -> None:
-    """重建 FastAPI app.state 中的 Agent 实例。"""
-    try:
-        from app.main import app
-        from agent.factory import create_customer_agent
-
-        app.state.agent = create_customer_agent()
-    except Exception as e:
-        logger.warning("重建 Agent 失败: %s", e)
+    return result
