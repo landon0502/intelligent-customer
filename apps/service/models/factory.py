@@ -34,9 +34,9 @@ def _build_llm_params(config: dict, prefix: str = "llm") -> dict:
         "max_tokens": max_tokens,
         "timeout": timeout,
         "max_retries": max_retries,
-        "http_async_client": httpx.AsyncClient(
-            timeout=httpx.Timeout(timeout, connect=10)
-        ),
+        # "http_async_client": httpx.AsyncClient(
+        #     timeout=httpx.Timeout(timeout, connect=10)
+        # ),
     }
 
 
@@ -65,7 +65,11 @@ def create_rag_llm(rag_config: dict, llm_config: dict):
     Returns:
         BaseChatModel 实例
     """
-    if not rag_config:
+    if (
+        not rag_config
+        or rag_config.get("rag_llm.model") == ""
+        or rag_config.get("rag_llm.api_key") == ""
+    ):
         # rag_llm 分类无配置，回退到 llm 分类
         params = _build_llm_params(llm_config, prefix="llm")
     else:

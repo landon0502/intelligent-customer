@@ -1,10 +1,10 @@
-"""SQLAlchemy ORM 模型 —— 定义数据库表结构。"""
+"""SQLAlchemy ORM 模型 —— 定义数据库表结构。
 
-# 当前模型：
-# - User（用户表）—— 定义在 schemas/user.py
-#
-# 待添加模型：
-# - Conversation（会话表）
-# - Message（消息表）
-# - KnowledgeBase（知识库表）
-# - Document（文档表）
+所有模型统一导入，确保 Base.metadata.create_all 能创建全部表。
+"""
+
+from schemas.user import User  # noqa: F401
+from schemas.conversation import Conversation  # noqa: F401
+from schemas.message import Message  # noqa: F401
+from schemas.document import Document  # noqa: F401
+from schemas.system_config import SystemConfig  # noqa: F401

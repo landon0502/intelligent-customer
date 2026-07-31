@@ -4,7 +4,7 @@ import { useEffect } from "react"
 import { Spinner } from "@intelligent-customer/ui/components/spinner"
 export default function HomePage() {
   useEffect(() => {
-    window.location.href = "/home"
+    window.location.href = "/chat"
   }, [])
 
   return (

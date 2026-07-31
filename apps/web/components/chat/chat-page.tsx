@@ -1,169 +1,207 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
-import type { Session, Message, ToolCall } from "@/config/mock-chat";
-import { mockSessions, mockGetAIResponse } from "@/config/mock-chat";
+import useChatServices, { type DisplaySession, type DisplayMessage } from "./useServices";
 import { SessionList } from "./session-list";
 import { MessageArea } from "./message-area";
 import { ChatInput } from "./chat-input";
-
-let nextId = 100;
-function genId() {
-  return `id-${nextId++}`;
-}
+import type { ToolCall } from "./tool-call-status";
 
 export function ChatPage() {
   const t = useTranslations("chat");
-  const [sessions, setSessions] = useState<Session[]>(mockSessions);
-  const [currentSessionId, setCurrentSessionId] = useState<string | null>(
-    mockSessions[0]?.id ?? null
-  );
-  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const {
+    conversationsControl,
+    sessions: apiSessions,
+    createSession,
+    removeSession,
+    loadMessages,
+    sendChat,
+    createLocalUserMessage,
+    createLocalAssistantMessage,
+  } = useChatServices();
 
-  useEffect(
-    () => () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    },
-    []
-  );
+  const [localSessions, setLocalSessions] = useState<DisplaySession[]>([]);
+  const [currentSessionId, setCurrentSessionId] = useState<number | null>(null);
+  const [sending, setSending] = useState(false);
 
-  const currentSession = sessions.find((s) => s.id === currentSessionId) ?? null;
+  // 会话列表加载完成时同步到本地状态
+  useEffect(() => {
+    if (apiSessions.length > 0) {
+      setLocalSessions((prev) => {
+        // 合并：API 返回的会话 + 本地新增消息
+        return apiSessions.map((apiS) => {
+          const local = prev.find((l) => l.id === apiS.id);
+          return local ? { ...apiS, messages: local.messages } : apiS;
+        });
+      });
+      // 自动选中第一个
+      if (!currentSessionId) {
+        const first = apiSessions[0]!;
+        setCurrentSessionId(first.id);
+        handleLoadMessages(first.id);
+      }
+    }
+  }, [apiSessions]);
 
-  const handleSelectSession = useCallback((id: string) => {
-    setCurrentSessionId(id);
+  // 页面加载时获取会话列表
+  useEffect(() => {
+    conversationsControl.run();
   }, []);
 
-  const handleNewSession = useCallback(() => {
-    const newSession: Session = {
-      id: genId(),
-      title: t("newSession"),
-      time: new Date().toLocaleString("zh-CN", {
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-      messages: [],
-    };
-    setSessions((prev) => [newSession, ...prev]);
+  async function handleLoadMessages(conversationId: number) {
+    const msgs = await loadMessages(conversationId);
+    setLocalSessions((prev) =>
+      prev.map((s) =>
+        s.id === conversationId ? { ...s, messages: msgs } : s,
+      ),
+    );
+  }
+
+  const currentSession = localSessions.find((s) => s.id === currentSessionId) ?? null;
+
+  const handleSelectSession = useCallback((id: number) => {
+    setCurrentSessionId(id);
+    handleLoadMessages(id);
+  }, []);
+
+  const handleNewSession = useCallback(async () => {
+    const newSession = await createSession(t("newSession"));
+    if (!newSession) return;
+    setLocalSessions((prev) => [newSession, ...prev]);
     setCurrentSessionId(newSession.id);
-  }, [t]);
+  }, [t, createSession]);
 
   const handleDeleteSession = useCallback(
-    (id: string) => {
-      setSessions((prev) => {
+    async (id: number) => {
+      const ok = await removeSession(id);
+      if (!ok) return;
+      setLocalSessions((prev) => {
         const next = prev.filter((s) => s.id !== id);
         if (id === currentSessionId) {
-          setCurrentSessionId(next[0]?.id ?? null);
+          const newId = next[0]?.id ?? null;
+          setCurrentSessionId(newId);
+          if (newId) handleLoadMessages(newId);
         }
         return next;
       });
     },
-    [currentSessionId]
+    [currentSessionId, removeSession],
   );
 
   const handleSendMessage = useCallback(
     (text: string) => {
-      if (!currentSessionId) return;
+      if (!currentSessionId || sending) return;
 
-      const userMsg: Message = {
-        id: genId(),
-        role: "user",
-        content: text,
-        time: new Date().toLocaleTimeString("zh-CN", {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      };
+      const userMsg = createLocalUserMessage(text);
+      const assistantMsg = createLocalAssistantMessage();
+      const assistantId = assistantMsg.id;
 
-      const response = mockGetAIResponse(text);
-      const assistantId = genId();
-
-      // Step 1: add user message + assistant message (with toolCalls in calling state if any)
-      setSessions((prev) =>
+      // 添加用户消息和空的助手消息
+      setLocalSessions((prev) =>
         prev.map((s) => {
           if (s.id !== currentSessionId) return s;
-          const toolCalls: ToolCall[] | undefined = response.toolCalls
-            ? response.toolCalls.map((tc) => ({ ...tc, status: "calling" as const }))
-            : undefined;
-          const assistantMsg: Message = {
-            id: assistantId,
-            role: "assistant",
-            content: "",
-            time: new Date().toLocaleTimeString("zh-CN", {
-              hour: "2-digit",
-              minute: "2-digit",
-            }),
-            toolCalls,
-          };
           return { ...s, messages: [...s.messages, userMsg, assistantMsg] };
-        })
+        }),
       );
 
-      // Step 2: if toolCalls, show spinner for 1.2s then mark done
-      if (response.toolCalls) {
-        timerRef.current = setTimeout(() => {
-          setSessions((prev) =>
+      setSending(true);
+
+      sendChat(
+        { conversation_id: currentSessionId, message: text },
+        // onMessage
+        (chunk: string) => {
+          setLocalSessions((prev) =>
             prev.map((s) => {
               if (s.id !== currentSessionId) return s;
               return {
                 ...s,
-                messages: s.messages.map((m) => {
+                messages: s.messages.map((m: DisplayMessage) => {
                   if (m.id !== assistantId) return m;
-                  return {
-                    ...m,
-                    toolCalls: response.toolCalls!.map((tc) => ({
-                      ...tc,
-                      status: "done" as const,
-                    })),
-                  };
+                  return { ...m, content: m.content + chunk };
                 }),
               };
-            })
+            }),
           );
-
-          // Step 3: after 0.4s, start streaming text
-          timerRef.current = setTimeout(() => {
-            streamResponse(response.content);
-          }, 400);
-        }, 1200);
-      } else {
-        streamResponse(response.content);
-      }
-
-      function streamResponse(fullText: string) {
-        let charIdx = 0;
-        function typeChar() {
-          if (charIdx < fullText.length) {
-            const chunk = Math.min(2, fullText.length - charIdx);
-            const nextContent = fullText.slice(0, charIdx + chunk);
-            charIdx += chunk;
-            setSessions((prev) =>
-              prev.map((s) => {
-                if (s.id !== currentSessionId) return s;
-                return {
-                  ...s,
-                  messages: s.messages.map((m) => {
-                    if (m.id !== assistantId) return m;
-                    return { ...m, content: nextContent };
-                  }),
-                };
-              })
-            );
-            timerRef.current = setTimeout(typeChar, 30);
-          }
-        }
-        typeChar();
-      }
+        },
+        // onDone
+        () => {
+          setSending(false);
+        },
+        // onError
+        (error: Error) => {
+          setSending(false);
+          setLocalSessions((prev) =>
+            prev.map((s) => {
+              if (s.id !== currentSessionId) return s;
+              return {
+                ...s,
+                messages: s.messages.map((m: DisplayMessage) => {
+                  if (m.id !== assistantId) return m;
+                  return { ...m, content: m.content || `⚠️ ${error.message}` };
+                }),
+              };
+            }),
+          );
+        },
+        // onToolCall — LLM 决定调用工具，显示"调用中"状态
+        (toolCall) => {
+          const newToolCall: ToolCall = {
+            name: toolCall.name,
+            display: `🔧 调用工具：${toolCall.name}(${Object.entries(toolCall.args).map(([k, v]) => `${k}="${v}"`).join(", ")})`,
+            status: "calling",
+            summary: "",
+          };
+          setLocalSessions((prev) =>
+            prev.map((s) => {
+              if (s.id !== currentSessionId) return s;
+              return {
+                ...s,
+                messages: s.messages.map((m: DisplayMessage) => {
+                  if (m.id !== assistantId) return m;
+                  return { ...m, toolCalls: [...(m.toolCalls ?? []), newToolCall] };
+                }),
+              };
+            }),
+          );
+        },
+        // onToolResult — 工具执行完成，更新为"已完成"状态
+        (result) => {
+          setLocalSessions((prev) =>
+            prev.map((s) => {
+              if (s.id !== currentSessionId) return s;
+              return {
+                ...s,
+                messages: s.messages.map((m: DisplayMessage) => {
+                  if (m.id !== assistantId) return m;
+                  const toolCalls = (m.toolCalls ?? []).map((tc: ToolCall) =>
+                    tc.name === result.name && tc.status === "calling"
+                      ? { ...tc, status: "done" as const, summary: `✓ ${result.name}: ${result.content.slice(0, 60)}${result.content.length > 60 ? "..." : ""}` }
+                      : tc,
+                  );
+                  return { ...m, toolCalls };
+                }),
+              };
+            }),
+          );
+        },
+      );
     },
-    [currentSessionId]
+    [currentSessionId, sending, sendChat, createLocalUserMessage, createLocalAssistantMessage],
   );
+
+  if (conversationsControl.loading) {
+    return (
+      <div className="flex h-full items-center justify-center" style={{ height: "calc(100% + 3rem)" }}>
+        <p className="text-muted-foreground">{t("loading")}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-full -m-6" style={{ height: "calc(100% + 3rem)" }}>
       <SessionList
-        sessions={sessions}
+        sessions={localSessions}
         currentSessionId={currentSessionId}
         onSelect={handleSelectSession}
         onNew={handleNewSession}
@@ -173,7 +211,7 @@ export function ChatPage() {
         {currentSession ? (
           <>
             <MessageArea messages={currentSession.messages} />
-            <ChatInput onSend={handleSendMessage} />
+            <ChatInput onSend={handleSendMessage} disabled={sending} />
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center">

@@ -3,7 +3,7 @@
 import { Fragment } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import type { Message } from "@/config/mock-chat";
+import type { DisplayMessage } from "./session-list";
 import { ToolCallStatus } from "./tool-call-status";
 
 const markdownComponents = {
@@ -33,7 +33,7 @@ const markdownComponents = {
 };
 
 interface MessageBubbleProps {
-  message: Message;
+  message: DisplayMessage;
 }
 
 export function MessageBubble({ message }: MessageBubbleProps) {
@@ -57,12 +57,12 @@ export function MessageBubble({ message }: MessageBubbleProps) {
   return (
     <div className="flex justify-start">
       <div className="bg-background border rounded-xl rounded-bl-sm max-w-[70%] px-3.5 py-2.5">
-        <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
-          {message.content}
-        </ReactMarkdown>
         {message.toolCalls && message.toolCalls.length > 0 && (
           <ToolCallStatus toolCalls={message.toolCalls} />
         )}
+        <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+          {message.content}
+        </ReactMarkdown>
       </div>
     </div>
   );

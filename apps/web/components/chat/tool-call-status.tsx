@@ -1,6 +1,11 @@
 "use client";
 
-import type { ToolCall } from "@/config/mock-chat";
+export interface ToolCall {
+  name: string;
+  display: string;
+  status: "calling" | "done";
+  summary: string;
+}
 
 interface ToolCallStatusProps {
   toolCalls: ToolCall[];

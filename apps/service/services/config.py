@@ -151,6 +151,9 @@ async def get_config_value(db: AsyncSession, key: str) -> str | None:
     return config.value if config else None
 
 
+api_key_placeholder = "*" * 16
+
+
 async def update_configs(
     db: AsyncSession, configs: list[dict], registry=None
 ) -> dict[str, dict[str, bool]]:
@@ -168,7 +171,7 @@ async def update_configs(
 
     for item in configs:
         # 跳过脱敏占位值，不覆盖真实的 API Key
-        if "api_key" in item["key"] and item.get("value") == "******":
+        if "api_key" in item["key"] and item.get("value") == api_key_placeholder:
             continue
 
         result = await db.execute(
@@ -224,13 +227,12 @@ async def _apply_config_changes(
             success_names = [n for n, ok in refresh_result.items() if ok]
             fail_names = [n for n, ok in refresh_result.items() if not ok]
             if success_names:
-                logger.info(
-                    "分类 %s 刷新成功: %s", category, ", ".join(success_names)
-                )
+                logger.info("分类 %s 刷新成功: %s", category, ", ".join(success_names))
             if fail_names:
                 logger.warning(
                     "分类 %s 刷新失败（旧组件继续服务）: %s",
-                    category, ", ".join(fail_names),
+                    category,
+                    ", ".join(fail_names),
                 )
 
     # 特殊处理：embedding 变更时额外刷新 vectorstore

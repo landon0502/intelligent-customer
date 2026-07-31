@@ -24,6 +24,7 @@ logger = logging.getLogger("intelligent-customer")
 async def _seed_initial_data() -> None:
     """初始化种子数据：创建管理员用户"""
     from services.auth import seed_admin_user
+
     async for db in get_db():
         await seed_admin_user(db)
 
@@ -95,6 +96,7 @@ async def lifespan(_app: FastAPI):
     try:
         async for db in get_db():
             from services.config import init_default_configs
+
             await init_default_configs(db)
     except Exception as e:
         logger.warning("初始化默认配置失败: %s", e)

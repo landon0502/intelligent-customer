@@ -11,6 +11,7 @@ from services.config import (
     get_all_configs,
     get_configs_by_category,
     update_configs,
+    api_key_placeholder,
 )
 from app.dependencies import get_registry
 from utils.response import success, error
@@ -38,7 +39,7 @@ async def list_configs(
     # API Key 脱敏：不返回明文，只标记是否已设置
     for item in items:
         if "api_key" in item.key and item.value:
-            item.value = "*" * 16
+            item.value = api_key_placeholder
 
     return success(data=items)
 
@@ -60,7 +61,9 @@ async def update_config(
     refresh_result = await update_configs(
         db, [c.model_dump() for c in req.configs], registry
     )
-    return success(data={
-        "updated": len(req.configs),
-        "refresh_result": refresh_result,
-    })
+    return success(
+        data={
+            "updated": len(req.configs),
+            "refresh_result": refresh_result,
+        }
+    )

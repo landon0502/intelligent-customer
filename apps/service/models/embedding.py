@@ -19,6 +19,6 @@ def create_embeddings(config: dict) -> HuggingFaceEmbeddings:
 
     return HuggingFaceEmbeddings(
         model_name=model_name,
-        model_kwargs={"device": "cpu"},
+        model_kwargs={"device": "mps"},
         encode_kwargs={"normalize_embeddings": True},
     )

@@ -3,7 +3,6 @@
 import { useState } from "react"
 import { useTranslations } from "next-intl"
 import { Search, UserPlus, Trash2, Shield, User } from "lucide-react"
-import { AppLayout } from "@/components/layout/app-layout"
 
 import { Button } from "@intelligent-customer/ui/components/button"
 import { Input } from "@intelligent-customer/ui/components/input"
@@ -49,107 +48,142 @@ export default function UsersPage() {
   const [addOpen, setAddOpen] = useState(false)
 
   const filteredUsers = mockUsers.filter(
-    (user) => !searchQuery || user.username.toLowerCase().includes(searchQuery.toLowerCase())
+    (user) =>
+      !searchQuery ||
+      user.username.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
   return (
-    <AppLayout>
-      <div className="space-y-6">
-        {/* 标题栏 */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-semibold">{t("title")}</h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              {t("userCount", { count: mockUsers.length })}
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-              <Input
-                placeholder={t("searchPlaceholder")}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 w-60"
-              />
-            </div>
-            <Dialog open={addOpen} onOpenChange={setAddOpen}>
-              <DialogTrigger render={<Button><UserPlus className="size-4 mr-2" />{t("addUser")}</Button>}>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>{t("addUserTitle")}</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <div className="space-y-2">
-                    <Label>{t("colUsername")}</Label>
-                    <Input placeholder={t("usernamePlaceholder")} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>{t("colPassword")}</Label>
-                    <Input type="password" placeholder={t("passwordPlaceholder")} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>{t("colRole")}</Label>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder={t("rolePlaceholder")} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="user">{tCommon("roleUser")}</SelectItem>
-                        <SelectItem value="admin">{tCommon("roleAdmin")}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <Button className="w-full" onClick={() => setAddOpen(false)}>
-                    {t("addUserConfirm")}
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-          </div>
+    <div className="space-y-6">
+      {/* 标题栏 */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-semibold">{t("title")}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {t("userCount", { count: mockUsers.length })}
+          </p>
         </div>
-
-        {/* 用户表格 */}
-        <Card>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>{t("colUsername")}</TableHead>
-                  <TableHead>{t("colRole")}</TableHead>
-                  <TableHead>{t("colCreatedAt")}</TableHead>
-                  <TableHead className="text-right">{t("colActions")}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredUsers.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell className="text-muted-foreground">{user.id}</TableCell>
-                    <TableCell className="font-medium">{user.username}</TableCell>
-                    <TableCell>
-                      <Badge variant={user.role === "admin" ? "default" : "secondary"} className={user.role === "admin" ? "bg-primary/10 text-primary hover:bg-primary/10" : ""}>
-                        {user.role === "admin" ? (
-                          <><Shield className="size-3 mr-1" />{tCommon("roleAdmin")}</>
-                        ) : (
-                          <><User className="size-3 mr-1" />{tCommon("roleUser")}</>
-                        )}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">{user.createdAt}</TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="icon-sm" className="text-destructive hover:text-destructive" disabled={user.username === "admin"}>
-                        <Trash2 className="size-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder={t("searchPlaceholder")}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-60 pl-9"
+            />
+          </div>
+          <Dialog open={addOpen} onOpenChange={setAddOpen}>
+            <DialogTrigger
+              render={
+                <Button>
+                  <UserPlus className="mr-2 size-4" />
+                  {t("addUser")}
+                </Button>
+              }
+            ></DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{t("addUserTitle")}</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label>{t("colUsername")}</Label>
+                  <Input placeholder={t("usernamePlaceholder")} />
+                </div>
+                <div className="space-y-2">
+                  <Label>{t("colPassword")}</Label>
+                  <Input
+                    type="password"
+                    placeholder={t("passwordPlaceholder")}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>{t("colRole")}</Label>
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("rolePlaceholder")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="user">
+                        {tCommon("roleUser")}
+                      </SelectItem>
+                      <SelectItem value="admin">
+                        {tCommon("roleAdmin")}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button className="w-full" onClick={() => setAddOpen(false)}>
+                  {t("addUserConfirm")}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
-    </AppLayout>
+
+      {/* 用户表格 */}
+      <Card>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>ID</TableHead>
+                <TableHead>{t("colUsername")}</TableHead>
+                <TableHead>{t("colRole")}</TableHead>
+                <TableHead>{t("colCreatedAt")}</TableHead>
+                <TableHead className="text-right">{t("colActions")}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredUsers.map((user) => (
+                <TableRow key={user.id}>
+                  <TableCell className="text-muted-foreground">
+                    {user.id}
+                  </TableCell>
+                  <TableCell className="font-medium">{user.username}</TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={user.role === "admin" ? "default" : "secondary"}
+                      className={
+                        user.role === "admin"
+                          ? "bg-primary/10 text-primary hover:bg-primary/10"
+                          : ""
+                      }
+                    >
+                      {user.role === "admin" ? (
+                        <>
+                          <Shield className="mr-1 size-3" />
+                          {tCommon("roleAdmin")}
+                        </>
+                      ) : (
+                        <>
+                          <User className="mr-1 size-3" />
+                          {tCommon("roleUser")}
+                        </>
+                      )}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {user.createdAt}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      className="text-destructive hover:text-destructive"
+                      disabled={user.username === "admin"}
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </div>
   )
 }
