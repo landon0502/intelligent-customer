@@ -77,7 +77,7 @@ async def add_documents_to_vectorstore(
         doc.metadata["filename"] = filename
 
     registry = _get_registry()
-    vectorstore = registry.get("vectorstore")
+    vectorstore = await registry.ensure_initialized("vectorstore")
     await asyncio.to_thread(vectorstore.add_documents, documents)
     logger.info(
         "文档 %s (id=%d) 共 %d 个块已入库",
@@ -90,7 +90,7 @@ async def delete_from_vectorstore(doc_id: int) -> None:
     """从 Chroma 中删除指定文档的所有向量。"""
     try:
         registry = _get_registry()
-        client = registry.get("chroma_client")
+        client = await registry.ensure_initialized("chroma_client")
         from configs.config import settings
         collection_name = settings.CHROMA_COLLECTION
         collection = client.get_collection(collection_name)

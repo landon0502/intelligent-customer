@@ -67,7 +67,7 @@ async def generate_answer(
     # 如果未注入 rag_llm，从 Registry 获取
     if rag_llm is None:
         from app.main import app
-        rag_llm = app.state.registry.get("rag_llm")
+        rag_llm = await app.state.registry.ensure_initialized("rag_llm")
 
     # 组装上下文
     context = _format_context(context_chunks)

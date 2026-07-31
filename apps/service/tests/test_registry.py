@@ -135,8 +135,8 @@ async def test_registry_refresh_failure_keeps_old_instance():
 
 
 @pytest.mark.anyio
-async def test_registry_refresh_category_transactional_all_or_nothing():
-    """refresh_category() 事务性刷新：全部成功才替换，任一失败全部回退。"""
+async def test_registry_refresh_category_partial_failure_keeps_successful():
+    """refresh_category() 逐个替换：成功的立即生效，失败的保留旧实例。"""
     mock_provider = AsyncMock()
     mock_provider.get_category = AsyncMock(return_value={"llm.model": "deepseek-v4-pro"})
 
@@ -155,9 +155,9 @@ async def test_registry_refresh_category_transactional_all_or_nothing():
     # 刷新分类
     result = await registry.refresh_category("llm")
 
-    # 全部回退
-    assert result == {"agent_llm": False, "agent": False}
-    assert registry.get("agent_llm") == "old_llm"
+    # agent_llm 成功替换，agent 失败保留旧实例
+    assert result == {"agent_llm": True, "agent": False}
+    assert registry.get("agent_llm") == "new_llm"
     assert registry.get("agent") == "old_agent"
 
 
@@ -204,3 +204,33 @@ async def test_registry_refresh_category_invalidates_cache_first():
     await registry.refresh_category("llm")
 
     mock_provider.invalidate.assert_called_once_with("llm")
+
+
+@pytest.mark.anyio
+async def test_registry_refresh_category_factory_sees_replaced_dependency():
+    """refresh_category() 逐个替换时，后续工厂闭包通过 get() 获取已替换的前置组件。"""
+    mock_provider = AsyncMock()
+    mock_provider.get_category = AsyncMock(return_value={"llm.model": "deepseek-v4-pro"})
+
+    factory_llm = MagicMock(side_effect=["old_llm", "new_llm"])
+
+    # agent 工厂闭包通过 registry.get("agent_llm") 获取依赖
+    def _agent_factory(config):
+        llm = registry.get("agent_llm")
+        return f"agent_with_{llm}"
+
+    registry = ComponentRegistry(mock_provider)
+    registry.register("agent_llm", factory_llm, "llm")
+    registry.register("agent", _agent_factory, "llm")
+
+    # 初始化
+    await registry.ensure_initialized("agent_llm")
+    await registry.ensure_initialized("agent")
+    assert registry.get("agent") == "agent_with_old_llm"
+
+    # 刷新分类 — agent 工厂应获取已替换的 new_llm
+    result = await registry.refresh_category("llm")
+
+    assert result == {"agent_llm": True, "agent": True}
+    assert registry.get("agent_llm") == "new_llm"
+    assert registry.get("agent") == "agent_with_new_llm"

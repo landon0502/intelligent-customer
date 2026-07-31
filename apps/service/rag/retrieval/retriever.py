@@ -38,7 +38,7 @@ async def retrieve(
 
     # Chroma 相似度检索（同步阻塞操作，放入线程池避免卡住事件循环）
     from app.main import app
-    vectorstore = app.state.registry.get("vectorstore")
+    vectorstore = await app.state.registry.ensure_initialized("vectorstore")
     raw_results = await asyncio.to_thread(
         vectorstore.similarity_search_with_relevance_scores, query, k=k
     )

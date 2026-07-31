@@ -172,11 +172,12 @@ class ComponentRegistry:
             return False
 
     async def refresh_category(self, category: str) -> dict[str, bool]:
-        """事务性刷新某分类下所有组件。
+        """按依赖顺序刷新某分类下所有组件。
 
         先失效缓存，确保读取最新配置。
-        为每个 slot 创建新实例，全部成功后统一替换；
-        任一失败则全部回退，保留旧实例。
+        按注册顺序逐个创建新实例并立即替换，保证后续工厂闭包
+        通过 registry.get() 获取的是已更新的前置组件。
+        任一失败时已替换的保留（部分更新），未替换的继续用旧实例。
 
         Args:
             category: 配置分类名
@@ -184,7 +185,7 @@ class ComponentRegistry:
         Returns:
             {组件名: 是否刷新成功} 字典
         """
-        # 1. 收集该分类下的 slot（按注册顺序）
+        # 1. 收集该分类下的 slot（按注册顺序，保证依赖组件先刷新）
         affected = [s for s in self._slots.values()
                      if s._config_category == category]
 
@@ -194,21 +195,19 @@ class ComponentRegistry:
         # 2. 先失效缓存，确保读取最新配置
         self._provider.invalidate(category)
 
-        # 3. 为每个 slot 创建新实例
-        new_instances: dict[str, tuple[ComponentSlot, Any]] = {}
+        # 3. 按注册顺序逐个创建并替换
+        #    注册顺序保证依赖组件先刷新：agent_llm 在 agent 之前，
+        #    embeddings 在 vectorstore 之前。
+        #    逐个替换确保后续工厂闭包通过 registry.get() 获取已更新的前置组件。
+        result: dict[str, bool] = {}
         for slot in affected:
             try:
                 config = await self._provider.get_category(slot._config_category)
                 new_instance = slot._factory(config)
-                new_instances[slot.name] = (slot, new_instance)
+                slot.replace(new_instance)
+                result[slot.name] = True
             except Exception as e:
-                logger.error("事务性刷新失败: 创建 %s 时出错: %s", slot.name, e)
-                # 全部回退：不替换任何实例
-                return {name: False for name in self._slots
-                        if self._slots[name]._config_category == category}
+                logger.error("刷新组件 %s 失败（旧实例继续服务）: %s", slot.name, e)
+                result[slot.name] = False
 
-        # 4. 全部成功，统一替换
-        for slot, new_instance in new_instances.values():
-            slot.replace(new_instance)
-
-        return {name: True for name in new_instances}
+        return result

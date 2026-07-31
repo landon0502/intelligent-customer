@@ -6,19 +6,18 @@ from configs.provider import AsyncConfigProvider
 from configs.registry import ComponentRegistry
 
 
-def get_agent(request: Request):
-    """获取 Agent 实例（同步，必须已初始化）。"""
-    return request.app.state.registry.get("agent")
-
-
 async def get_agent_async(request: Request):
     """获取 Agent 实例（异步，支持懒加载）。"""
     return await request.app.state.registry.ensure_initialized("agent")
 
 
-def get_chroma_client(request: Request):
-    """获取 Chroma Client 实例。"""
-    return request.app.state.registry.get("chroma_client")
+# 别名：get_agent_async 的同步命名兼容
+get_agent = get_agent_async
+
+
+async def get_chroma_client(request: Request):
+    """获取 Chroma Client 实例（异步，支持懒加载）。"""
+    return await request.app.state.registry.ensure_initialized("chroma_client")
 
 
 def get_config_provider(request: Request) -> AsyncConfigProvider:

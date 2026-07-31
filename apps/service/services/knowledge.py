@@ -141,7 +141,7 @@ async def query_knowledge(question: str) -> dict:
 
     # 2. 生成回答
     from app.main import app
-    rag_llm = app.state.registry.get("rag_llm")
+    rag_llm = await app.state.registry.ensure_initialized("rag_llm")
     result = await generate_answer(question, chunks, rag_llm=rag_llm)
     t_generate = time.time()
 
