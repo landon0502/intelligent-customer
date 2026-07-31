@@ -33,6 +33,42 @@ DEFAULT_CONFIGS: dict[str, dict] = {
     },
     "llm.timeout": {"value": "15", "category": "llm", "description": "超时时间(秒)"},
     "llm.max_retries": {"value": "1", "category": "llm", "description": "最大重试次数"},
+    # RAG LLM（独立配置，为空时回退到 llm 分类）
+    "rag_llm.model": {
+        "value": "",
+        "category": "rag_llm",
+        "description": "RAG 生成链使用的 LLM 模型（为空时回退到 llm.model）",
+    },
+    "rag_llm.api_key": {
+        "value": "",
+        "category": "rag_llm",
+        "description": "RAG LLM API Key（为空时回退到 llm.api_key）",
+    },
+    "rag_llm.base_url": {
+        "value": "",
+        "category": "rag_llm",
+        "description": "RAG LLM API Base URL（为空时回退到 llm.base_url）",
+    },
+    "rag_llm.temperature": {
+        "value": "0.3",
+        "category": "rag_llm",
+        "description": "RAG 生成温度",
+    },
+    "rag_llm.max_tokens": {
+        "value": "512",
+        "category": "rag_llm",
+        "description": "RAG 最大输出 Token",
+    },
+    "rag_llm.timeout": {
+        "value": "15",
+        "category": "rag_llm",
+        "description": "RAG LLM 超时时间(秒)",
+    },
+    "rag_llm.max_retries": {
+        "value": "1",
+        "category": "rag_llm",
+        "description": "RAG LLM 最大重试次数",
+    },
     # Embedding
     "embedding.provider": {
         "value": "local",
