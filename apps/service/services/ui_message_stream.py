@@ -84,10 +84,14 @@ async def to_ui_message_stream_chunk(chunk, state: StreamState) -> AsyncIterator
                 "toolName": chunk.name or "",
                 "input": parsed_input,
             }
+        # 确保 output 是可 JSON 序列化的值
+        output = chunk.content
+        if not isinstance(output, (str, int, float, bool, list, dict, type(None))):
+            output = str(output)
         yield {
             "type": "tool-output-available",
             "toolCallId": chunk.tool_call_id,
-            "output": chunk.content,
+            "output": output,
         }
         # 工具结果后通常有新文本，关闭当前步骤
         yield {"type": "finish-step"}

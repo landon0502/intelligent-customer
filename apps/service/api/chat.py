@@ -23,7 +23,6 @@ from services.ui_message_stream import (
     error_stream,
 )
 from app.dependencies import get_agent_async
-from utils.response import error
 
 logger = logging.getLogger("intelligent-customer.chat")
 
@@ -38,10 +37,26 @@ async def chat_stream(
     agent=Depends(get_agent_async),
 ):
     """发送消息（UIMessageStream SSE 流式），自动持久化用户消息和助手回复"""
+
+    async def _error_sse(msg: str):
+        """以 SSE 格式返回错误，确保前端 useChat 能正确解析。"""
+        import uuid
+        events = [
+            {"type": "start", "messageId": str(uuid.uuid4())},
+            {"type": "error", "errorText": msg},
+            {"type": "finish"},
+        ]
+        for ev in events:
+            yield f"data: {json.dumps(ev, ensure_ascii=False)}\n\n"
+
     # 验证会话归属
     conv = await get_conversation_by_id(db, req.conversation_id, current_user.id)
     if not conv:
-        return error(code=40001, message="会话不存在")
+        return StreamingResponse(
+            _error_sse("会话不存在"),
+            media_type="text/event-stream",
+            headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+        )
 
     # 从请求体提取 UIMessage[] 并转换为 LangChain 历史
     # 如果前端发送了 messages，使用前端历史；否则从 DB 加载
