@@ -277,7 +277,7 @@ git commit -m "feat(service): add UIMessage to LangChain message converter"
 
 ---
 
-### Task 2: 后端 LangChain → UIMessageStream 转换函数
+### Task 2: 后端 LangChain → UIMessageStream 转换函数 ✅
 
 **Files:**
 - Create: `apps/service/services/ui_message_stream.py`
