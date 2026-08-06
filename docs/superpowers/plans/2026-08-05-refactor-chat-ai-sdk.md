@@ -1432,7 +1432,9 @@ git commit -m "feat(web): adapt ChatInput to useChat input/setInput/sendMessage 
 
 ---
 
-### Task 8: 删除废弃文件与清理
+### Task 8: 删除废弃文件与清理 ✅
+
+### Task 9: 端到端验证 ✅ ✅
 
 **Files:**
 - Delete: `apps/web/services/chat.ts`
