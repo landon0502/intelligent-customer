@@ -72,16 +72,23 @@ function ChatInner({
     messages: initialMessages,
   });
 
-  const isStreaming = chat.status === "streaming" || chat.status === "submitted";
+  const [input, setInput] = useState("");
 
-  const handleSend = (text: string) => {
-    chat.sendMessage({ text });
+  const handleSendMessage = async (msg: string) => {
+    await chat.sendMessage({ text: msg });
+    setInput("");
   };
 
   return (
     <>
       <MessageArea messages={chat.messages} />
-      <ChatInput onSend={handleSend} disabled={isStreaming} />
+      <ChatInput
+        input={input}
+        setInput={setInput}
+        sendMessage={handleSendMessage}
+        status={chat.status}
+        stop={chat.stop}
+      />
     </>
   );
 }
