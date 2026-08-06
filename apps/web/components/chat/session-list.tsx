@@ -2,7 +2,6 @@
 
 import { useTranslations } from "next-intl"
 import { Plus, X } from "lucide-react"
-import type { ToolCall } from "./tool-call-status"
 
 export interface DisplaySession {
   id: number
@@ -15,7 +14,6 @@ export interface DisplayMessage {
   role: "user" | "assistant"
   content: string
   time: string
-  toolCalls?: ToolCall[]
 }
 
 interface SessionListProps {
