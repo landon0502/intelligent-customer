@@ -1318,7 +1318,7 @@ git commit -m "feat(web): adapt ToolCallStatus to accept ToolUIPart from AI SDK"
 
 ---
 
-### Task 7: 前端 ChatInput 适配 useChat 接口
+### Task 7: 前端 ChatInput 适配 useChat 接口 ✅
 
 **Files:**
 - Modify: `apps/web/components/chat/chat-input.tsx`
