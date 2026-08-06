@@ -1132,7 +1132,7 @@ git commit -m "feat(web): integrate useChat hook with ChatContainer component"
 
 ---
 
-### Task 5: 前端 MessageBubble 基于 UIMessage.parts 重写
+### Task 5: 前端 MessageBubble 基于 UIMessage.parts 重写 ✅
 
 **Files:**
 - Modify: `apps/web/components/chat/message-bubble.tsx`
