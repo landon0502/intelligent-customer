@@ -628,7 +628,7 @@ git commit -m "feat(service): add LangChain to UIMessageStream converter"
 
 ---
 
-### Task 3: 后端 chat.py 端点重写
+### Task 3: 后端 chat.py 端点重写 ✅
 
 **Files:**
 - Modify: `apps/service/api/chat.py`
