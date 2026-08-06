@@ -4,6 +4,8 @@ from pydantic import BaseModel, Field
 
 
 class ChatSendRequest(BaseModel):
-    """发送消息请求"""
+    """发送消息请求（AI SDK UIMessage 格式）"""
     conversation_id: int = Field(..., description="会话ID")
-    message: str = Field(..., min_length=1, description="消息内容")
+    messages: list[dict] = Field(default_factory=list, description="AI SDK UIMessage[]")
+    id: str | None = Field(None, description="AI SDK chat ID")
+    trigger: str | None = Field(None, description="submit-message | regenerate-message")
