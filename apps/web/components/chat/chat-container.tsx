@@ -8,23 +8,6 @@ import useChatServices from "./useServices";
 import { MessageArea } from "./message-area";
 import { ChatInput } from "./chat-input";
 import { tokenManager } from "@/lib/fetch/token-manager";
-import type { DisplayMessage } from "./session-list";
-
-// ========== UIMessage -> DisplayMessage 临时桥接 ==========
-// Task 5 将重写 MessageBubble 以原生支持 UIMessage，届时移除此桥接
-
-function uiMessageToDisplayMessage(msg: UIMessage): DisplayMessage {
-  // 从 parts 中提取文本内容
-  const textParts = msg.parts.filter((p): p is Extract<typeof p, { type: "text" }> => p.type === "text");
-  const content = textParts.map((p) => p.text).join("");
-
-  return {
-    id: msg.id,
-    role: msg.role as "user" | "assistant",
-    content,
-    time: new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" }),
-  };
-}
 
 // ========== ChatContainer ==========
 
@@ -89,12 +72,6 @@ function ChatInner({
     messages: initialMessages,
   });
 
-  // UIMessage[] -> DisplayMessage[] 临时桥接
-  const displayMessages = useMemo(
-    () => chat.messages.map(uiMessageToDisplayMessage),
-    [chat.messages],
-  );
-
   const isStreaming = chat.status === "streaming" || chat.status === "submitted";
 
   const handleSend = (text: string) => {
@@ -103,7 +80,7 @@ function ChatInner({
 
   return (
     <>
-      <MessageArea messages={displayMessages} />
+      <MessageArea messages={chat.messages} />
       <ChatInput onSend={handleSend} disabled={isStreaming} />
     </>
   );

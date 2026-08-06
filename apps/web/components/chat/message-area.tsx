@@ -2,11 +2,11 @@
 
 import { useRef, useEffect } from "react"
 import { useTranslations } from "next-intl"
-import type { DisplayMessage } from "./session-list"
+import type { UIMessage } from "ai"
 import { MessageBubble } from "./message-bubble"
 
 interface MessageAreaProps {
-  messages: DisplayMessage[]
+  messages: UIMessage[]
 }
 
 export function MessageArea({ messages }: MessageAreaProps) {
