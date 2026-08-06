@@ -1249,7 +1249,7 @@ git commit -m "feat(web): rewrite MessageBubble to render based on UIMessage.par
 
 ---
 
-### Task 6: 前端 ToolCallStatus 适配 ToolUIPart
+### Task 6: 前端 ToolCallStatus 适配 ToolUIPart ✅
 
 **Files:**
 - Modify: `apps/web/components/chat/tool-call-status.tsx`
