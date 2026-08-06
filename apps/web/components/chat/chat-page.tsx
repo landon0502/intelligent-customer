@@ -34,13 +34,15 @@ export function ChatPage() {
   const handleNewSession = useCallback(async () => {
     const newSession = await createSession(t("newSession"))
     if (!newSession) return
+    await conversationsControl.runAsync()
     setCurrentSessionId(newSession.id)
-  }, [t, createSession])
+  }, [t, createSession, conversationsControl])
 
   const handleDeleteSession = useCallback(
     async (id: number) => {
       const ok = await removeSession(id)
       if (!ok) return
+      await conversationsControl.runAsync()
       setCurrentSessionId((prev) => {
         // 找到下一个会话
         const idx = sessions.findIndex((s) => s.id === id)
@@ -51,7 +53,7 @@ export function ChatPage() {
         return prev
       })
     },
-    [sessions, removeSession]
+    [sessions, removeSession, conversationsControl]
   )
 
   if (conversationsControl.loading) {
