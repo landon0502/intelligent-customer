@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from langchain_core.messages import HumanMessage, AIMessage
+from langchain_core.messages import HumanMessage, AIMessage, AIMessageChunk
 
 from database.session import get_db
 from schemas.user import User
@@ -79,8 +79,8 @@ async def chat_stream(
                 {"messages": history_messages},
                 stream_mode="messages",
             ):
-                # 收集文本内容用于持久化
-                if hasattr(chunk, "content") and chunk.content:
+                # 收集 AI 文本内容用于持久化（排除 ToolMessage 等非 AI 内容）
+                if isinstance(chunk, AIMessageChunk) and chunk.content:
                     full_response.append(chunk.content)
 
                 # 转换为 UIMessageStream 事件
