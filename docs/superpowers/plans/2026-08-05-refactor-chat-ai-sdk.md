@@ -6,7 +6,7 @@ base-ref: 4a8073d070ef465aa259172b62744e39a6e21f31
 
 # refactor-chat-ai-sdk 实施计划
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** 将后端 SSE 协议从自定义事件格式替换为 AI SDK UIMessageStream 协议，前端用 `useChat` hook 替换手写 SSE 流式处理。
 
@@ -54,7 +54,7 @@ base-ref: 4a8073d070ef465aa259172b62744e39a6e21f31
 - Consumes: 无（独立工具模块）
 - Produces: `ui_messages_to_langchain(ui_messages: list[dict]) -> list[BaseMessage]` — 供 Task 3 的 chat.py 端点调用
 
-- [ ] **Step 1: 编写失败测试**
+- [x] **Step 1: 编写失败测试**
 
 ```python
 # apps/service/tests/test_message_converter.py
@@ -168,12 +168,12 @@ def test_mixed_conversation():
     assert isinstance(result[2], HumanMessage)
 ```
 
-- [ ] **Step 2: 运行测试确认失败**
+- [x] **Step 2: 运行测试确认失败**
 
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/service && python -m pytest tests/test_message_converter.py -v`
 Expected: FAIL — `ModuleNotFoundError: No module named 'services.message_converter'`
 
-- [ ] **Step 3: 编写最小实现**
+- [x] **Step 3: 编写最小实现**
 
 ```python
 # apps/service/services/message_converter.py
@@ -263,12 +263,12 @@ def ui_messages_to_langchain(ui_messages: list[dict]) -> list[BaseMessage]:
     return result
 ```
 
-- [ ] **Step 4: 运行测试确认通过**
+- [x] **Step 4: 运行测试确认通过**
 
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/service && python -m pytest tests/test_message_converter.py -v`
 Expected: ALL PASS
 
-- [ ] **Step 5: 提交**
+- [x] **Step 5: 提交**
 
 ```bash
 git add apps/service/services/message_converter.py apps/service/tests/test_message_converter.py
@@ -287,7 +287,7 @@ git commit -m "feat(service): add UIMessage to LangChain message converter"
 - Consumes: 无（独立工具模块）
 - Produces: `to_ui_message_stream_chunk(chunk, state: StreamState) -> AsyncIterator[dict]` — 供 Task 3 的 chat.py 端点调用；`StreamState` 数据类管理流状态
 
-- [ ] **Step 1: 编写失败测试**
+- [x] **Step 1: 编写失败测试**
 
 ```python
 # apps/service/tests/test_ui_message_stream.py
@@ -435,12 +435,12 @@ async def test_tool_call_no_duplicate_start():
     assert start_count == 1  # 只发一次 start
 ```
 
-- [ ] **Step 2: 运行测试确认失败**
+- [x] **Step 2: 运行测试确认失败**
 
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/service && python -m pytest tests/test_ui_message_stream.py -v`
 Expected: FAIL — `ModuleNotFoundError: No module named 'services.ui_message_stream'`
 
-- [ ] **Step 3: 编写最小实现**
+- [x] **Step 3: 编写最小实现**
 
 ```python
 # apps/service/services/ui_message_stream.py
@@ -614,12 +614,12 @@ async def error_stream(error_message: str, state: StreamState) -> AsyncIterator[
     yield {"type": "error", "errorText": error_message}
 ```
 
-- [ ] **Step 4: 运行测试确认通过**
+- [x] **Step 4: 运行测试确认通过**
 
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/service && python -m pytest tests/test_ui_message_stream.py -v`
 Expected: ALL PASS
 
-- [ ] **Step 5: 提交**
+- [x] **Step 5: 提交**
 
 ```bash
 git add apps/service/services/ui_message_stream.py apps/service/tests/test_ui_message_stream.py
@@ -638,7 +638,7 @@ git commit -m "feat(service): add LangChain to UIMessageStream converter"
 - Consumes: `ui_messages_to_langchain` from Task 1；`to_ui_message_stream_chunk`/`finish_stream`/`error_stream`/`StreamState` from Task 2
 - Produces: `POST /api/chat/send` 端点输出 UIMessageStream SSE 格式
 
-- [ ] **Step 1: 更新请求模型**
+- [x] **Step 1: 更新请求模型**
 
 在 `apps/service/schemas/chat_schema.py` 中更新 `ChatSendRequest`：
 
@@ -656,7 +656,7 @@ class ChatSendRequest(BaseModel):
     trigger: str | None = Field(None, description="submit-message | regenerate-message")
 ```
 
-- [ ] **Step 2: 重写 chat.py 端点**
+- [x] **Step 2: 重写 chat.py 端点**
 
 ```python
 """对话接口 —— UIMessageStream SSE 流式对话，支持鉴权、工具调用展示和消息持久化。"""
@@ -780,7 +780,7 @@ async def chat_stream(
     )
 ```
 
-- [ ] **Step 3: 手动验证后端 SSE 输出格式**
+- [x] **Step 3: 手动验证后端 SSE 输出格式**
 
 启动后端服务，用 curl 发送请求，确认输出格式：
 
@@ -793,7 +793,7 @@ curl -N -X POST http://localhost:8000/api/chat/send \
 
 Expected: SSE 输出包含 `data: {"type":"start",...}`、`data: {"type":"text-delta",...}`、`data: {"type":"finish"}` 等事件
 
-- [ ] **Step 4: 提交**
+- [x] **Step 4: 提交**
 
 ```bash
 git add apps/service/api/chat.py apps/service/schemas/chat_schema.py
@@ -812,7 +812,7 @@ git commit -m "feat(service): rewrite chat endpoint to output UIMessageStream pr
 - Consumes: `useChatServices` 的 `loadMessages`、`createSession`、`removeSession`、`conversationsControl`；AI SDK `useChat` + `DefaultChatTransport`
 - Produces: `ChatContainer` 组件（接收 `conversationId`，封装 `useChat`）；简化后的 `useChatServices`（移除 `sendChat`/`createLocal*`）
 
-- [ ] **Step 1: 简化 useServices.ts**
+- [x] **Step 1: 简化 useServices.ts**
 
 移除 `sendChat`、`createLocalUserMessage`、`createLocalAssistantMessage` 及相关导入，保留会话 CRUD：
 
@@ -934,7 +934,7 @@ export default function useChatServices() {
 }
 ```
 
-- [ ] **Step 2: 创建 ChatContainer 组件**
+- [x] **Step 2: 创建 ChatContainer 组件**
 
 ```typescript
 // apps/web/components/chat/chat-container.tsx
@@ -1025,7 +1025,7 @@ function ChatInner({
 }
 ```
 
-- [ ] **Step 3: 重构 chat-page.tsx**
+- [x] **Step 3: 重构 chat-page.tsx**
 
 ```typescript
 // apps/web/components/chat/chat-page.tsx
@@ -1118,12 +1118,12 @@ export function ChatPage() {
 }
 ```
 
-- [ ] **Step 4: 验证前端编译通过**
+- [x] **Step 4: 验证前端编译通过**
 
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/web && pnpm build 2>&1 | tail -20`
 Expected: 编译成功，无类型错误
 
-- [ ] **Step 5: 提交**
+- [x] **Step 5: 提交**
 
 ```bash
 git add apps/web/components/chat/chat-container.tsx apps/web/components/chat/chat-page.tsx apps/web/components/chat/useServices.ts
@@ -1141,7 +1141,7 @@ git commit -m "feat(web): integrate useChat hook with ChatContainer component"
 - Consumes: `UIMessage` from `ai`；`ToolCallStatus` from Task 6
 - Produces: `MessageBubble` 组件接收 `UIMessage` 替代 `DisplayMessage`
 
-- [ ] **Step 1: 重写 message-bubble.tsx**
+- [x] **Step 1: 重写 message-bubble.tsx**
 
 ```typescript
 // apps/web/components/chat/message-bubble.tsx
@@ -1225,7 +1225,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
 }
 ```
 
-- [ ] **Step 2: 更新 MessageArea 组件的 props 类型**
+- [x] **Step 2: 更新 MessageArea 组件的 props 类型**
 
 检查 `message-area.tsx` 是否需要更新 `MessageBubble` 的 props 类型。如果 `MessageArea` 传递 `DisplayMessage` 给 `MessageBubble`，需要改为传递 `UIMessage`：
 
@@ -1235,12 +1235,12 @@ grep -n "MessageBubble\|DisplayMessage" apps/web/components/chat/message-area.ts
 
 根据结果更新 `MessageArea` 接收 `UIMessage[]` 并传递给 `MessageBubble`。
 
-- [ ] **Step 3: 验证编译通过**
+- [x] **Step 3: 验证编译通过**
 
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/web && pnpm build 2>&1 | tail -20`
 Expected: 编译成功
 
-- [ ] **Step 4: 提交**
+- [x] **Step 4: 提交**
 
 ```bash
 git add apps/web/components/chat/message-bubble.tsx apps/web/components/chat/message-area.tsx
@@ -1258,7 +1258,7 @@ git commit -m "feat(web): rewrite MessageBubble to render based on UIMessage.par
 - Consumes: AI SDK `ToolUIPart` 类型（`type` 以 `tool-` 开头的 part）
 - Produces: `ToolCallStatus` 组件接收 `toolPart` prop 替代 `toolCalls: ToolCall[]`
 
-- [ ] **Step 1: 重写 tool-call-status.tsx**
+- [x] **Step 1: 重写 tool-call-status.tsx**
 
 ```typescript
 // apps/web/components/chat/tool-call-status.tsx
@@ -1304,12 +1304,12 @@ export function ToolCallStatus({ toolPart }: ToolCallStatusProps) {
 }
 ```
 
-- [ ] **Step 2: 验证编译通过**
+- [x] **Step 2: 验证编译通过**
 
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/web && pnpm build 2>&1 | tail -20`
 Expected: 编译成功
 
-- [ ] **Step 3: 提交**
+- [x] **Step 3: 提交**
 
 ```bash
 git add apps/web/components/chat/tool-call-status.tsx
@@ -1327,7 +1327,7 @@ git commit -m "feat(web): adapt ToolCallStatus to accept ToolUIPart from AI SDK"
 - Consumes: `useChat` 的 `input`/`setInput`/`sendMessage`/`status`/`stop`
 - Produces: `ChatInput` 组件接收新 props 接口
 
-- [ ] **Step 1: 重写 chat-input.tsx**
+- [x] **Step 1: 重写 chat-input.tsx**
 
 ```typescript
 // apps/web/components/chat/chat-input.tsx
@@ -1418,12 +1418,12 @@ export function ChatInput({ input, setInput, sendMessage, status, stop }: ChatIn
 }
 ```
 
-- [ ] **Step 2: 验证编译通过**
+- [x] **Step 2: 验证编译通过**
 
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/web && pnpm build 2>&1 | tail -20`
 Expected: 编译成功
 
-- [ ] **Step 3: 提交**
+- [x] **Step 3: 提交**
 
 ```bash
 git add apps/web/components/chat/chat-input.tsx
@@ -1444,7 +1444,7 @@ git commit -m "feat(web): adapt ChatInput to useChat input/setInput/sendMessage 
 - Consumes: 无
 - Produces: 清理后的代码库，无残留引用
 
-- [ ] **Step 1: 检查 chat.ts 的所有引用**
+- [x] **Step 1: 检查 chat.ts 的所有引用**
 
 ```bash
 grep -rn "from.*services/chat\|from.*@/services/chat" apps/web/ --include="*.ts" --include="*.tsx"
@@ -1452,7 +1452,7 @@ grep -rn "from.*services/chat\|from.*@/services/chat" apps/web/ --include="*.ts"
 
 确认 `services/chat.ts` 不再被任何文件引用。如果 `useServices.ts` 仍引用它，确认已在 Task 4 中移除。
 
-- [ ] **Step 2: 检查 session-list.tsx 的类型依赖**
+- [x] **Step 2: 检查 session-list.tsx 的类型依赖**
 
 ```bash
 grep -n "DisplayMessage\|ToolCall" apps/web/components/chat/session-list.tsx
@@ -1460,22 +1460,22 @@ grep -n "DisplayMessage\|ToolCall" apps/web/components/chat/session-list.tsx
 
 如果 `session-list.tsx` 导出了 `DisplayMessage` 类型，需要移除或更新（`MessageBubble` 现在使用 `UIMessage`）。
 
-- [ ] **Step 3: 删除 chat.ts**
+- [x] **Step 3: 删除 chat.ts**
 
 ```bash
 rm apps/web/services/chat.ts
 ```
 
-- [ ] **Step 4: 更新 session-list.tsx 类型**
+- [x] **Step 4: 更新 session-list.tsx 类型**
 
 移除 `session-list.tsx` 中对 `DisplayMessage` 的导出（如果存在），因为 `MessageBubble` 现在接收 `UIMessage`。`SessionList` 组件只需要 `DisplaySession` 的 `id`/`title`/`time` 字段，不需要 `messages`。
 
-- [ ] **Step 5: 验证编译通过**
+- [x] **Step 5: 验证编译通过**
 
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer/apps/web && pnpm build 2>&1 | tail -20`
 Expected: 编译成功，无未解析引用
 
-- [ ] **Step 6: 提交**
+- [x] **Step 6: 提交**
 
 ```bash
 git add -A apps/web/services/chat.ts apps/web/components/chat/session-list.tsx
@@ -1493,39 +1493,39 @@ git commit -m "chore(web): remove deprecated chat.ts and clean up DisplayMessage
 - Consumes: 所有前序 Task 的产物
 - Produces: 验证报告
 
-- [ ] **Step 1: 启动后端服务**
+- [x] **Step 1: 启动后端服务**
 
 ```bash
 cd /Users/superhuan/Documents/project/intelligent-customer && docker compose up -d
 ```
 
-- [ ] **Step 2: 启动前端开发服务器**
+- [x] **Step 2: 启动前端开发服务器**
 
 ```bash
 cd /Users/superhuan/Documents/project/intelligent-customer/apps/web && pnpm dev
 ```
 
-- [ ] **Step 3: 验证流式 Markdown 渲染**
+- [x] **Step 3: 验证流式 Markdown 渲染**
 
 在浏览器中打开聊天页面，发送包含加粗、代码块、表格、列表的消息，确认流式过程中正确渲染。
 
-- [ ] **Step 4: 验证工具调用状态**
+- [x] **Step 4: 验证工具调用状态**
 
 触发知识库检索等工具，确认调用中（黄色旋转动画）和完成（绿色勾号）状态正确显示。
 
-- [ ] **Step 5: 验证会话切换**
+- [x] **Step 5: 验证会话切换**
 
 切换会话后历史消息正确加载，新消息正常发送和流式接收。
 
-- [ ] **Step 6: 验证鉴权**
+- [x] **Step 6: 验证鉴权**
 
 确认 Bearer token 正确注入请求头（检查浏览器 Network 面板）。
 
-- [ ] **Step 7: 验证停止功能**
+- [x] **Step 7: 验证停止功能**
 
 流式过程中点击停止按钮，确认流正确中断。
 
-- [ ] **Step 8: 提交验证记录**
+- [x] **Step 8: 提交验证记录**
 
 ```bash
 git commit --allow-empty -m "chore: e2e verification passed for refactor-chat-ai-sdk"
