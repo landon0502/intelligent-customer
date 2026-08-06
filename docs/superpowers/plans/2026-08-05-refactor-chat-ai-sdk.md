@@ -802,7 +802,7 @@ git commit -m "feat(service): rewrite chat endpoint to output UIMessageStream pr
 
 ---
 
-### Task 4: 前端 ChatContainer + useChat 集成
+### Task 4: 前端 ChatContainer + useChat 集成 ✅
 
 **Files:**
 - Create: `apps/web/components/chat/chat-container.tsx`
