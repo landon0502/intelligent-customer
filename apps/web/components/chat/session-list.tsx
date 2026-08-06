@@ -8,7 +8,6 @@ export interface DisplaySession {
   id: number
   title: string
   time: string
-  messages: DisplayMessage[]
 }
 
 export interface DisplayMessage {
