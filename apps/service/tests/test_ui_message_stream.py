@@ -274,7 +274,7 @@ async def test_finish_stream_closes_text_and_step():
     """finish_stream 关闭未关闭的文本块和步骤"""
     state = StreamState(message_id="msg-1", text_id="txt-1", step_started=True)
     events = []
-    async for event in finish_stream(state, []):
+    async for event in finish_stream(state):
         events.append(event)
 
     types = [e["type"] for e in events]
@@ -293,7 +293,7 @@ async def test_finish_stream_no_open_text():
     """finish_stream 无未关闭文本块时不发 text-end"""
     state = StreamState(message_id="msg-1", text_id="", step_started=True)
     events = []
-    async for event in finish_stream(state, []):
+    async for event in finish_stream(state):
         events.append(event)
 
     types = [e["type"] for e in events]
@@ -313,6 +313,53 @@ async def test_error_stream():
     assert len(events) == 1
     assert events[0]["type"] == "error"
     assert events[0]["errorText"] == "连接超时"
+
+
+@pytest.mark.anyio
+async def test_error_stream_closes_open_text_and_step():
+    """error_stream 应先关闭未完成的文本块和步骤，再发送 error 事件。
+
+    当流中途出错时，可能存在未关闭的 text_id 和 step_started，
+    error_stream 应先关闭这些块再发送错误，避免前端状态不一致。
+    """
+    state = StreamState(message_id="msg-1", text_id="txt-err", step_started=True)
+    events = []
+    async for event in error_stream("连接超时", state):
+        events.append(event)
+
+    types = [e["type"] for e in events]
+    # 应先关闭文本块和步骤，再发 error
+    assert "text-end" in types
+    assert "finish-step" in types
+    assert "error" in types
+    # 顺序：text-end → finish-step → error
+    text_end_idx = next(i for i, e in enumerate(events) if e["type"] == "text-end")
+    finish_step_idx = next(i for i, e in enumerate(events) if e["type"] == "finish-step")
+    error_idx = next(i for i, e in enumerate(events) if e["type"] == "error")
+    assert text_end_idx < finish_step_idx < error_idx
+
+
+@pytest.mark.anyio
+async def test_error_stream_no_open_text_no_text_end():
+    """error_stream 无未关闭文本块时不发 text-end"""
+    state = StreamState(message_id="msg-1", text_id="", step_started=True)
+    events = []
+    async for event in error_stream("连接超时", state):
+        events.append(event)
+
+    types = [e["type"] for e in events]
+    assert "text-end" not in types
+    assert "finish-step" in types
+    assert "error" in types
+
+
+@pytest.mark.anyio
+async def test_finish_stream_no_full_response_param():
+    """finish_stream 不再接受 full_response 参数"""
+    import inspect
+    sig = inspect.signature(finish_stream)
+    param_names = list(sig.parameters.keys())
+    assert "full_response" not in param_names, f"finish_stream 不应包含 full_response 参数，实际参数: {param_names}"
 
 
 # ---- 边界情况测试 ----
@@ -345,6 +392,104 @@ async def test_text_id_carries_across_chunks():
 
     text_start_count = sum(1 for e in all_events if e["type"] == "text-start")
     assert text_start_count == 1  # 只发一次 text-start
+
+
+@pytest.mark.anyio
+async def test_incremental_tool_call_sends_input_available_on_tool_message():
+    """增量工具调用：收到 ToolMessage 时应发送 tool-input-available 标记输入完成。
+
+    AI SDK 7.x 中 tool-input-start 将工具状态设为 input-streaming，
+    只有 tool-input-available 才能将状态转为 input-available。
+    缺少此事件会导致前端工具调用永远停留在 input-streaming 状态。
+    """
+    # 模拟增量工具调用：先发 tool_call_chunks，再发 ToolMessage
+    chunk1 = AIMessageChunk(
+        content="",
+        tool_call_chunks=[
+            {"name": "kb_query", "args": '{"quer', "id": "call_inc1", "index": 0, "type": "tool_call_chunk"}
+        ],
+    )
+    chunk2 = AIMessageChunk(
+        content="",
+        tool_call_chunks=[
+            {"name": "kb_query", "args": 'y": "退货"}', "id": "call_inc1", "index": 0, "type": "tool_call_chunk"}
+        ],
+    )
+    tool_msg = ToolMessage(content="退货需在7天内", tool_call_id="call_inc1", name="kb_query")
+
+    state = StreamState(message_id="msg-1")
+    all_events = []
+    for chunk in [chunk1, chunk2, tool_msg]:
+        async for event in to_ui_message_stream_chunk(chunk, state):
+            all_events.append(event)
+
+    # 关键断言：ToolMessage 处理时应先发 tool-input-available
+    available_events = [e for e in all_events if e["type"] == "tool-input-available" and e.get("toolCallId") == "call_inc1"]
+    assert len(available_events) == 1, f"期望 1 个 tool-input-available 事件，实际 {len(available_events)}"
+    # input 应从累积的增量文本解析
+    assert available_events[0]["input"] == {"query": "退货"}
+    # tool-input-available 应在 tool-output-available 之前
+    available_idx = next(i for i, e in enumerate(all_events) if e["type"] == "tool-input-available" and e.get("toolCallId") == "call_inc1")
+    output_idx = next(i for i, e in enumerate(all_events) if e["type"] == "tool-output-available" and e.get("toolCallId") == "call_inc1")
+    assert available_idx < output_idx
+
+
+@pytest.mark.anyio
+async def test_incremental_tool_call_finish_stream_sends_input_available():
+    """增量工具调用：finish_stream 应对未发送 tool-input-available 的工具调用补发。
+
+    当流正常结束但工具调用尚未收到 ToolMessage 时（如 LLM 决定不调用工具），
+    finish_stream 应补发 tool-input-available 以关闭 input-streaming 状态。
+    使用不完整 JSON 的 args 确保 LangChain 生成空字典的 tool_calls（增量模式）。
+    """
+    chunk = AIMessageChunk(
+        content="",
+        tool_call_chunks=[
+            {"name": "kb_query", "args": '{"quer', "id": "call_inc2", "index": 0, "type": "tool_call_chunk"}
+        ],
+    )
+    state = StreamState(message_id="msg-1")
+    all_events = []
+    async for event in to_ui_message_stream_chunk(chunk, state):
+        all_events.append(event)
+
+    # 增量模式下不应有 tool-input-available（只有 start + delta）
+    available_before = [e for e in all_events if e["type"] == "tool-input-available"]
+    assert len(available_before) == 0
+
+    # finish_stream 应补发 tool-input-available
+    finish_events = []
+    async for event in finish_stream(state):
+        finish_events.append(event)
+
+    available_after = [e for e in finish_events if e["type"] == "tool-input-available"]
+    assert len(available_after) == 1, f"期望 1 个 tool-input-available 事件，实际 {len(available_after)}"
+    assert available_after[0]["toolCallId"] == "call_inc2"
+    # 不完整 JSON 解析失败，应使用空字典
+    assert available_after[0]["input"] == {}
+
+
+@pytest.mark.anyio
+async def test_incremental_tool_call_input_parse_fallback():
+    """增量工具调用：累积输入文本解析失败时使用空字典作为 input。"""
+    chunk = AIMessageChunk(
+        content="",
+        tool_call_chunks=[
+            {"name": "kb_query", "args": '{"incomplete', "id": "call_inc3", "index": 0, "type": "tool_call_chunk"}
+        ],
+    )
+    tool_msg = ToolMessage(content="结果", tool_call_id="call_inc3", name="kb_query")
+
+    state = StreamState(message_id="msg-1")
+    all_events = []
+    for c in [chunk, tool_msg]:
+        async for event in to_ui_message_stream_chunk(c, state):
+            all_events.append(event)
+
+    available_events = [e for e in all_events if e["type"] == "tool-input-available" and e.get("toolCallId") == "call_inc3"]
+    assert len(available_events) == 1
+    # 解析失败应使用空字典
+    assert available_events[0]["input"] == {}
 
 
 @pytest.mark.anyio

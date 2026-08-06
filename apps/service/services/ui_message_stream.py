@@ -13,6 +13,7 @@ UIMessageStream 事件类型：
 - error: 错误
 """
 
+import json
 import logging
 import uuid
 from dataclasses import dataclass, field
@@ -28,7 +29,11 @@ class StreamState:
     """UIMessageStream 转换状态，跨 chunk 维护。"""
     message_id: str = ""
     text_id: str = ""
-    started_tool_calls: set = field(default_factory=set)
+    started_tool_calls: set[str] = field(default_factory=set)
+    partial_tool_inputs: dict[str, str] = field(default_factory=dict)
+    """增量工具调用的累积输入文本，key 为 tool_call_id，value 为累积的 args 字符串。"""
+    completed_tool_calls: set[str] = field(default_factory=set)
+    """已发送 tool-input-available 的工具调用 ID 集合。"""
     step_started: bool = False
     stream_started: bool = False
 
@@ -62,6 +67,23 @@ async def to_ui_message_stream_chunk(chunk, state: StreamState) -> AsyncIterator
 
     # === ToolMessage: 工具结果 ===
     if isinstance(chunk, ToolMessage):
+        # 对应的增量工具调用需要先发送 tool-input-available 标记输入完成
+        tc_id = chunk.tool_call_id
+        if tc_id in state.started_tool_calls and tc_id not in state.completed_tool_calls:
+            accumulated = state.partial_tool_inputs.pop(tc_id, "")
+            try:
+                parsed_input = json.loads(accumulated) if accumulated else {}
+                if not isinstance(parsed_input, dict):
+                    parsed_input = {}
+            except (json.JSONDecodeError, ValueError):
+                parsed_input = {}
+            state.completed_tool_calls.add(tc_id)
+            yield {
+                "type": "tool-input-available",
+                "toolCallId": tc_id,
+                "toolName": chunk.name or "",
+                "input": parsed_input,
+            }
         yield {
             "type": "tool-output-available",
             "toolCallId": chunk.tool_call_id,
@@ -125,10 +147,14 @@ async def to_ui_message_stream_chunk(chunk, state: StreamState) -> AsyncIterator
                     "toolCallId": tc_id,
                     "toolName": tcc.get("name", ""),
                 }
+            # 累积增量输入文本
+            args_text = tcc.get("args", "")
+            if args_text:
+                state.partial_tool_inputs[tc_id] = state.partial_tool_inputs.get(tc_id, "") + args_text
             yield {
                 "type": "tool-input-delta",
                 "toolCallId": tc_id,
-                "inputTextDelta": tcc.get("args", ""),
+                "inputTextDelta": args_text,
             }
 
     # 3. 处理完整工具调用（tool_calls 的 args 为非空字典）
@@ -142,6 +168,7 @@ async def to_ui_message_stream_chunk(chunk, state: StreamState) -> AsyncIterator
                     "toolCallId": tc_id,
                     "toolName": tc.get("name", ""),
                 }
+            state.completed_tool_calls.add(tc_id)
             yield {
                 "type": "tool-input-available",
                 "toolCallId": tc_id,
@@ -150,12 +177,11 @@ async def to_ui_message_stream_chunk(chunk, state: StreamState) -> AsyncIterator
             }
 
 
-async def finish_stream(state: StreamState, full_response: list[str]) -> AsyncIterator[dict]:
+async def finish_stream(state: StreamState) -> AsyncIterator[dict]:
     """发送流结束事件序列。
 
     Args:
         state: 流状态
-        full_response: 收集的完整文本回复
 
     Yields:
         finish-step + finish 事件
@@ -164,6 +190,23 @@ async def finish_stream(state: StreamState, full_response: list[str]) -> AsyncIt
     if state.text_id:
         yield {"type": "text-end", "id": state.text_id}
         state.text_id = ""
+
+    # 对已 start 但未发送 tool-input-available 的增量工具调用补发
+    pending_tool_ids = state.started_tool_calls - state.completed_tool_calls
+    for tc_id in pending_tool_ids:
+        accumulated = state.partial_tool_inputs.pop(tc_id, "")
+        try:
+            parsed_input = json.loads(accumulated) if accumulated else {}
+            if not isinstance(parsed_input, dict):
+                parsed_input = {}
+        except (json.JSONDecodeError, ValueError):
+            parsed_input = {}
+        state.completed_tool_calls.add(tc_id)
+        yield {
+            "type": "tool-input-available",
+            "toolCallId": tc_id,
+            "input": parsed_input,
+        }
 
     # 关闭未关闭的步骤
     if state.step_started:
@@ -175,11 +218,23 @@ async def finish_stream(state: StreamState, full_response: list[str]) -> AsyncIt
 async def error_stream(error_message: str, state: StreamState) -> AsyncIterator[dict]:
     """发送错误事件。
 
+    先关闭未完成的文本块和步骤，再发送错误事件，
+    避免前端状态不一致。
+
     Args:
         error_message: 错误消息文本
         state: 流状态
 
     Yields:
-        error 事件
+        关闭事件 + error 事件
     """
+    # 关闭未关闭的文本块
+    if state.text_id:
+        yield {"type": "text-end", "id": state.text_id}
+        state.text_id = ""
+
+    # 关闭未关闭的步骤
+    if state.step_started:
+        yield {"type": "finish-step"}
+
     yield {"type": "error", "errorText": error_message}
