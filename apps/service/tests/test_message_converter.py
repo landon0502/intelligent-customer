@@ -114,3 +114,217 @@ def test_mixed_conversation():
     assert isinstance(result[0], HumanMessage)
     assert isinstance(result[1], AIMessage)
     assert isinstance(result[2], HumanMessage)
+
+
+# ---- AI SDK 7.x 字段优先级与 state 处理测试 ----
+
+
+def test_tool_args_prefers_input_over_args():
+    """7.x 优先级：当 input 和 args 同时存在时，应优先取 input"""
+    ui_messages = [
+        {
+            "role": "assistant",
+            "parts": [
+                {
+                    "type": "tool-invocation",
+                    "toolName": "knowledge_base_query",
+                    "toolCallId": "call_input_priority",
+                    "input": {"query": "7.x 查询"},
+                    "args": {"query": "旧版查询"},
+                    "state": "call",
+                },
+            ],
+        }
+    ]
+    result = ui_messages_to_langchain(ui_messages)
+    assert len(result) == 1
+    assert isinstance(result[0], AIMessage)
+    # input 应优先于 args
+    assert result[0].tool_calls[0]["args"] == {"query": "7.x 查询"}
+
+
+def test_tool_args_fallback_to_args_when_no_input():
+    """7.x 回退：当 input 不存在时，应回退到 args"""
+    ui_messages = [
+        {
+            "role": "assistant",
+            "parts": [
+                {
+                    "type": "tool-invocation",
+                    "toolName": "knowledge_base_query",
+                    "toolCallId": "call_args_fallback",
+                    "args": {"query": "旧版查询"},
+                    "state": "call",
+                },
+            ],
+        }
+    ]
+    result = ui_messages_to_langchain(ui_messages)
+    assert len(result) == 1
+    assert isinstance(result[0], AIMessage)
+    assert result[0].tool_calls[0]["args"] == {"query": "旧版查询"}
+
+
+def test_tool_result_prefers_output_over_result():
+    """7.x 优先级：当 output 和 result 同时存在时，应优先取 output"""
+    ui_messages = [
+        {
+            "role": "assistant",
+            "parts": [
+                {
+                    "type": "tool-invocation",
+                    "toolName": "knowledge_base_query",
+                    "toolCallId": "call_output_priority",
+                    "args": {"query": "退货政策"},
+                    "state": "result",
+                    "output": "7.x 输出结果",
+                    "result": "旧版输出结果",
+                },
+            ],
+        }
+    ]
+    result = ui_messages_to_langchain(ui_messages)
+    assert len(result) == 2
+    assert isinstance(result[1], ToolMessage)
+    # output 应优先于 result
+    assert result[1].content == "7.x 输出结果"
+
+
+def test_tool_result_fallback_to_result_when_no_output():
+    """7.x 回退：当 output 不存在时，应回退到 result"""
+    ui_messages = [
+        {
+            "role": "assistant",
+            "parts": [
+                {
+                    "type": "tool-invocation",
+                    "toolName": "knowledge_base_query",
+                    "toolCallId": "call_result_fallback",
+                    "args": {"query": "退货政策"},
+                    "state": "result",
+                    "result": "旧版输出结果",
+                },
+            ],
+        }
+    ]
+    result = ui_messages_to_langchain(ui_messages)
+    assert len(result) == 2
+    assert isinstance(result[1], ToolMessage)
+    assert result[1].content == "旧版输出结果"
+
+
+def test_output_error_state_creates_tool_message():
+    """output-error state：工具执行出错时应转为 ToolMessage，content 为 errorText"""
+    ui_messages = [
+        {
+            "role": "assistant",
+            "parts": [
+                {
+                    "type": "tool-invocation",
+                    "toolName": "knowledge_base_query",
+                    "toolCallId": "call_error",
+                    "input": {"query": "不存在的查询"},
+                    "state": "output-error",
+                    "errorText": "工具执行失败：数据库连接超时",
+                },
+            ],
+        }
+    ]
+    result = ui_messages_to_langchain(ui_messages)
+    # 应产生 AIMessage + ToolMessage
+    assert len(result) == 2
+    assert isinstance(result[0], AIMessage)
+    assert result[0].tool_calls[0]["name"] == "knowledge_base_query"
+    assert isinstance(result[1], ToolMessage)
+    assert result[1].content == "工具执行失败：数据库连接超时"
+    assert result[1].tool_call_id == "call_error"
+
+
+def test_output_available_state_with_output_field():
+    """output-available state：使用 output 字段的工具结果"""
+    ui_messages = [
+        {
+            "role": "assistant",
+            "parts": [
+                {
+                    "type": "tool-invocation",
+                    "toolName": "knowledge_base_query",
+                    "toolCallId": "call_output_avail",
+                    "input": {"query": "退款流程"},
+                    "state": "output-available",
+                    "output": "退款需3-5个工作日",
+                },
+            ],
+        }
+    ]
+    result = ui_messages_to_langchain(ui_messages)
+    assert len(result) == 2
+    assert isinstance(result[1], ToolMessage)
+    assert result[1].content == "退款需3-5个工作日"
+
+
+def test_input_available_state_creates_ai_message_only():
+    """input-available state：工具参数已就绪但尚未执行，只产生 AIMessage 不产生 ToolMessage"""
+    ui_messages = [
+        {
+            "role": "assistant",
+            "parts": [
+                {
+                    "type": "tool-invocation",
+                    "toolName": "knowledge_base_query",
+                    "toolCallId": "call_input_avail",
+                    "input": {"query": "配送范围"},
+                    "state": "input-available",
+                },
+            ],
+        }
+    ]
+    result = ui_messages_to_langchain(ui_messages)
+    # input-available 表示参数已就绪但尚未执行，只产生 AIMessage
+    assert len(result) == 1
+    assert isinstance(result[0], AIMessage)
+    assert result[0].tool_calls[0]["name"] == "knowledge_base_query"
+    assert result[0].tool_calls[0]["args"] == {"query": "配送范围"}
+
+
+def test_dynamic_tool_with_input_field():
+    """动态格式 tool-{toolName} 使用 input 字段（7.x）"""
+    ui_messages = [
+        {
+            "role": "assistant",
+            "parts": [
+                {
+                    "type": "tool-knowledge_base_query",
+                    "toolCallId": "call_dynamic_input",
+                    "input": {"query": "7.x 动态查询"},
+                    "state": "call",
+                },
+            ],
+        }
+    ]
+    result = ui_messages_to_langchain(ui_messages)
+    assert len(result) == 1
+    assert isinstance(result[0], AIMessage)
+    assert result[0].tool_calls[0]["args"] == {"query": "7.x 动态查询"}
+
+
+def test_dynamic_tool_output_error_state():
+    """动态格式 tool-{toolName} 的 output-error state"""
+    ui_messages = [
+        {
+            "role": "assistant",
+            "parts": [
+                {
+                    "type": "tool-knowledge_base_query",
+                    "toolCallId": "call_dynamic_error",
+                    "input": {"query": "失败查询"},
+                    "state": "output-error",
+                    "errorText": "动态工具执行失败",
+                },
+            ],
+        }
+    ]
+    result = ui_messages_to_langchain(ui_messages)
+    assert len(result) == 2
+    assert isinstance(result[1], ToolMessage)
+    assert result[1].content == "动态工具执行失败"

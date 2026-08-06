@@ -30,8 +30,11 @@ def _extract_tool_call_id(part: dict) -> str:
 
 
 def _extract_tool_args(part: dict) -> dict:
-    """从 part 中提取工具参数。"""
-    return part.get("args", part.get("input", {}))
+    """从 part 中提取工具参数。
+
+    优先取 AI SDK 7.x 的 input 字段，回退到旧版 args 字段。
+    """
+    return part.get("input", part.get("args", {}))
 
 
 def ui_messages_to_langchain(ui_messages: list[dict]) -> list[BaseMessage]:
@@ -71,13 +74,13 @@ def ui_messages_to_langchain(ui_messages: list[dict]) -> list[BaseMessage]:
                 elif part_type == "tool-invocation":
                     # Legacy 格式: type="tool-invocation"
                     tool_calls.append(p)
-                    if p.get("state") in ("result", "output-available"):
+                    if p.get("state") in ("result", "output-available", "output-error"):
                         tool_results.append(p)
 
                 elif part_type.startswith("tool-"):
                     # 动态格式: type="tool-{toolName}"
                     tool_calls.append(p)
-                    if p.get("state") in ("result", "output-available"):
+                    if p.get("state") in ("result", "output-available", "output-error"):
                         tool_results.append(p)
 
             # 创建 AIMessage（含文本和工具调用）
@@ -98,9 +101,14 @@ def ui_messages_to_langchain(ui_messages: list[dict]) -> list[BaseMessage]:
 
             # 创建 ToolMessage（工具结果）
             for tr in tool_results:
+                # 优先取 AI SDK 7.x 的 output 字段，回退到旧版 result 字段
+                content = tr.get("output", tr.get("result", ""))
+                # output-error state: 使用 errorText 作为 content
+                if tr.get("state") == "output-error":
+                    content = tr.get("errorText", str(content))
                 result.append(
                     ToolMessage(
-                        content=str(tr.get("result", tr.get("output", ""))),
+                        content=str(content),
                         tool_call_id=_extract_tool_call_id(tr),
                         name=_extract_tool_name(tr),
                     )
