@@ -379,3 +379,23 @@ async def lifespan(_app: FastAPI):
 | VectorStore 跨分类 | embedding 变更需要同时刷新 vectorstore | `refresh_category("embedding")` 手动追加 vectorstore 刷新 |
 | rag_llm 分类为空 | RAG LLM 需要回退到 llm 分类 | factory 内部检测空配置并回退 |
 | 旧组件资源释放 | Python 引用计数确保旧组件在流结束后回收 | 无额外处理，依赖 GC |
+
+## 10. Implementation Divergence
+
+### D-1: refresh_category 刷新策略变更
+
+**Design Doc 描述**：`refresh_category()` 实现事务性刷新——先创建所有新实例，全部成功后统一替换；任一失败则全部回退，保留旧实例。
+
+**实际实现**：`refresh_category()` 采用逐个替换策略——按注册顺序逐个创建新实例并立即替换 `_current` 指针。部分失败时，已替换的组件保留新实例，未替换的继续使用旧实例。
+
+**变更原因**：事务性全量替换会导致后续工厂闭包通过 `registry.get()` 获取到旧的前置组件。例如，当 `agent_llm` 和 `agent` 都需要刷新时，事务性替换会先创建新 agent（此时 `registry.get("agent_llm")` 返回旧实例），再统一替换——导致新 agent 绑定的是旧 agent_llm。逐个替换确保 `agent_llm` 先替换，`agent` 工厂闭包通过 `registry.get("agent_llm")` 获取到已更新的新实例。
+
+**测试覆盖**：`test_registry_refresh_category_partial_failure_keeps_successful` 验证了部分失败时已替换组件保留的行为。
+
+### D-2: invalidate 调用位置内聚化
+
+**Design Doc 描述**：`_apply_config_changes()` 先调用 `config_provider.invalidate(category)`，再调用 `registry.refresh_category(category)`。
+
+**实际实现**：`invalidate(category)` 在 `refresh_category()` 内部调用（第 196 行），`_apply_config_changes()` 不再显式调用 invalidate。
+
+**变更原因**：将 invalidate 封装在 refresh_category 内部更内聚，避免调用方遗漏 invalidate 步骤。效果等价——refresh_category 先 invalidate 再读取，保证读取到最新配置。
