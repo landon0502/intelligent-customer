@@ -1,0 +1,11 @@
+# 向量数据库配置
+
+stores:
+  milvus:
+    host: 127.0.0.1
+    port: 19530
+    collection: intelligent_customer
+
+  chroma:
+    persist_directory: ./data/chroma
+    collection: intelligent_customer

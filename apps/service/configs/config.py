@@ -11,7 +11,7 @@ load_dotenv(dotenv_path=".env")
 
 class Settings:
     # ========== 应用基础 ==========
-    APP_NAME: str = "ai-service"
+    APP_NAME: str = "intelligent-customer"
     APP_HOST: str = os.getenv("APP_HOST")
     APP_PORT: int = int(os.getenv("APP_PORT"))
     DEBUG: bool = os.getenv("DEBUG").lower() == "true"
@@ -52,20 +52,23 @@ class Settings:
             return f"redis://:{self.REDIS_PASSWORD}@{self.REDIS_HOST}:{self.REDIS_PORT}/{self.REDIS_DB}"
         return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}/{self.REDIS_DB}"
 
-    # ========== 大模型 ==========
-    DEEPSEEK_API_KEY: str = os.getenv("DEEPSEEK_API_KEY", "")
-    DEEPSEEK_BASE_URL: str = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com")
-    ZAI_API_KEY: str = os.getenv("ZAI_API_KEY", "")
-    ZAI_BASE_URL: str = os.getenv(
-        "ZAI_BASE_URL", "https://open.bigmodel.cn/api/paas/v4/"
-    )
-
     # ========== 日志 ==========
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
 
     # ========== JWT ==========
     JWT_SECRET: str = os.getenv("JWT_SECRET", "change-me-in-production")
     JWT_EXPIRE_MINUTES: int = int(os.getenv("JWT_EXPIRE_MINUTES", "10080"))
+
+    # ========== Chroma ==========
+    CHROMA_HOST: str = os.getenv("CHROMA_HOST", "localhost")
+    CHROMA_PORT: int = int(os.getenv("CHROMA_PORT", "8000"))
+    CHROMA_COLLECTION: str = os.getenv("CHROMA_COLLECTION", "knowledge_base")
+
+    # ========== RAG ==========
+    RAG_TOP_K: int = int(os.getenv("RAG_TOP_K", "4"))
+    RAG_CHUNK_SIZE: int = int(os.getenv("RAG_CHUNK_SIZE", "512"))
+    RAG_CHUNK_OVERLAP: int = int(os.getenv("RAG_CHUNK_OVERLAP", "64"))
+    RAG_SCORE_THRESHOLD: float = float(os.getenv("RAG_SCORE_THRESHOLD", "0.3"))
 
     # ========== Admin ==========
     ADMIN_PASSWORD: str = os.getenv("ADMIN_PASSWORD", "admin123456")

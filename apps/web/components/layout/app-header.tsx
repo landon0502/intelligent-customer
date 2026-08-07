@@ -19,6 +19,10 @@ import {
   DropdownMenuGroup,
 } from "@intelligent-customer/ui/components/dropdown-menu"
 import { Sun, Moon, Monitor, Check, LogOut, Settings } from "lucide-react"
+import {
+  SidebarTrigger,
+  SidebarSeparator,
+} from "@intelligent-customer/ui/components/sidebar"
 import { useMounted } from "@/hooks"
 
 const localeOptions = routing.locales
@@ -79,15 +83,21 @@ export function AppHeader() {
 
   if (!user) {
     return (
-      <header className="flex h-14 shrink-0 items-center border-b bg-background px-6">
+      <header className="flex h-14 shrink-0 items-center justify-between border-b bg-background px-4">
+        <SidebarTrigger className="-ml-1" />
+        <SidebarSeparator orientation="vertical" className="mr-2 h-8" />
         <h1 className="text-base font-semibold">{pageTitle}</h1>
       </header>
     )
   }
 
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between border-b bg-background px-6">
-      <h1 className="text-base font-semibold">{pageTitle}</h1>
+    <header className="flex h-14 shrink-0 items-center justify-between border-b bg-background px-4">
+      <div className="flex items-center gap-2">
+        <SidebarTrigger className="-ml-1" />
+        <SidebarSeparator orientation="vertical" className="mr-2 h-8" />
+        <h1 className="text-base font-semibold">{pageTitle}</h1>
+      </div>
       <div className="flex items-center gap-2">
         {/* Language switcher - text only */}
         <DropdownMenu>

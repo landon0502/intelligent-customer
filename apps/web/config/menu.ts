@@ -21,7 +21,12 @@ export interface MenuGroupConfig {
 export type MenuEntry = MenuGroupConfig | MenuItemConfig
 
 export const menuConfig: MenuEntry[] = [
-  { key: "chat", labelKey: "layout.menuChat", href: "/", icon: MessageSquare },
+  {
+    key: "chat",
+    labelKey: "layout.menuChat",
+    href: "/chat",
+    icon: MessageSquare,
+  },
   {
     type: "group",
     key: "management",
@@ -89,7 +94,7 @@ export function filterMenuByRole(
 }
 
 export const titleKeyMap: Record<string, string> = {
-  "/": "layout.menuChat",
+  "/chat": "layout.menuChat",
   "/knowledge": "layout.menuKnowledge",
   "/users": "layout.menuUsers",
   "/config": "layout.menuConfig",

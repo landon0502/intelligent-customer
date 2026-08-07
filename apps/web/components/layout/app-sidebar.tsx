@@ -1,71 +1,166 @@
-"use client";
+"use client"
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useTranslations } from "next-intl";
-import { useAuthStore } from "@/store/auth";
+import { useState } from "react"
+import { useTranslations } from "next-intl"
+import { ChevronRight } from "lucide-react"
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
+} from "@intelligent-customer/ui/components/sidebar"
+import { useAuthStore } from "@/store/auth"
 import {
   menuConfig,
   filterMenuByRole,
   type MenuItemConfig,
+  type MenuGroupConfig,
   type MenuRole,
-} from "@/config/menu";
+} from "@/config/menu"
 
-export function AppSidebar() {
-  const pathname = usePathname();
-  const t = useTranslations("layout");
-  const tCommon = useTranslations("common");
-  const user = useAuthStore((s) => s.user);
+interface AppSidebarProps {
+  activeTab: string
+  onTabChange?: (tab: string) => void
+  collapsible?: "icon" | "offcanvas"
+}
+
+export function AppSidebar({
+  activeTab,
+  onTabChange,
+  collapsible = "icon",
+}: AppSidebarProps) {
+  const t = useTranslations("layout")
+  const tCommon = useTranslations("common")
+  const user = useAuthStore((s) => s.user)
 
   const filteredMenu = filterMenuByRole(
     menuConfig,
     user?.role as MenuRole | undefined
-  );
+  )
+
+  // 追踪每个分组的展开/收起状态
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(
+    () => {
+      const initial: Record<string, boolean> = {}
+      for (const entry of filteredMenu) {
+        if (entry.type === "group") {
+          initial[entry.key] = true // 默认展开
+        }
+      }
+      return initial
+    }
+  )
+
+  function toggleGroup(key: string) {
+    setExpandedGroups((prev) => ({ ...prev, [key]: !prev[key] }))
+  }
 
   function renderMenuItem(item: MenuItemConfig) {
-    const Icon = item.icon;
-    const isActive = pathname === item.href;
+    const Icon = item.icon
+    const isActive = item.href === activeTab
+    const label = t(
+      item.labelKey.replace("layout.", "") as Parameters<typeof t>[0]
+    )
+
     return (
-      <Link
-        key={item.key}
-        href={item.href}
-        className={`flex items-center gap-3 px-5 py-2.5 text-sm transition-colors ${
-          isActive
-            ? "bg-sidebar-primary text-sidebar-primary-foreground"
-            : "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-        }`}
-      >
-        {Icon && <Icon className="h-4 w-4 shrink-0" />}
-        <span>{t(item.labelKey.replace("layout.", "") as Parameters<typeof t>[0])}</span>
-      </Link>
-    );
+      <SidebarMenuItem key={item.key}>
+        <SidebarMenuButton
+          isActive={isActive}
+          onClick={() => onTabChange?.(item.href)}
+          tooltip={label}
+        >
+          <Icon className="size-4" />
+          <span>{label}</span>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    )
+  }
+
+  function renderGroup(group: MenuGroupConfig) {
+    const isExpanded = expandedGroups[group.key] ?? true
+    const label = t(
+      group.labelKey.replace("layout.", "") as Parameters<typeof t>[0]
+    )
+
+    return (
+      <SidebarGroup key={group.key}>
+        <SidebarGroupContent>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                onClick={() => toggleGroup(group.key)}
+                tooltip={label}
+              >
+                <ChevronRight
+                  className={`size-4 transition-transform duration-200 ${
+                    isExpanded ? "rotate-90" : ""
+                  }`}
+                />
+                <span>{label}</span>
+              </SidebarMenuButton>
+              {isExpanded && (
+                <SidebarMenuSub>
+                  {group.children?.map((child) => {
+                    const Icon = child.icon
+                    const isActive = child.href === activeTab
+                    const childLabel = t(
+                      child.labelKey.replace("layout.", "") as Parameters<
+                        typeof t
+                      >[0]
+                    )
+
+                    return (
+                      <SidebarMenuSubItem key={child.key}>
+                        <SidebarMenuSubButton
+                          isActive={isActive}
+                          onClick={() => onTabChange?.(child.href)}
+                        >
+                          <Icon className="size-4" />
+                          <span>{childLabel}</span>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    )
+                  })}
+                </SidebarMenuSub>
+              )}
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+    )
   }
 
   return (
-    <aside className="w-[220px] bg-sidebar text-sidebar-foreground flex flex-col shrink-0">
-      {/* Top Logo area */}
-      <div className="h-14 flex items-center gap-2 px-5 border-b border-sidebar-border">
+    <Sidebar collapsible={collapsible}>
+      <SidebarHeader className="flex h-14 flex-row items-center justify-center gap-2 border-b border-sidebar-border px-4">
         <span className="text-xl">🤖</span>
-        <span className="font-semibold text-sm">{tCommon("appName")}</span>
-      </div>
+        <span className="truncate text-sm font-semibold group-data-[collapsible=icon]:hidden">
+          {tCommon("appName")}
+        </span>
+      </SidebarHeader>
 
-      {/* Menu area */}
-      <nav className="flex-1 overflow-y-auto py-2">
+      <SidebarContent>
         {filteredMenu.map((entry) => {
           if (entry.type === "group") {
-            return (
-              <div key={entry.key}>
-                <div className="px-5 pt-4 pb-1 text-xs text-muted-foreground uppercase tracking-wider">
-                  {t(entry.labelKey.replace("layout.", "") as Parameters<typeof t>[0])}
-                </div>
-                {entry.children?.map((child) => renderMenuItem(child))}
-              </div>
-            );
+            return renderGroup(entry)
           }
-
-          return renderMenuItem(entry);
+          // 顶级菜单项放在一个 SidebarGroup 中
+          return (
+            <SidebarGroup key={entry.key}>
+              <SidebarGroupContent>
+                <SidebarMenu>{renderMenuItem(entry)}</SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          )
         })}
-      </nav>
-    </aside>
-  );
+      </SidebarContent>
+    </Sidebar>
+  )
 }

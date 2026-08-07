@@ -4,7 +4,7 @@
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api import health_router, auth_router, agent_router
+from api import health_router, auth_router, chat_router, conversations_router, knowledge_router, config_router
 from .lifespan import lifespan
 from configs.config import settings
 # ==== FastAPI 实例 ====
@@ -27,4 +27,7 @@ app.add_middleware(
 # 路由
 app.include_router(health_router)
 app.include_router(auth_router)
-app.include_router(agent_router)
+app.include_router(chat_router)
+app.include_router(conversations_router)
+app.include_router(knowledge_router)
+app.include_router(config_router)
