@@ -18,9 +18,7 @@ import logging
 import uuid
 from dataclasses import dataclass, field
 from typing import AsyncIterator
-
 from langchain_core.messages import AIMessageChunk, ToolMessage
-
 logger = logging.getLogger("intelligent-customer.ui_message_stream")
 
 

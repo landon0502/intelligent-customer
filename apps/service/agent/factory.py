@@ -4,7 +4,7 @@
 """
 
 from langchain.agents import create_agent
-
+from langchain.messages import SystemMessage
 from agent.tools import ALL_TOOLS
 from agent.prompts import SYSTEM_PROMPT
 
@@ -23,5 +23,5 @@ def create_customer_agent(agent_llm, tools=None, system_prompt=None):
     return create_agent(
         model=agent_llm,
         tools=tools or ALL_TOOLS,
-        system_prompt=system_prompt or SYSTEM_PROMPT,
+        system_prompt=SystemMessage(content=system_prompt or SYSTEM_PROMPT),
     )

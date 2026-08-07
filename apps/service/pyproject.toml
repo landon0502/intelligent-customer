@@ -36,6 +36,7 @@ dependencies = [
     "flagembedding>=1.4.0",
     "torch>=2.13.0",
     "transformers>=5.14.1",
+    "langsmith>=0.10.10",
 ]
 
 [dependency-groups]

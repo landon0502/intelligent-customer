@@ -34,7 +34,8 @@
     "send": "发送",
     "emptySession": "选择或创建一个会话开始对话",
     "selectSession": "请选择一个会话",
-    "loading": "加载中..."
+    "loading": "加载中...",
+    "stop": "停止"
   },
   "knowledge": {
     "title": "📚 知识库管理",

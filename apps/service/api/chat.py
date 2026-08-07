@@ -28,7 +28,6 @@ logger = logging.getLogger("intelligent-customer.chat")
 
 router = APIRouter(prefix="/api/chat", tags=["chat"])
 
-
 @router.post("/send")
 async def chat_stream(
     req: ChatSendRequest,
@@ -77,7 +76,9 @@ async def chat_stream(
     else:
         # 兼容：如果前端未发送 messages，从 DB 加载历史
         recent = await get_recent_messages(db, req.conversation_id, limit=20)
-        history_messages = []
+        history_messages = [
+
+        ]
         for msg in recent:
             if msg.role == "user":
                 history_messages.append(HumanMessage(content=msg.content))
@@ -113,7 +114,7 @@ async def chat_stream(
             ):
                 yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
         finally:
-            # 流结束后持久化助手回复
+            # 流结束后持久化助手回复，存入数据库
             if full_response:
                 try:
                     await create_message(

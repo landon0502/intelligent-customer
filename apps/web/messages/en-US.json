@@ -34,7 +34,8 @@
     "send": "Send",
     "emptySession": "Select or create a session to start chatting",
     "selectSession": "Select a session",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "stop": "Stop"
   },
   "knowledge": {
     "title": "📚 Knowledge Base",

@@ -1,1 +1,1 @@
-export { default } from "@intelligent-customer/ui/postcss.config";
+export { default } from "@intelligent-customer/ui/postcss.config"
