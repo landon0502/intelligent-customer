@@ -295,7 +295,7 @@ git commit -m "feat(service): 用户管理服务层 list_users/create_user/delet
   - `DELETE /api/users/{id}` → 成功 `{ code: 0, data: { success: true } }`；目标不存在 → `{ code: 40005 }`；`ValueError` → `{ code: 40004 }`；非 admin → 40003
   - `apps/service/schemas/user_schema.py` 导出 `UserItem`（pydantic，`model_config = {"from_attributes": True}`）
 
-- [ ] **Step 1: 写失败的 API 权限测试**
+- [x] **Step 1: 写失败的 API 权限测试**
 
 在 `apps/service/tests/test_user_management.py` 末尾追加（**API 相关 import 必须放在测试函数内部**，这样 Task 2 中 `api/users.py` 尚未创建时只让本用例失败、不影响其余 10 个服务层用例；这是同步 TestClient 用例，不加 `@pytest.mark.anyio`）：
 
@@ -332,12 +332,12 @@ def test_users_api_rejects_non_admin():
     assert resp.json()["code"] == 40003
 ```
 
-- [ ] **Step 2: 运行测试确认失败**
+- [x] **Step 2: 运行测试确认失败**
 
 Run: `cd apps/service && .venv/bin/python -m pytest tests/test_user_management.py -v`
 Expected: 新增用例 FAIL，报 `ModuleNotFoundError: No module named 'api.users'`；其余 10 个服务层用例仍 PASS。
 
-- [ ] **Step 3: 实现 schema 与 API**
+- [x] **Step 3: 实现 schema 与 API**
 
 新建 `apps/service/schemas/user_schema.py`（镜像 `schemas/document_schema.py` 的 `DocumentItem` 惯例）：
 
@@ -450,17 +450,17 @@ from api import health_router, auth_router, chat_router, conversations_router, k
 app.include_router(users_router)
 ```
 
-- [ ] **Step 4: 运行测试确认通过**
+- [x] **Step 4: 运行测试确认通过**
 
 Run: `cd apps/service && .venv/bin/python -m pytest tests/test_user_management.py -v`
 Expected: 11 个用例全部 PASS（含新增 API 权限 40003 用例）。
 
-- [ ] **Step 5: 快速验证路由已挂载（可选但推荐）**
+- [x] **Step 5: 快速验证路由已挂载（可选但推荐）**
 
 Run: `cd apps/service && .venv/bin/python -c "from app.main import app; print([r.path for r in app.routes if 'users' in r.path])"`
 Expected: 输出包含 `/api/users`、`/api/users/{user_id}`。
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add apps/service/api/users.py apps/service/schemas/user_schema.py apps/service/api/__init__.py apps/service/app/main.py apps/service/tests/test_user_management.py
