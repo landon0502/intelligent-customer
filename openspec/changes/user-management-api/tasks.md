@@ -9,7 +9,7 @@
 ## 2. 前端 users 页接入
 
 - [x] 2.1 新增 `apps/web/services/users.ts`（`User` 类型 + `getUsersApi` / `createUserApi` / `deleteUserApi`）
-- [ ] 2.2 新增 `apps/web/app/users/useServices.ts`（useRequest 列表加载 + 新增/删除控制）
+- [x] 2.2 新增 `apps/web/app/users/useServices.ts`（useRequest 列表加载 + 新增/删除控制）
 - [ ] 2.3 改 `apps/web/app/users/page.tsx`：去除 `mockUsers`，真实列表渲染 + 搜索本地过滤 + 新增对话框（受控表单）+ 删除（admin 行按钮置灰）
 
 ## 3. 验证

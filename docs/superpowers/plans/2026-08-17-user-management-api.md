@@ -584,7 +584,7 @@ git commit -m "feat(web): 用户管理服务封装 services/users.ts（getUsersA
   - `export default function useUserServices(): { listControl, users: User[], createControl, createUser(username, password, role), deleteControl, removeUser(id) }`
   - `createUser` / `removeUser` 内部执行对应请求后调用 `listControl.run()` 刷新列表；请求失败时向调用方抛错（错误 toast 由 fetchClient 拦截器负责）
 
-- [ ] **Step 1: 写文件**
+- [x] **Step 1: 写文件**
 
 新建 `apps/web/app/users/useServices.ts`（镜像 `apps/web/app/tickets/useServices.ts`：列表自动模式；create/delete 用 `manual` 控制）：
 
@@ -635,12 +635,12 @@ export default function useUserServices() {
 }
 ```
 
-- [ ] **Step 2: typecheck 验证**
+- [x] **Step 2: typecheck 验证**
 
 Run: `cd apps/web && pnpm typecheck`
 Expected: 本文件 0 新增错误。
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add apps/web/app/users/useServices.ts
