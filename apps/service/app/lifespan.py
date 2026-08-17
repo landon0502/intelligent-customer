@@ -22,11 +22,13 @@ logger = logging.getLogger("intelligent-customer")
 
 
 async def _seed_initial_data() -> None:
-    """初始化种子数据：创建管理员用户"""
+    """初始化种子数据：创建管理员用户 + 企业业务"""
     from services.auth import seed_admin_user
+    from services.enterprise import seed_enterprise_businesses
 
     async for db in get_db():
         await seed_admin_user(db)
+        await seed_enterprise_businesses(db)
 
 
 def _register_components(registry: ComponentRegistry) -> None:
