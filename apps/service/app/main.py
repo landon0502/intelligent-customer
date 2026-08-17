@@ -4,7 +4,7 @@
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api import health_router, auth_router, chat_router, conversations_router, knowledge_router, config_router, enterprise_router, tickets_router
+from api import health_router, auth_router, chat_router, conversations_router, knowledge_router, config_router, enterprise_router, tickets_router, users_router
 from .lifespan import lifespan
 from configs.config import settings
 # ==== FastAPI 实例 ====
@@ -33,3 +33,4 @@ app.include_router(knowledge_router)
 app.include_router(config_router)
 app.include_router(enterprise_router)
 app.include_router(tickets_router)
+app.include_router(users_router)

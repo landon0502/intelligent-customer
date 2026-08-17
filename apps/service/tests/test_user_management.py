@@ -140,3 +140,37 @@ async def test_delete_user_self_raises():
 
     with pytest.raises(ValueError, match="不能删除当前登录用户"):
         await delete_user(db, user_id=1, current_user_id=1)
+
+
+# ---------- API 层 ----------
+
+def test_users_api_rejects_non_admin():
+    from unittest.mock import AsyncMock, MagicMock
+    from fastapi import FastAPI
+    from fastapi.testclient import TestClient
+    from api.users import router as users_router
+    from database.session import get_db
+    from auth.security import get_current_user
+
+    app = FastAPI()
+    app.include_router(users_router)
+
+    mock_user = MagicMock()
+    mock_user.id = 2
+    mock_user.role = "user"  # 非 admin
+    mock_db = AsyncMock()
+
+    def _override_user():
+        return mock_user
+
+    def _override_db():
+        yield mock_db
+
+    app.dependency_overrides[get_current_user] = _override_user
+    app.dependency_overrides[get_db] = _override_db
+
+    client = TestClient(app)
+    resp = client.get("/api/users")
+
+    assert resp.status_code == 200
+    assert resp.json()["code"] == 40003
