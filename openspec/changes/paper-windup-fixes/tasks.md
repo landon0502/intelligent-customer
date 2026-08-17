@@ -1,8 +1,8 @@
 ## 组 1：会话排序与检索权限（S4、S5）
 
 ### Task 1: 会话 updated_at 随消息更新
-- [ ] `services/message.py` `create_message` 内 touch 会话：`UPDATE conversation SET updated_at = NOW()`（复用 `Conversation` ORM，新增会话服务辅助函数或内联）
-- [ ] 单测：创建消息后会话 `updated_at` 更新且等于最新时间
+- [x] `services/message.py` `create_message` 内 touch 会话：`UPDATE conversation SET updated_at = NOW()`（复用 `Conversation` ORM，新增会话服务辅助函数或内联）
+- [x] 单测：创建消息后会话 `updated_at` 更新且等于最新时间
 
 ### Task 2: 检索接口 admin 权限
 - [ ] `api/knowledge.py` `POST /api/knowledge/query` 增加 admin 校验：非 admin → `error(40003, "仅管理员可检索知识库")`

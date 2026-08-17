@@ -1,8 +1,11 @@
 """消息业务逻辑 —— 查询、创建消息。"""
 
-from sqlalchemy import select
+from datetime import datetime, timezone
+
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from schemas.conversation import Conversation
 from schemas.message import Message
 
 
@@ -25,7 +28,7 @@ async def create_message(
     content: str,
     sources: dict | None = None,
 ) -> Message:
-    """创建一条消息记录"""
+    """创建一条消息记录，并 touch 会话更新时间（支撑会话列表按更新时间倒序）。"""
     msg = Message(
         conversation_id=conversation_id,
         role=role,
@@ -33,6 +36,12 @@ async def create_message(
         sources=sources,
     )
     db.add(msg)
+    # 会话 updated_at 随最新消息更新（与 Conversation.updated_at 的默认时区一致）
+    await db.execute(
+        update(Conversation)
+        .where(Conversation.id == conversation_id)
+        .values(updated_at=datetime.now(timezone.utc))
+    )
     await db.commit()
     await db.refresh(msg)
     return msg
