@@ -24,12 +24,12 @@
 ## 组 4：评估脚本（P4）
 
 ### Task 5: benchmark 题目集
-- [ ] 基于 20 份企业 PDF 内容生成 `rag/evaluation/questions.json`：20–30 道问答（问题/参考答案/来源文档）
+- [x] 基于 20 份企业 PDF 内容生成 `rag/evaluation/questions.json`：20–30 道问答（问题/参考答案/来源文档）
 
 ### Task 6: benchmark.py 评估脚本
-- [ ] 新增 `rag/evaluation/benchmark.py`：加载题目集 → `--mode pure`（LLM 直答）与 `--mode rag`（检索注入后回答）→ 参考答案比对判定 → 输出准确率对比表并保存报告
-- [ ] 复用 `models.factory` LLM 工厂与 `rag.retrieval.retrieve`；支持 `--limit N` 小批量
-- [ ] 运行验证：`--limit 3` 纯 LLM 与 RAG 各跑一次，输出对比表
+- [x] 新增 `rag/evaluation/benchmark.py`：加载题目集 → `--mode pure`（LLM 直答）与 `--mode rag`（检索注入后回答）→ 参考答案比对判定 → 输出准确率对比表并保存报告
+- [x] 复用 `models.factory` LLM 工厂与 `rag.retrieval.retrieve`；支持 `--limit N` 小批量
+- [x] 运行验证：`--limit 3` 纯 LLM 与 RAG 各跑一次，输出对比表
 
 ## 组 5：文档入库（P3）
 
