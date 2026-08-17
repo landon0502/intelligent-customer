@@ -2156,12 +2156,12 @@ git commit -m "test: 补全工单用例"
 **Files:**
 - 无新增（回归验证）
 
-- [ ] **Step 1: 运行全量测试**
+- [x] **Step 1: 运行全量测试**
 
 Run: `cd apps/service && .venv/bin/python -m pytest tests/ -q`
 Expected: 全部通过（既有 11 个测试文件 + 新增 2 个，无失败）
 
-- [ ] **Step 2: 确认无相关告警/报错**
+- [x] **Step 2: 确认无相关告警/报错**
 
 若有失败：加载 systematic-debugging 定位根因后修复，禁止跳过失败直接提交。
 
