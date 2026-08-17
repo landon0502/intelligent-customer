@@ -2130,16 +2130,16 @@ git commit -m "test: 补全企业业务用例"
 **Interfaces:**
 - Consumes: Task 2.2/3.3/3.1/3.2 累计的用例（服务层 + 上下文 + 工具层）
 
-- [ ] **Step 1: 运行完整测试文件**
+- [x] **Step 1: 运行完整测试文件**
 
 Run: `cd apps/service && .venv/bin/python -m pytest tests/test_ticket_service.py -v`
 Expected: 15 passed（服务层 10 + 上下文 1 + 工具层 4）
 
-- [ ] **Step 2: 检查规格覆盖补漏**
+- [x] **Step 2: 检查规格覆盖补漏**
 
 对照设计文档 §5 与 OpenSpec `ticket-service/spec.md`：确认「工单号格式与当日内自增」「创建返回工单号」「列表 + 状态筛选」「详情」「状态更新合法流转/非法值」「转人工生成 HUMAN 工单」均有对应用例；若缺失，补一条并重跑。
 
-- [ ] **Step 3: 提交（若补了用例）**
+- [x] **Step 3: 提交（若补了用例）**
 
 ```bash
 cd /Users/superhuan/Documents/project/intelligent-customer
