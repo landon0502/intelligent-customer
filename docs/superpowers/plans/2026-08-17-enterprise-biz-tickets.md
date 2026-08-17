@@ -467,7 +467,7 @@ git commit -m "feat: 企业业务查询接口（GET /api/enterprise/businesses�
 - Consumes: `seed_enterprise_businesses`（Task 1.2）
 - Produces: 服务启动时幂等初始化 3 条企业业务种子数据（验证在 Task 7.1 日志确认）。
 
-- [ ] **Step 1: 修改 `_seed_initial_data`**
+- [x] **Step 1: 修改 `_seed_initial_data`**
 
 `apps/service/app/lifespan.py` 中 `_seed_initial_data` 改为：
 
@@ -482,12 +482,12 @@ async def _seed_initial_data() -> None:
         await seed_enterprise_businesses(db)
 ```
 
-- [ ] **Step 2: 验证既有测试不回归**
+- [x] **Step 2: 验证既有测试不回归**
 
 Run: `cd apps/service && .venv/bin/python -m pytest tests/test_enterprise_biz.py -q`
 Expected: 6 passed
 
-- [ ] **Step 3: 提交**
+- [x] **Step 3: 提交**
 
 ```bash
 cd /Users/superhuan/Documents/project/intelligent-customer
@@ -2224,7 +2224,7 @@ Expected: 业务列表返回 3 条；B-001 返回详情；`B-999` 返回 `code=4
 **Interfaces:**
 - Consumes: 全部前后端改动（Task 1.1–6.3）
 
-- [ ] **Step 1: 通过对话触发生成工单**
+- [x] **Step 1: 通过对话触发生成工单**
 
 后端保持运行，向前端（`cd apps/web && pnpm dev`，端口 3000）发起对话：
 
@@ -2233,7 +2233,7 @@ Expected: 业务列表返回 3 条；B-001 返回详情；`B-999` 返回 `code=4
 3. 提问「提交企业开户的办理申请」→ Agent 调用 `ticket_submit`，回复应含 `TK-YYYYMMDD-XXXX` 工单号。
 4. 提问「转人工客服」→ Agent 调用 `transfer_human`，回复应含工单号。
 
-- [ ] **Step 2: 查库确认落库与上下文注入**
+- [x] **Step 2: 查库确认落库与上下文注入**
 
 Run:
 
@@ -2243,7 +2243,7 @@ mysql -uroot -p00000000 ling_diary -e "SELECT ticket_no,user_id,conversation_id,
 
 Expected: 提交/转人工工单均已落库；`business_code` 为对应业务编号与 `HUMAN`；`user_id`、`conversation_id` 已由 ContextVar 注入（对话路径下非空）；`status` 为 `open`。
 
-- [ ] **Step 3: 后台工单页验证**
+- [x] **Step 3: 后台工单页验证**
 
 浏览器访问 `http://localhost:3000/tickets`（admin 登录）：
 - 侧边栏「管理」分组含「工单管理」入口，可跳转 `/tickets`，页面标题正确（中/英切换验证 i18n）
@@ -2252,7 +2252,7 @@ Expected: 提交/转人工工单均已落库；`business_code` 为对应业务�
 - 每行状态下拉更新后 toast「状态已更新」，列表刷新后状态变更
 - 非 admin 账号访问 `/tickets`：菜单不显示该入口；直连页面接口返回 40003 错误（无权限）
 
-- [ ] **Step 4: 提交（无代码改动则不提交）**
+- [x] **Step 4: 提交（无代码改动则不提交）**
 
 本任务为端到端验证，若发现缺陷回到对应任务修复后再验收；无源码改动时不产生提交。
 
