@@ -67,3 +67,6 @@ __pycache__/
 
 # Comet skills lock
 skills-lock.json
+
+# 运行时上传存储目录（不入库）
+apps/service/data/uploads/
