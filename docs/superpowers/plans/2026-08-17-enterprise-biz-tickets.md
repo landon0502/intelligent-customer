@@ -360,7 +360,7 @@ git commit -m "feat: 企业业务服务层（list/get/幂等种子初始化）"
 - Produces: `GET /api/enterprise/businesses`、`GET /api/enterprise/businesses/{code}`（登录即可）。前端与 `enterprise_query` 工具（走服务层）消费。
 - 说明：API 层为薄封装，按设计文档不写单测；功能验证在 Task 7.1/7.2 端到端完成。本任务以「导入成功 + 既有测试不回归」为验收。
 
-- [ ] **Step 1: 实现接口**
+- [x] **Step 1: 实现接口**
 
 `apps/service/api/enterprise.py`：
 
@@ -420,7 +420,7 @@ async def get_business_api(
     return success(data=EnterpriseBizItem.model_validate(biz).model_dump())
 ```
 
-- [ ] **Step 2: 注册路由**
+- [x] **Step 2: 注册路由**
 
 `apps/service/api/__init__.py` 末尾追加：
 
@@ -440,7 +440,7 @@ app.include_router(enterprise_router)
 
 （在 `app.include_router(config_router)` 之后追加 `app.include_router(enterprise_router)`。）
 
-- [ ] **Step 3: 验证导入 + 既有测试不回归**
+- [x] **Step 3: 验证导入 + 既有测试不回归**
 
 Run: `cd apps/service && .venv/bin/python -c "from api.enterprise import router; print(len(router.routes))"`
 Expected: 输出 `2`
@@ -448,7 +448,7 @@ Expected: 输出 `2`
 Run: `cd apps/service && .venv/bin/python -m pytest tests/ -q`
 Expected: 全部通过（原有用例 + 新增企业用例不回归）
 
-- [ ] **Step 4: 提交**
+- [x] **Step 4: 提交**
 
 ```bash
 cd /Users/superhuan/Documents/project/intelligent-customer

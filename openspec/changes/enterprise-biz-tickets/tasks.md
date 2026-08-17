@@ -4,7 +4,7 @@
 
 - [x] 1.1 新增 `apps/service/schemas/enterprise_biz.py`（`enterprise_biz` 表：id/code/name/description/requirements/process/status/created_at），注册到 `database/models.py` 与 `schemas/__init__.py`
 - [x] 1.2 新增 `apps/service/services/enterprise.py`：`list_businesses()` / `get_business_by_code()` + 幂等种子数据函数
-- [ ] 1.3 新增 `apps/service/api/enterprise.py`：`GET /api/enterprise/businesses`、`GET /api/enterprise/businesses/{code}`（登录即可访问），注册 `api/__init__.py` + `app/main.py`
+- [x] 1.3 新增 `apps/service/api/enterprise.py`：`GET /api/enterprise/businesses`、`GET /api/enterprise/businesses/{code}`（登录即可访问），注册 `api/__init__.py` + `app/main.py`
 - [ ] 1.4 扩展 `lifespan._seed_initial_data()`：启动时幂等初始化企业业务种子数据（3-5 条）
 
 ## 2. P6 工单落库与 API
