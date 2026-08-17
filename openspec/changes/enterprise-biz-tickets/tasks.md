@@ -15,7 +15,7 @@
 
 ## 3. P5/P6 工具 async 化
 
-- [ ] 3.1 `apps/service/agent/tools/enterprise.py`：`enterprise_query` 改 async 查 `enterprise_biz` 表（删除 `_MOCK_BUSINESS`）；`ticket_submit`/`ticket_status` 改 async 落库/查库
+- [x] 3.1 `apps/service/agent/tools/enterprise.py`：`enterprise_query` 改 async 查 `enterprise_biz` 表（删除 `_MOCK_BUSINESS`）；`ticket_submit`/`ticket_status` 改 async 落库/查库
 - [ ] 3.2 `apps/service/agent/tools/chat.py`：`transfer_human` 改 async 生成转人工工单
 - [x] 3.3 新增 ContextVar（`user_id`/`conversation_id`）：`api/chat.py` 的 `chat_stream` 中 set/reset；工具内读取（缺失降级）
 

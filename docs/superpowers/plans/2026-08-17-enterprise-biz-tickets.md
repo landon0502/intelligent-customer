@@ -1249,7 +1249,7 @@ git commit -m "feat: ContextVar 注入用户/会话上下文（chat_stream set/r
 - Consumes: `async_session_factory`（`database/session.py`）、`agent/tools/context.py` 的 `get_current_user_id`/`get_current_conversation_id`（Task 3.3）、`services/enterprise.py`、`services/ticket.py`（Task 1.2/2.2）
 - Produces: 三个 async 工具 `enterprise_query` / `ticket_submit` / `ticket_status`（函数名、docstring 与 `agent/tools/__init__.py` 的 `ALL_TOOLS` 引用保持不变）。
 
-- [ ] **Step 1: 写失败测试**
+- [x] **Step 1: 写失败测试**
 
 `apps/service/tests/test_enterprise_biz.py` 追加（模块顶部新增两个 import；`patch` 为本文件首次使用，须补上）：
 
@@ -1320,12 +1320,12 @@ async def test_ticket_status_not_found():
 
 > 注：工具函数在函数体内惰性 `from services.xxx import ...`，因此 `patch("services.xxx.<函数>")` 在调用时生效；`async with async_session_factory() as session:` 只创建会话不发起连接，服务函数被 patch 后不会产生真实 DB 查询，测试无需数据库。
 
-- [ ] **Step 2: 运行测试确认失败**
+- [x] **Step 2: 运行测试确认失败**
 
 Run: `cd apps/service && .venv/bin/python -m pytest tests/test_enterprise_biz.py tests/test_ticket_service.py -v`
 Expected: 新增用例失败（`TypeError: 'coroutine' object is not iterable` 或工具仍为同步返回 str 无法 await）
 
-- [ ] **Step 3: 实现 async 工具**
+- [x] **Step 3: 实现 async 工具**
 
 `apps/service/agent/tools/enterprise.py` 整体替换为（删除 `_MOCK_BUSINESS` 与 `_TICKET_COUNTER`）：
 
@@ -1401,12 +1401,12 @@ async def ticket_status(ticket_id: str) -> str:
     )
 ```
 
-- [ ] **Step 4: 运行测试确认通过**
+- [x] **Step 4: 运行测试确认通过**
 
 Run: `cd apps/service && .venv/bin/python -m pytest tests/test_enterprise_biz.py tests/test_ticket_service.py -v`
 Expected: `test_enterprise_biz.py` 8 passed（模型 1 + 服务 5 + 工具 2）、`test_ticket_service.py` 14 passed（服务 10 + 上下文 1 + 工具 3）
 
-- [ ] **Step 5: 提交**
+- [x] **Step 5: 提交**
 
 ```bash
 cd /Users/superhuan/Documents/project/intelligent-customer
