@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback } from "react"
 import { useTranslations } from "next-intl"
 import useTicketServices from "./useServices"
 
@@ -73,16 +73,13 @@ export default function TicketsPage() {
   const {
     statusFilter,
     setStatusFilter,
-    listControl,
     tickets,
     updateControl,
     updateStatus,
   } = useTicketServices()
 
-  // 状态筛选变化时重新拉取
-  useEffect(() => {
-    listControl.run()
-  }, [statusFilter, listControl])
+  // 列表加载与状态筛选重拉已由 useServices 的 refreshDeps 机制接管，
+  // 页面不再手写 useEffect（避免依赖 listControl 对象身份造成无限循环）
 
   const handleStatusChange = useCallback(
     async (ticketNo: string, status: TicketStatus) => {
