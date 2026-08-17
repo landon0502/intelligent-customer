@@ -1895,7 +1895,7 @@ git commit -m "feat(web): 工单管理页（列表/状态筛选/状态更新）"
 - Consumes: Task 4.2 页面引用的 `t("...")` 文案键
 - Produces: 侧边栏「管理」分组新增「工单管理」（admin）菜单项与 `titleKeyMap["/tickets"]`；两份 messages 补 `layout.menuTickets` 与 `tickets.*`。
 
-- [ ] **Step 1: 修改 menu.ts**
+- [x] **Step 1: 修改 menu.ts**
 
 `apps/web/config/menu.ts`：
 
@@ -1923,7 +1923,7 @@ import { MessageSquare, BookOpen, Users, Settings, Wrench, ClipboardList } from 
   "/tickets": "layout.menuTickets",
 ```
 
-- [ ] **Step 2: 补齐 zh-CN 文案**
+- [x] **Step 2: 补齐 zh-CN 文案**
 
 `apps/web/messages/zh-CN.json`：
 
@@ -1949,7 +1949,7 @@ import { MessageSquare, BookOpen, Users, Settings, Wrench, ClipboardList } from 
   }
 ```
 
-- [ ] **Step 3: 补齐 en-US 文案**
+- [x] **Step 3: 补齐 en-US 文案**
 
 `apps/web/messages/en-US.json`：
 
@@ -1975,7 +1975,7 @@ import { MessageSquare, BookOpen, Users, Settings, Wrench, ClipboardList } from 
   }
 ```
 
-- [ ] **Step 4: 验证 JSON 合法 + 类型检查**
+- [x] **Step 4: 验证 JSON 合法 + 类型检查**
 
 Run: `cd apps/web && node -e "JSON.parse(require('fs').readFileSync('messages/zh-CN.json','utf8')); JSON.parse(require('fs').readFileSync('messages/en-US.json','utf8')); console.log('json ok')"`
 Expected: 输出 `json ok`
@@ -1983,7 +1983,7 @@ Expected: 输出 `json ok`
 Run: `cd apps/web && pnpm typecheck`
 Expected: 无类型错误
 
-- [ ] **Step 5: 提交**
+- [x] **Step 5: 提交**
 
 ```bash
 cd /Users/superhuan/Documents/project/intelligent-customer
