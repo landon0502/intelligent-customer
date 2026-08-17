@@ -2175,11 +2175,11 @@ Expected: 全部通过（既有 11 个测试文件 + 新增 2 个，无失败）
 **Interfaces:**
 - Consumes: 全部后端改动（Task 1.1–5.2）
 
-- [ ] **Step 1: 确认 MySQL/Redis/Chroma 依赖可用**
+- [x] **Step 1: 确认 MySQL/Redis/Chroma 依赖可用**
 
 按项目现有方式确认依赖服务已启动（本机 MySQL 或 `docker compose`）。若用 Docker：`docker compose up -d mysql redis chroma`（按 `docker-compose.yml` 实际服务名）。
 
-- [ ] **Step 2: 启动后端并观察日志**
+- [x] **Step 2: 启动后端并观察日志**
 
 Run: `cd apps/service && .venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8009`
 
@@ -2188,7 +2188,7 @@ Run: `cd apps/service && .venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 80
 - 出现「企业业务种子初始化: 插入 3 条」（或已有数据时跳过）
 - 启动完成行 `启动完成  ...:8009`
 
-- [ ] **Step 3: 确认建表**
+- [x] **Step 3: 确认建表**
 
 Run: `mysql -uroot -p00000000 ling_diary -e "SHOW TABLES;"`
 Expected: 包含 `enterprise_biz`、`service_tickets`
@@ -2196,7 +2196,7 @@ Expected: 包含 `enterprise_biz`、`service_tickets`
 Run: `mysql -uroot -p00000000 ling_diary -e "SELECT code,name FROM enterprise_biz ORDER BY code;"`
 Expected: B-001 企业开户 / B-002 对公转账 / B-003 电子发票申领
 
-- [ ] **Step 4: 冒烟调用接口**
+- [x] **Step 4: 冒烟调用接口**
 
 用登录 token 调企业接口（先用 admin/新密码登录拿 token）：
 
@@ -2210,7 +2210,7 @@ curl -s http://localhost:8009/api/enterprise/businesses/B-001 -H "Authorization:
 
 Expected: 业务列表返回 3 条；B-001 返回详情；`B-999` 返回 `code=40006` 错误。
 
-- [ ] **Step 5: 提交（无代码改动则不提交）**
+- [x] **Step 5: 提交（无代码改动则不提交）**
 
 本任务为运行验证，无源码改动时不产生提交。
 
