@@ -4,6 +4,7 @@
 """
 
 import os
+import logging
 from dotenv import load_dotenv
 
 load_dotenv(dotenv_path=".env")
@@ -76,3 +77,17 @@ class Settings:
 
 # 全局单例
 settings = Settings()
+
+
+def validate_security_defaults() -> None:
+    """校验安全默认值：弱 JWT_SECRET / ADMIN_PASSWORD 命中时仅告警，不阻塞启动。"""
+    logger = logging.getLogger("intelligent-customer.security")
+    if settings.JWT_SECRET == "change-me-in-production":
+        logger.warning(
+            "安全告警: JWT_SECRET 仍为默认弱值 change-me-in-production，"
+            "请在 .env 中配置强随机密钥"
+        )
+    if settings.ADMIN_PASSWORD == "admin123456":
+        logger.warning(
+            "安全告警: ADMIN_PASSWORD 仍为默认弱值 admin123456，请在 .env 中配置强密码"
+        )
