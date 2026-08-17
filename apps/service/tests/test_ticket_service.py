@@ -7,6 +7,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from sqlalchemy.exc import IntegrityError
 
+from agent.tools.chat import transfer_human
 from agent.tools.context import (
     set_user_context,
     reset_user_context,
@@ -281,3 +282,14 @@ async def test_ticket_status_not_found():
     with patch("services.ticket.get_ticket_by_no", new_callable=AsyncMock, return_value=None):
         result = await ticket_status.ainvoke({"ticket_id": "TK-00000000-0000"})
     assert "未找到工单" in result
+
+
+@pytest.mark.anyio
+async def test_transfer_human_creates_human_ticket():
+    create_mock = AsyncMock(return_value=_make_ticket("TK-20260817-0001", status="open"))
+    with patch("services.ticket.create_ticket", create_mock):
+        result = await transfer_human.ainvoke({})
+    assert "TK-20260817-0001" in result
+    assert "人工" in result
+    _, kwargs = create_mock.call_args
+    assert kwargs["business_code"] == "HUMAN"
