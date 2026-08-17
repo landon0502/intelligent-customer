@@ -2003,7 +2003,7 @@ git commit -m "feat(web): 工单管理菜单入口与双语文案"
 - Consumes: `settings.JWT_SECRET` / `settings.ADMIN_PASSWORD`
 - Produces: `def validate_security_defaults() -> None`；`lifespan` 启动时调用（`logging.basicConfig` 之后）。弱默认值命中仅 `logger.warning`，不阻塞启动。
 
-- [ ] **Step 1: 在 config.py 增加校验函数**
+- [x] **Step 1: 在 config.py 增加校验函数**
 
 `apps/service/configs/config.py` 顶部 `import os` 之后新增 `import logging`：
 
@@ -2028,7 +2028,7 @@ def validate_security_defaults() -> None:
         )
 ```
 
-- [ ] **Step 2: 在 lifespan 启动时调用**
+- [x] **Step 2: 在 lifespan 启动时调用**
 
 `apps/service/app/lifespan.py` 的 `lifespan` 异步函数开头（`logger.info("启动中... 创建数据库表")` 之前）新增：
 
@@ -2037,12 +2037,12 @@ def validate_security_defaults() -> None:
     validate_security_defaults()
 ```
 
-- [ ] **Step 3: 验证告警输出（当前 .env 仍为弱值）**
+- [x] **Step 3: 验证告警输出（当前 .env 仍为弱值）**
 
 Run: `cd apps/service && .venv/bin/python -c "from configs.config import validate_security_defaults; validate_security_defaults()"`
 Expected: 输出两条 `安全告警`（JWT_SECRET + ADMIN_PASSWORD）
 
-- [ ] **Step 4: 提交**
+- [x] **Step 4: 提交**
 
 ```bash
 cd /Users/superhuan/Documents/project/intelligent-customer
