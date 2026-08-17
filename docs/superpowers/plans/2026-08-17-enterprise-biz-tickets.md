@@ -2,6 +2,7 @@
 change: enterprise-biz-tickets
 design-doc: docs/superpowers/specs/2026-08-17-enterprise-biz-tickets-design.md
 base-ref: 1baf075b1595b446eb2cca83a91c6f43ddc72879
+archived-with: 2026-08-17-enterprise-biz-tickets
 ---
 
 # 企业工具真实后端 + 工单落库与后台界面 + 安全默认值加固 Implementation Plan

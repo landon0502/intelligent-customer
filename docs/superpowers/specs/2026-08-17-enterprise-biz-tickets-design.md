@@ -2,6 +2,8 @@
 comet_change: enterprise-biz-tickets
 role: technical-design
 canonical_spec: openspec
+archived-with: 2026-08-17-enterprise-biz-tickets
+status: final
 ---
 
 # Design: 企业工具真实后端 + 工单落库与后台界面 + 安全默认值加固
