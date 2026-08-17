@@ -478,7 +478,7 @@ git commit -m "feat(service): 用户管理 API /api/users（GET/POST/DELETE，�
 - Consumes: Task 1 的服务层三函数 + Task 2 的 `api/users.py`；tasks.md 1.3 的 10 用例清单
 - Produces: 通过本任务的完整测试文件（作为 tasks 1.3 的交付物），供 Task 7 全量回归
 
-- [ ] **Step 1: 对照 tasks.md 1.3 清单核对用例覆盖**
+- [x] **Step 1: 对照 tasks.md 1.3 清单核对用例覆盖**
 
 逐一确认下列 10 项在 `tests/test_user_management.py` 中均有对应测试函数（Task 1/2 已写，仅核对；若有缺失则补齐并复用相同 mock 模式）：
 
@@ -495,12 +495,12 @@ git commit -m "feat(service): 用户管理 API /api/users（GET/POST/DELETE，�
 | 删不存在 | `test_delete_user_not_found_returns_none` |
 | 非 admin 403 | `test_users_api_rejects_non_admin`（断言 `code == 40003`） |
 
-- [ ] **Step 2: 运行该文件全量确认通过**
+- [x] **Step 2: 运行该文件全量确认通过**
 
 Run: `cd apps/service && .venv/bin/python -m pytest tests/test_user_management.py -v`
 Expected: 11 个用例全部 PASS（10 项要求全覆盖 + 1 个 admin 角色变体）。
 
-- [ ] **Step 3: Commit（仅当 Step 1 补齐了用例）**
+- [x] **Step 3: Commit（仅当 Step 1 补齐了用例）**
 
 ```bash
 git add apps/service/tests/test_user_management.py

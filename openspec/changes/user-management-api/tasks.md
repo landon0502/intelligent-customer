@@ -4,7 +4,7 @@
 
 - [x] 1.1 `services/auth.py` 新增 `list_users(db)` / `create_user(db, username, password, role)` / `delete_user(db, user_id, current_user_id)`（含删除保护：不能删自己/不能删 admin）
 - [x] 1.2 新增 `api/users.py`：`GET /api/users`（admin）、`POST /api/users`（admin，username/password/role）、`DELETE /api/users/{id}`（admin），注册 `api/__init__.py` + `app/main.py`
-- [ ] 1.3 新增 `tests/test_user_management.py`（列表/创建成功/重复用户名/密码过短/非法角色/删除成功/删自己被拒/删 admin 被拒/删不存在/非 admin 403）
+- [x] 1.3 新增 `tests/test_user_management.py`（列表/创建成功/重复用户名/密码过短/非法角色/删除成功/删自己被拒/删 admin 被拒/删不存在/非 admin 403）
 
 ## 2. 前端 users 页接入
 
