@@ -18,8 +18,8 @@
 ## 组 3：依赖清理（O1）
 
 ### Task 4: pyproject.toml 依赖清理
-- [ ] `apps/service/pyproject.toml` 注释 `streamlit`/`redis`/`flagembedding` 三项并加说明（源码零引用）
-- [ ] 验证：依赖解析/安装不受影响（`pip install -e .` 或 `uv pip install` 模拟通过）
+- [x] `apps/service/pyproject.toml` 注释 `streamlit`/`redis`/`flagembedding` 三项并加说明（源码零引用）
+- [x] 验证：依赖解析/安装不受影响（`pip install -e .` 或 `uv pip install` 模拟通过）
 
 ## 组 4：评估脚本（P4）
 

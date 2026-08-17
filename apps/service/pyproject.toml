@@ -12,9 +12,11 @@ dependencies = [
     "pydantic>=2.13.4",
     "pymysql>=1.2.0",
     "python-dotenv>=1.2.2",
-    "redis>=8.0.1",
+    # redis：源码零引用，疑似未用（2026-08-18 收尾注释，如需恢复删除井号）
+    # "redis>=8.0.1",
     "rich>=15.0.0",
-    "streamlit>=1.60.0",
+    # streamlit：源码零引用，疑似未用（2026-08-18 收尾注释，如需恢复删除井号）
+    # "streamlit>=1.60.0",
     "uvicorn>=0.51.0",
     "sqlalchemy[asyncio]>=2.0.0",
     "asyncmy>=0.2.9",
@@ -33,7 +35,8 @@ dependencies = [
     "docx2txt>=0.8",
     "langchain-huggingface>=1.2.2",
     "sentence-transformers>=5.6.1",
-    "flagembedding>=1.4.0",
+    # flagembedding：源码零引用，疑似未用（2026-08-18 收尾注释，如需恢复删除井号）
+    # "flagembedding>=1.4.0",
     "torch>=2.13.0",
     "transformers>=5.14.1",
     "langsmith>=0.10.10",
