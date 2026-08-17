@@ -7,3 +7,4 @@ from .config import router as config_router
 from .enterprise import router as enterprise_router
 from .tickets import router as tickets_router
 from .users import router as users_router
+from .tools import router as tools_router
