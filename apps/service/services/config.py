@@ -106,6 +106,37 @@ DEFAULT_CONFIGS: dict[str, dict] = {
         "category": "vectorstore",
         "description": "集合名称",
     },
+    # 工具启停（默认全启用；transfer_human / clarify 为兜底工具，后端禁止禁用）
+    "tools.knowledge_base_query": {
+        "value": "enabled",
+        "category": "tools",
+        "description": "知识库问答工具是否启用",
+    },
+    "tools.enterprise_query": {
+        "value": "enabled",
+        "category": "tools",
+        "description": "企业业务查询工具是否启用",
+    },
+    "tools.ticket_submit": {
+        "value": "enabled",
+        "category": "tools",
+        "description": "工单提交工具是否启用",
+    },
+    "tools.ticket_status": {
+        "value": "enabled",
+        "category": "tools",
+        "description": "工单状态查询工具是否启用",
+    },
+    "tools.transfer_human": {
+        "value": "enabled",
+        "category": "tools",
+        "description": "转人工工具是否启用（兜底，不可禁用）",
+    },
+    "tools.clarify": {
+        "value": "enabled",
+        "category": "tools",
+        "description": "追问澄清工具是否启用（兜底，不可禁用）",
+    },
 }
 
 
