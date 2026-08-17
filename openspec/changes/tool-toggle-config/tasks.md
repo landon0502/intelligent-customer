@@ -1,9 +1,9 @@
 ## 组 1：后端配置与 Agent 动态绑定
 
 ### Task 1: tools 分类默认配置
-- [ ] `services/config.py` 的 `DEFAULT_CONFIGS` 添加 `tools` 分类 6 项默认配置（key=`tools.<工具名>`，value=`enabled`，category=`tools`，description 中文说明），覆盖 `knowledge_base_query`/`enterprise_query`/`ticket_submit`/`ticket_status`/`transfer_human`/`clarify`
-- [ ] 确认 `init_default_configs` 幂等插入（仅缺失键，不覆盖已有值）
-- [ ] 单测：`init_default_configs` 后 `tools` 分类 6 项全部为 `enabled`
+- [x] `services/config.py` 的 `DEFAULT_CONFIGS` 添加 `tools` 分类 6 项默认配置（key=`tools.<工具名>`，value=`enabled`，category=`tools`，description 中文说明），覆盖 `knowledge_base_query`/`enterprise_query`/`ticket_submit`/`ticket_status`/`transfer_human`/`clarify`
+- [x] 确认 `init_default_configs` 幂等插入（仅缺失键，不覆盖已有值）
+- [x] 单测：`init_default_configs` 后 `tools` 分类 6 项全部为 `enabled`
 
 ### Task 2: 工具启停服务层
 - [ ] 新增 `services/tools.py`：`list_tool_states(db)` 读取 `tools` 分类返回 `{工具名: enabled/disabled}`，缺失项按默认 `enabled`
