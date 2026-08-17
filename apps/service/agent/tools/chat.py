@@ -24,11 +24,11 @@ def clarify(question: str) -> str:
 
     触发条件：
     - 用户的问题模糊，无法判断需要哪个工具
-    - 用户提供的订单号不完整
+    - 用户提供的业务编号或工单号不完整
     - 用户的需求可以有多种理解
 
     使用示例：
-    - clarify(question="请问您是想查询订单状态还是申请退货？")
-    - clarify(question="请提供完整的订单号，格式如 ORD-20260720。")
+    - clarify(question="请问您是想查询办理进度还是提交新工单？")
+    - clarify(question="请提供完整的业务编号或工单号，格式如 B-001 或 TK-101。")
     """
     return question

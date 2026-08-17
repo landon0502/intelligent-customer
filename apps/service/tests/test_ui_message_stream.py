@@ -66,7 +66,7 @@ async def test_tool_calls_complete():
     chunk = AIMessageChunk(
         content="",
         tool_calls=[
-            {"name": "knowledge_base_query", "args": {"query": "退货"}, "id": "call_1", "type": "tool_call"}
+            {"name": "knowledge_base_query", "args": {"query": "企业开户"}, "id": "call_1", "type": "tool_call"}
         ],
     )
     state = StreamState(message_id="msg-1")
@@ -80,7 +80,7 @@ async def test_tool_calls_complete():
     available = next(e for e in events if e["type"] == "tool-input-available")
     assert available["toolName"] == "knowledge_base_query"
     assert available["toolCallId"] == "call_1"
-    assert available["input"] == {"query": "退货"}
+    assert available["input"] == {"query": "企业开户"}
 
 
 @pytest.mark.anyio
@@ -111,7 +111,7 @@ async def test_tool_call_chunks_incremental():
 @pytest.mark.anyio
 async def test_tool_message():
     """ToolMessage → tool-output-available + finish-step"""
-    chunk = ToolMessage(content="退货需在7天内", tool_call_id="call_1", name="knowledge_base_query")
+    chunk = ToolMessage(content="开户审核需3个工作日", tool_call_id="call_1", name="knowledge_base_query")
     state = StreamState(message_id="msg-1")
     events = []
     async for event in to_ui_message_stream_chunk(chunk, state):
@@ -120,7 +120,7 @@ async def test_tool_message():
     # ToolMessage 产生 start + start-step + tool-output-available + finish-step
     output_event = next(e for e in events if e["type"] == "tool-output-available")
     assert output_event["toolCallId"] == "call_1"
-    assert output_event["output"] == "退货需在7天内"
+    assert output_event["output"] == "开户审核需3个工作日"
     # finish-step 应在 tool-output-available 之后
     output_idx = next(i for i, e in enumerate(events) if e["type"] == "tool-output-available")
     finish_idx = next(i for i, e in enumerate(events) if e["type"] == "finish-step")
@@ -133,7 +133,7 @@ async def test_text_then_tool_call_same_chunk():
     chunk = AIMessageChunk(
         content="让我查一下",
         tool_calls=[
-            {"name": "order_query", "args": {"order_id": "123"}, "id": "call_3", "type": "tool_call"}
+            {"name": "enterprise_query", "args": {"service_code": "B-001"}, "id": "call_3", "type": "tool_call"}
         ],
     )
     state = StreamState(message_id="msg-1")
@@ -412,10 +412,10 @@ async def test_incremental_tool_call_sends_input_available_on_tool_message():
     chunk2 = AIMessageChunk(
         content="",
         tool_call_chunks=[
-            {"name": "kb_query", "args": 'y": "退货"}', "id": "call_inc1", "index": 0, "type": "tool_call_chunk"}
+            {"name": "kb_query", "args": 'y": "企业开户"}', "id": "call_inc1", "index": 0, "type": "tool_call_chunk"}
         ],
     )
-    tool_msg = ToolMessage(content="退货需在7天内", tool_call_id="call_inc1", name="kb_query")
+    tool_msg = ToolMessage(content="开户审核需3个工作日", tool_call_id="call_inc1", name="kb_query")
 
     state = StreamState(message_id="msg-1")
     all_events = []
@@ -427,7 +427,7 @@ async def test_incremental_tool_call_sends_input_available_on_tool_message():
     available_events = [e for e in all_events if e["type"] == "tool-input-available" and e.get("toolCallId") == "call_inc1"]
     assert len(available_events) == 1, f"期望 1 个 tool-input-available 事件，实际 {len(available_events)}"
     # input 应从累积的增量文本解析
-    assert available_events[0]["input"] == {"query": "退货"}
+    assert available_events[0]["input"] == {"query": "企业开户"}
     # tool-input-available 应在 tool-output-available 之前
     available_idx = next(i for i, e in enumerate(all_events) if e["type"] == "tool-input-available" and e.get("toolCallId") == "call_inc1")
     output_idx = next(i for i, e in enumerate(all_events) if e["type"] == "tool-output-available" and e.get("toolCallId") == "call_inc1")
@@ -498,8 +498,8 @@ async def test_multiple_tool_calls_in_one_chunk():
     chunk = AIMessageChunk(
         content="",
         tool_calls=[
-            {"name": "kb_query", "args": {"q": "退货"}, "id": "call_a", "type": "tool_call"},
-            {"name": "order_query", "args": {"order_id": "123"}, "id": "call_b", "type": "tool_call"},
+            {"name": "kb_query", "args": {"q": "企业开户"}, "id": "call_a", "type": "tool_call"},
+            {"name": "enterprise_query", "args": {"service_code": "B-001"}, "id": "call_b", "type": "tool_call"},
         ],
     )
     state = StreamState(message_id="msg-1")

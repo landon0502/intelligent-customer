@@ -25,23 +25,23 @@ ui_messages_to_langchain = _mod.ui_messages_to_langchain
 def test_user_message_text_only():
     """纯文本用户消息转换"""
     ui_messages = [
-        {"role": "user", "parts": [{"type": "text", "text": "退货政策是什么"}]}
+        {"role": "user", "parts": [{"type": "text", "text": "企业开户需要什么材料"}]}
     ]
     result = ui_messages_to_langchain(ui_messages)
     assert len(result) == 1
     assert isinstance(result[0], HumanMessage)
-    assert result[0].content == "退货政策是什么"
+    assert result[0].content == "企业开户需要什么材料"
 
 
 def test_assistant_message_text_only():
     """纯文本助手消息转换"""
     ui_messages = [
-        {"role": "assistant", "parts": [{"type": "text", "text": "退货需在7天内"}]}
+        {"role": "assistant", "parts": [{"type": "text", "text": "开户审核需3个工作日"}]}
     ]
     result = ui_messages_to_langchain(ui_messages)
     assert len(result) == 1
     assert isinstance(result[0], AIMessage)
-    assert result[0].content == "退货需在7天内"
+    assert result[0].content == "开户审核需3个工作日"
 
 
 def test_assistant_message_with_tool_invocation():
@@ -55,9 +55,9 @@ def test_assistant_message_with_tool_invocation():
                     "type": "tool-invocation",
                     "toolName": "knowledge_base_query",
                     "toolCallId": "call_1",
-                    "args": {"query": "退货政策"},
+                    "args": {"query": "企业开户"},
                     "state": "result",
-                    "result": "退货需在7天内...",
+                    "result": "开户审核需3个工作日...",
                 },
             ],
         }
@@ -83,7 +83,7 @@ def test_assistant_message_with_dynamic_tool_part():
                 {
                     "type": "tool-knowledge_base_query",
                     "toolCallId": "call_2",
-                    "args": {"query": "退款流程"},
+                    "args": {"query": "开户流程"},
                     "state": "call",
                 },
             ],
@@ -105,9 +105,9 @@ def test_empty_parts():
 def test_mixed_conversation():
     """完整对话序列转换"""
     ui_messages = [
-        {"role": "user", "parts": [{"type": "text", "text": "查询订单"}]},
+        {"role": "user", "parts": [{"type": "text", "text": "查询企业业务"}]},
         {"role": "assistant", "parts": [{"type": "text", "text": "好的"}]},
-        {"role": "user", "parts": [{"type": "text", "text": "订单号123"}]},
+        {"role": "user", "parts": [{"type": "text", "text": "业务编号B-001"}]},
     ]
     result = ui_messages_to_langchain(ui_messages)
     assert len(result) == 3
@@ -175,7 +175,7 @@ def test_tool_result_prefers_output_over_result():
                     "type": "tool-invocation",
                     "toolName": "knowledge_base_query",
                     "toolCallId": "call_output_priority",
-                    "args": {"query": "退货政策"},
+                    "args": {"query": "企业开户"},
                     "state": "result",
                     "output": "7.x 输出结果",
                     "result": "旧版输出结果",
@@ -200,7 +200,7 @@ def test_tool_result_fallback_to_result_when_no_output():
                     "type": "tool-invocation",
                     "toolName": "knowledge_base_query",
                     "toolCallId": "call_result_fallback",
-                    "args": {"query": "退货政策"},
+                    "args": {"query": "企业开户"},
                     "state": "result",
                     "result": "旧版输出结果",
                 },
@@ -250,9 +250,9 @@ def test_output_available_state_with_output_field():
                     "type": "tool-invocation",
                     "toolName": "knowledge_base_query",
                     "toolCallId": "call_output_avail",
-                    "input": {"query": "退款流程"},
+                    "input": {"query": "开户流程"},
                     "state": "output-available",
-                    "output": "退款需3-5个工作日",
+                    "output": "开户审核需3个工作日",
                 },
             ],
         }
@@ -260,7 +260,7 @@ def test_output_available_state_with_output_field():
     result = ui_messages_to_langchain(ui_messages)
     assert len(result) == 2
     assert isinstance(result[1], ToolMessage)
-    assert result[1].content == "退款需3-5个工作日"
+    assert result[1].content == "开户审核需3个工作日"
 
 
 def test_input_available_state_creates_ai_message_only():
@@ -273,7 +273,7 @@ def test_input_available_state_creates_ai_message_only():
                     "type": "tool-invocation",
                     "toolName": "knowledge_base_query",
                     "toolCallId": "call_input_avail",
-                    "input": {"query": "配送范围"},
+                    "input": {"query": "服务范围"},
                     "state": "input-available",
                 },
             ],
@@ -284,7 +284,7 @@ def test_input_available_state_creates_ai_message_only():
     assert len(result) == 1
     assert isinstance(result[0], AIMessage)
     assert result[0].tool_calls[0]["name"] == "knowledge_base_query"
-    assert result[0].tool_calls[0]["args"] == {"query": "配送范围"}
+    assert result[0].tool_calls[0]["args"] == {"query": "服务范围"}
 
 
 def test_dynamic_tool_with_input_field():
