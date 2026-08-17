@@ -28,9 +28,9 @@
 - [x] 单测：GET 非 admin 40003、PATCH 成功/兜底禁用 40004/未知工具 40005
 
 ### Task 6: 前端 services 与 useServices
-- [ ] 新增 `apps/web/services/tools.ts`：`ToolItem` 类型（name/description/enabled）+ `getToolsApi()` + `updateToolApi(name, enabled)`（fetchClient 封装）
-- [ ] 新增 `app/tools/useServices.ts`：`useRequest` 加载工具列表 + toggle 切换控制（成功后刷新）
-- [ ] `pnpm typecheck` 无本文件新增错误
+- [x] 新增 `apps/web/services/tools.ts`：`ToolItem` 类型（name/description/enabled）+ `getToolsApi()` + `updateToolApi(name, enabled)`（fetchClient 封装）
+- [x] 新增 `app/tools/useServices.ts`：`useRequest` 加载工具列表 + toggle 切换控制（成功后刷新）
+- [x] `pnpm typecheck` 无本文件新增错误
 
 ### Task 7: page.tsx 去 mock 与 i18n
 - [ ] `page.tsx` 去除 `mockTools`：保留前端静态展示元数据映射（name → triggerKey/inputKey/outputKey/i18n、implemented 标记），与后端返回的 name/enabled 合并渲染

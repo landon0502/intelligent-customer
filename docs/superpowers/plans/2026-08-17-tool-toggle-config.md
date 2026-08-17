@@ -1078,7 +1078,7 @@ git commit -m "feat(api): 新增 /api/tools GET/PATCH 管理接口（仅 admin�
   - `useToolServices()`：`listControl` / `tools` / `toggleControl` / `toggleTool(name, enabled)`
   - 供 Task7 的 `page.tsx` 消费。
 
-- [ ] **Step 1: 创建 `apps/web/services/tools.ts`**
+- [x] **Step 1: 创建 `apps/web/services/tools.ts`**
 
 ```ts
 import { fetchClient } from "@/lib/fetch"
@@ -1108,7 +1108,7 @@ export async function updateToolApi(name: string, enabled: boolean) {
 }
 ```
 
-- [ ] **Step 2: 创建 `apps/web/app/tools/useServices.ts`**（沿用 `app/users/useServices.ts` 的 ahooks 模式）
+- [x] **Step 2: 创建 `apps/web/app/tools/useServices.ts`**（沿用 `app/users/useServices.ts` 的 ahooks 模式）
 
 ```ts
 import { useRequest } from "ahooks";
@@ -1141,12 +1141,12 @@ export default function useToolServices() {
 }
 ```
 
-- [ ] **Step 3: typecheck**
+- [x] **Step 3: typecheck**
 
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer && pnpm typecheck`
 Expected: PASS，无本文件新增错误（`pnpm typecheck` 经 turbo 分发到 web 的 `tsc --noEmit`）。
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add apps/web/services/tools.ts apps/web/app/tools/useServices.ts
