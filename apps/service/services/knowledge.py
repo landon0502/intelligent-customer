@@ -8,6 +8,7 @@ import uuid
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from database.session import async_session_factory
 from schemas.document import Document
 from configs.config import settings
 from rag.ingestion import ingest_document, delete_from_vectorstore
@@ -23,6 +24,15 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 # 允许的文件类型
 ALLOWED_EXTENSIONS = {"pdf", "docx", "doc", "txt"}
 
+# 后台文档处理任务集合 —— 保存 asyncio.create_task 引用防止任务被 GC 回收
+_pending_tasks: set[asyncio.Task] = set()
+
+
+def _track_task(task: asyncio.Task) -> None:
+    """保存任务引用并在完成后自动清理。"""
+    _pending_tasks.add(task)
+    task.add_done_callback(_pending_tasks.discard)
+
 
 def _get_file_extension(filename: str) -> str:
     """获取文件扩展名（小写）"""
@@ -30,30 +40,35 @@ def _get_file_extension(filename: str) -> str:
 
 
 async def _process_document(
-    db: AsyncSession, doc_id: int, file_path: str, file_type: str, filename: str
+    doc_id: int, file_path: str, file_type: str, filename: str
 ) -> None:
-    """异步处理文档：解析 → 分块 → 向量化 → 入库。更新文档状态。"""
+    """异步处理文档：解析 → 分块 → 向量化 → 入库。更新文档状态。
+
+    使用独立数据库会话（async_session_factory），不依赖请求级会话——
+    请求结束后 get_db 的会话已关闭，复用会导致大文档处理时 session closed。
+    """
     try:
         chunk_count = await ingest_document(file_path, file_type, doc_id, filename)
-        # 更新文档状态和块数量
-        result = await db.execute(
-            select(Document).where(Document.id == doc_id)
-        )
-        doc = result.scalar_one_or_none()
-        if doc:
-            doc.chunk_count = chunk_count
-            doc.status = "ready"
-            await db.commit()
-            logger.info("文档处理完成: id=%d, chunks=%d", doc_id, chunk_count)
+        async with async_session_factory() as session:
+            result = await session.execute(
+                select(Document).where(Document.id == doc_id)
+            )
+            doc = result.scalar_one_or_none()
+            if doc:
+                doc.chunk_count = chunk_count
+                doc.status = "ready"
+                await session.commit()
+                logger.info("文档处理完成: id=%d, chunks=%d", doc_id, chunk_count)
     except Exception as e:
         logger.error("文档处理失败: id=%d, error=%s", doc_id, e)
-        result = await db.execute(
-            select(Document).where(Document.id == doc_id)
-        )
-        doc = result.scalar_one_or_none()
-        if doc:
-            doc.status = "failed"
-            await db.commit()
+        async with async_session_factory() as session:
+            result = await session.execute(
+                select(Document).where(Document.id == doc_id)
+            )
+            doc = result.scalar_one_or_none()
+            if doc:
+                doc.status = "failed"
+                await session.commit()
 
 
 async def upload_document(
@@ -88,9 +103,9 @@ async def upload_document(
     await db.commit()
     await db.refresh(doc)
 
-    # 触发异步文档处理
-    asyncio.create_task(
-        _process_document(db, doc.id, file_path, ext, filename)
+    # 触发异步文档处理（独立会话，不受请求级会话生命周期影响）
+    _track_task(
+        asyncio.create_task(_process_document(doc.id, file_path, ext, filename))
     )
 
     return doc
