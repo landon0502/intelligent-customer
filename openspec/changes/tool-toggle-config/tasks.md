@@ -45,3 +45,5 @@
 - [x] `npm run build` 构建成功（含 `/tools` 路由）
 - [x] 端到端（admin 登录）：GET /api/tools 返回 6 工具全 enabled → PATCH 禁用 `knowledge_base_query` → 状态持久化 + 热更新生效（agent SYSTEM_PROMPT 不含该工具描述、不再调用该工具）→ PATCH 禁用 `transfer_human` 返回 40004 → 恢复 `knowledge_base_query` 为 enabled → 前端 tools 页真实列表渲染 + 开关切换刷新 + 兜底工具置灰
 - [x] 测试数据清理，无脏数据残留
+
+<!-- review skipped: review_mode=off（用户选择）。未派发自动代码审查；任务验收依 implementer 测试/构建证据 + 协调者定向勾选验证。全量 pytest 158 passed、npm run build 成功、API 端到端 8 步通过。 -->
