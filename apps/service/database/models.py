@@ -9,3 +9,4 @@ from schemas.message import Message  # noqa: F401
 from schemas.document import Document  # noqa: F401
 from schemas.system_config import SystemConfig  # noqa: F401
 from schemas.enterprise_biz import EnterpriseBiz  # noqa: F401
+from schemas.ticket import ServiceTicket  # noqa: F401
