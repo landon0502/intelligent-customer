@@ -14,7 +14,8 @@
     "menuKnowledge": "知识库管理",
     "menuUsers": "用户管理",
     "menuConfig": "系统配置",
-    "menuTools": "工具配置"
+    "menuTools": "工具配置",
+    "menuTickets": "工单管理"
   },
   "theme": {
     "toggle": "切换主题",
@@ -147,5 +148,22 @@
     "toolOutputTicket": "工单受理结果/状态",
     "toolOutputNotify": "转人工通知",
     "toolOutputQuestion": "追问语句"
+  },
+  "tickets": {
+    "title": "🎫 工单管理",
+    "ticketCount": "共 {count} 张工单",
+    "statusFilter": "状态筛选",
+    "statusAll": "全部",
+    "statusOpen": "待处理",
+    "statusProcessing": "办理中",
+    "statusClosed": "已关闭",
+    "colTicketNo": "工单号",
+    "colBusiness": "业务",
+    "colUser": "提交用户",
+    "colStatus": "状态",
+    "colCreatedAt": "创建时间",
+    "colActions": "操作",
+    "statusUpdated": "状态已更新",
+    "noTickets": "暂无工单"
   }
 }

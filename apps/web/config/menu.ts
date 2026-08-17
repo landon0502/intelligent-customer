@@ -1,6 +1,6 @@
 // apps/web/config/menu.ts
 import type { LucideIcon } from "lucide-react"
-import { MessageSquare, BookOpen, Users, Settings, Wrench } from "lucide-react"
+import { MessageSquare, BookOpen, Users, Settings, Wrench, ClipboardList } from "lucide-react"
 
 export type MenuRole = "admin" | "user"
 
@@ -37,6 +37,13 @@ export const menuConfig: MenuEntry[] = [
         labelKey: "layout.menuKnowledge",
         href: "/knowledge",
         icon: BookOpen,
+        roles: ["admin"],
+      },
+      {
+        key: "tickets",
+        labelKey: "layout.menuTickets",
+        href: "/tickets",
+        icon: ClipboardList,
         roles: ["admin"],
       },
       {
@@ -99,4 +106,5 @@ export const titleKeyMap: Record<string, string> = {
   "/users": "layout.menuUsers",
   "/config": "layout.menuConfig",
   "/tools": "layout.menuTools",
+  "/tickets": "layout.menuTickets",
 }

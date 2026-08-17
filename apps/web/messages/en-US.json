@@ -14,7 +14,8 @@
     "menuKnowledge": "Knowledge Base",
     "menuUsers": "User Management",
     "menuConfig": "System Config",
-    "menuTools": "Tool Config"
+    "menuTools": "Tool Config",
+    "menuTickets": "Ticket Management"
   },
   "theme": {
     "toggle": "Toggle Theme",
@@ -147,5 +148,22 @@
     "toolOutputTicket": "Ticket status/result",
     "toolOutputNotify": "Transfer notification",
     "toolOutputQuestion": "Clarification question"
+  },
+  "tickets": {
+    "title": "🎫 Ticket Management",
+    "ticketCount": "{count} tickets",
+    "statusFilter": "Filter by status",
+    "statusAll": "All",
+    "statusOpen": "Open",
+    "statusProcessing": "Processing",
+    "statusClosed": "Closed",
+    "colTicketNo": "Ticket No.",
+    "colBusiness": "Business",
+    "colUser": "User",
+    "colStatus": "Status",
+    "colCreatedAt": "Created At",
+    "colActions": "Actions",
+    "statusUpdated": "Status updated",
+    "noTickets": "No tickets yet"
   }
 }
