@@ -109,6 +109,22 @@ export default function KnowledgePage() {
     documentsControl.run()
   }, [])
 
+  // 上传的异步处理在接口返回后才完成（processing → ready/failed），
+  // 这里轮询文档列表直至全部处理完成或超时，让状态自动反映到 UI
+  const hasProcessing = documents.some((doc) => doc.status === "processing")
+  useEffect(() => {
+    if (!hasProcessing) return
+    const start = Date.now()
+    const timer = setInterval(() => {
+      if (Date.now() - start > 60_000) {
+        clearInterval(timer)
+        return
+      }
+      documentsControl.run()
+    }, 2000)
+    return () => clearInterval(timer)
+  }, [hasProcessing, documentsControl])
+
   // 上传文档
   const handleUpload = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
