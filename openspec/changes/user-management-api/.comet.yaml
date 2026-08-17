@@ -14,7 +14,7 @@ base_ref: 89e9827463d743dd65ad68a70dbd4ce623e8a1f7
 design_doc: docs/superpowers/specs/2026-08-17-user-management-api-design.md
 plan: docs/superpowers/plans/2026-08-17-user-management-api.md
 verify_result: pending
-verification_report: null
+verification_report: docs/superpowers/reports/2026-08-17-user-management-api-verify.md
 branch_status: pending
 created_at: 2026-08-17
 verified_at: null
