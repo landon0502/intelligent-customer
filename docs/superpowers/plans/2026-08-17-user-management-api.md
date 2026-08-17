@@ -973,12 +973,12 @@ git commit -m "fix(service): 修复全量回归问题"
 - Consumes: Task 4–6 前端全部改动 + 后端 Task 1–2 已启动的 API
 - Produces: typecheck 证据 + 端到端实测证据（admin 真实列表 / 新增 / 删除 / 保护规则）
 
-- [ ] **Step 1: 前端 typecheck**
+- [x] **Step 1: 前端 typecheck**
 
 Run: `cd apps/web && pnpm typecheck`
 Expected: 本 change 涉及文件 0 新增错误（`__tests__` 14 个基线存量错误忽略）。
 
-- [ ] **Step 2: 启动后端与前端**
+- [x] **Step 2: 启动后端与前端**
 
 Run:
 ```bash
@@ -987,7 +987,7 @@ cd apps/service && .venv/bin/python -m uvicorn app.main:app --host 0.0.0.0 --por
 cd apps/web && pnpm dev
 ```
 
-- [ ] **Step 3: 端到端实测清单（admin 登录）**
+- [x] **Step 3: 端到端实测清单（admin 登录）**
 
 逐项实测并确认：
 1. 打开 users 页 → 表格渲染**真实**用户列表（含 `admin`、既有 seed/注册用户），非 mock 数据；`created_at` 显示为本地时间格式。
@@ -998,6 +998,6 @@ cd apps/web && pnpm dev
 6. 删除保护：**admin 行的删除按钮置灰 disabled**，无法点击；即便绕过前端调用 `DELETE /api/users/{admin_id}`，后端返回 `40004`（"不能删除管理员用户"）；调用 `DELETE /api/users/{自己的id}` 返回 `40004`（"不能删除当前登录用户"）；调用 `DELETE /api/users/{不存在的id}` 返回 `40005`。
 7. 用非 admin 账号直接请求 `GET /api/users` → 返回 `{ code: 40003 }`。
 
-- [ ] **Step 4: 无代码改动即完成**
+- [x] **Step 4: 无代码改动即完成**
 
 端到端实测通过即本任务（以及 tasks.md 3.2）完成，无需 commit。若实测发现缺陷，按 systematic-debugging 定位并修复后重测，修复按当前 Comet 阶段完成确认与 commit。

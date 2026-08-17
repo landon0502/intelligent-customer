@@ -15,4 +15,4 @@
 ## 3. 验证
 
 - [x] 3.1 全量 `pytest` 通过（`cd apps/service && .venv/bin/python -m pytest tests/ -q`）
-- [ ] 3.2 `pnpm typecheck` 本 change 文件 0 新增错误 + 端到端实测（admin 登录 users 页真实列表 / 新增 / 删除 / 保护规则）
+- [x] 3.2 `pnpm typecheck` 本 change 文件 0 新增错误 + 端到端实测（admin 登录 users 页真实列表 / 新增 / 删除 / 保护规则）
