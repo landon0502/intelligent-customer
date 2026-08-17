@@ -23,7 +23,10 @@ export interface KnowledgeQueryResult {
 export async function uploadDocumentApi(file: File) {
   const formData = new FormData()
   formData.append("file", file)
-  return fetchClient.post<{ document_id: number; status: string }>("/knowledge/upload", formData)
+  return fetchClient.post<{ document_id: number; status: string }>(
+    "/knowledge/upload",
+    formData
+  )
 }
 
 export async function getDocumentsApi() {
@@ -31,9 +34,13 @@ export async function getDocumentsApi() {
 }
 
 export async function deleteDocumentApi(documentId: number) {
-  return fetchClient.delete<{ success: boolean }>(`/knowledge/documents/${documentId}`)
+  return fetchClient.delete<{ success: boolean }>(
+    `/knowledge/documents/${documentId}`
+  )
 }
 
 export async function queryKnowledgeApi(question: string) {
-  return fetchClient.post<KnowledgeQueryResult>("/knowledge/query", { question })
+  return fetchClient.post<KnowledgeQueryResult>("/knowledge/query", {
+    question,
+  })
 }

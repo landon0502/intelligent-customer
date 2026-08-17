@@ -1,11 +1,9 @@
 "use client"
 
-import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { toast } from "sonner"
 import Link from "next/link"
 import { useAuthStore } from "@/store/auth"
 import { Button } from "@intelligent-customer/ui/components/button"
@@ -19,7 +17,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@intelligent-customer/ui/components/card"
-
+import { useRequest } from "ahooks"
 const loginSchema = z.object({
   username: z
     .string()
@@ -34,23 +32,17 @@ type LoginFormData = z.infer<typeof loginSchema>
 export default function LoginPage() {
   const router = useRouter()
   const { login } = useAuthStore()
-  const [submitting, setSubmitting] = useState(false)
 
   const loginForm = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: { username: "", password: "" },
   })
 
+  const { runAsync, loading } = useRequest(login, { manual: true })
+
   const handleLogin = async (data: LoginFormData) => {
-    setSubmitting(true)
-    try {
-      await login(data.username, data.password)
-      router.push("/")
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "登录失败")
-    } finally {
-      setSubmitting(false)
-    }
+    await runAsync(data.username, data.password)
+    router.push("/")
   }
 
   return (
@@ -92,8 +84,8 @@ export default function LoginPage() {
             </div>
           </CardContent>
           <CardFooter className="mt-1 flex flex-col gap-3">
-            <Button type="submit" className="w-full" disabled={submitting}>
-              {submitting ? "登录中..." : "登录"}
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "登录中..." : "登录"}
             </Button>
             <p className="text-sm text-muted-foreground">
               没有账户？{" "}
