@@ -2,6 +2,8 @@
 comet_change: tool-toggle-config
 role: technical-design
 canonical_spec: openspec
+archived-with: 2026-08-17-tool-toggle-config
+status: final
 ---
 
 # Design: 工具启停配置（后端配置 + Agent 动态绑定 + 接口 + tools 页对接）

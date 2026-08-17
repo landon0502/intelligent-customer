@@ -18,8 +18,8 @@ verification_report: docs/superpowers/reports/2026-08-17-tool-toggle-config-veri
 branch_status: handled
 created_at: 2026-08-17
 verified_at: 2026-08-17
-archive_confirmation: pending
-archived: false
+archive_confirmation: confirmed
+archived: true
 direct_override: null
 handoff_context: openspec/changes/tool-toggle-config/.comet/handoff/design-context.json
 handoff_hash: e165a6e393e32a819110dafc90fba534fad7212b52bc8f9dc44d0d7c1dea3e4e

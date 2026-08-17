@@ -2,6 +2,7 @@
 change: tool-toggle-config
 design-doc: docs/superpowers/specs/2026-08-17-tool-toggle-config-design.md
 base-ref: 01e3ab6e25f06f19cd2c28d1e83eee142e307108
+archived-with: 2026-08-17-tool-toggle-config
 ---
 
 # 工具启停配置实施计划（tool-toggle-config）
