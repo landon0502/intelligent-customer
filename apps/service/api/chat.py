@@ -90,7 +90,10 @@ async def chat_stream(
     state = StreamState()
 
     async def event_generator():
+        from agent.tools.context import set_user_context, reset_user_context
+
         try:
+            set_user_context(current_user.id, req.conversation_id)
             async for chunk, metadata in agent.astream(
                 {"messages": history_messages},
                 stream_mode="messages",
@@ -114,6 +117,7 @@ async def chat_stream(
             ):
                 yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
         finally:
+            reset_user_context()
             # 流结束后持久化助手回复，存入数据库
             if full_response:
                 try:

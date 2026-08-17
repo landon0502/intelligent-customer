@@ -7,6 +7,12 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from sqlalchemy.exc import IntegrityError
 
+from agent.tools.context import (
+    set_user_context,
+    reset_user_context,
+    get_current_user_id,
+    get_current_conversation_id,
+)
 from schemas.ticket import ServiceTicket
 from services.ticket import (
     create_ticket,
@@ -224,3 +230,19 @@ async def test_update_status_not_found_returns_none():
     )
     ticket = await update_status(db, "TK-99999999-9999", TICKET_STATUS_CLOSED)
     assert ticket is None
+
+
+# ========== 上下文 ==========
+
+def test_context_var_set_get_reset():
+    reset_user_context()
+    assert get_current_user_id() is None
+    assert get_current_conversation_id() is None
+
+    set_user_context(user_id=7, conversation_id=9)
+    assert get_current_user_id() == 7
+    assert get_current_conversation_id() == 9
+
+    reset_user_context()
+    assert get_current_user_id() is None
+    assert get_current_conversation_id() is None
