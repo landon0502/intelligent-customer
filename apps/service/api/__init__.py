@@ -5,3 +5,4 @@ from .conversations import router as conversations_router
 from .knowledge import router as knowledge_router
 from .config import router as config_router
 from .enterprise import router as enterprise_router
+from .tickets import router as tickets_router
