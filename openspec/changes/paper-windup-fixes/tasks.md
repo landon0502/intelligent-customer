@@ -5,8 +5,8 @@
 - [x] 单测：创建消息后会话 `updated_at` 更新且等于最新时间
 
 ### Task 2: 检索接口 admin 权限
-- [ ] `api/knowledge.py` `POST /api/knowledge/query` 增加 admin 校验：非 admin → `error(40003, "仅管理员可检索知识库")`
-- [ ] 单测：非 admin 请求 query 返回 40003；admin 正常检索
+- [x] `api/knowledge.py` `POST /api/knowledge/query` 增加 admin 校验：非 admin → `error(40003, "仅管理员可检索知识库")`
+- [x] 单测：非 admin 请求 query 返回 40003；admin 正常检索
 
 ## 组 2：上传安全强化（S7）
 

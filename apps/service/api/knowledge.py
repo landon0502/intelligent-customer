@@ -80,6 +80,8 @@ async def query_knowledge_base(
     req: KnowledgeQueryRequest,
     current_user: User = Depends(get_current_user),
 ):
-    """知识库检索测试"""
+    """知识库检索测试（管理员权限）"""
+    if current_user.role != "admin":
+        return error(code=40003, message="仅管理员可检索知识库")
     result = await query_knowledge(req.question)
     return success(data=KnowledgeQueryResult(**result).model_dump())
