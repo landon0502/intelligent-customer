@@ -32,7 +32,7 @@
 
 ## 6. 测试
 
-- [ ] 6.1 新增 `apps/service/tests/test_enterprise_biz.py`（业务查询命中/未命中）
+- [x] 6.1 新增 `apps/service/tests/test_enterprise_biz.py`（业务查询命中/未命中）
 - [ ] 6.2 新增 `apps/service/tests/test_ticket_service.py`（创建/查询/状态流转）
 - [ ] 6.3 全量 `pytest` 通过（原有用例 + 新增）
 

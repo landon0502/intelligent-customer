@@ -2101,16 +2101,16 @@ git commit -m "chore: .env 强化 JWT_SECRET 与 ADMIN_PASSWORD"
 **Interfaces:**
 - Consumes: Task 1.1/1.2/3.1 累计的用例（模型 + 服务层 + 工具层）
 
-- [ ] **Step 1: 运行完整测试文件**
+- [x] **Step 1: 运行完整测试文件**
 
 Run: `cd apps/service && .venv/bin/python -m pytest tests/test_enterprise_biz.py -v`
 Expected: 8 passed（`test_enterprise_biz_defaults` + 服务层 5 + 工具层 2）
 
-- [ ] **Step 2: 检查规格覆盖补漏**
+- [x] **Step 2: 检查规格覆盖补漏**
 
 对照设计文档 §5 与 OpenSpec `enterprise-biz/spec.md`：确认「业务列表/单业务查询/查询未命中」「启动种子初始化」均有对应用例；若缺失，补一条并重跑。
 
-- [ ] **Step 3: 提交（若补了用例）**
+- [x] **Step 3: 提交（若补了用例）**
 
 ```bash
 cd /Users/superhuan/Documents/project/intelligent-customer
