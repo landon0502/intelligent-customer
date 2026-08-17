@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock
-from app.services.auth import authenticate_user, register_user, get_user_by_username
+from services.auth import authenticate_user, register_user, get_user_by_username
 
 
 @pytest.mark.anyio
@@ -20,7 +20,7 @@ async def test_register_user_creates_new_user():
 @pytest.mark.anyio
 async def test_authenticate_user_with_correct_password():
     db = AsyncMock()
-    from app.utils.password import hash_password
+    from utils.password import hash_password
     mock_user = MagicMock()
     mock_user.username = "testuser"
     mock_user.password_hash = hash_password("password123")
@@ -33,7 +33,7 @@ async def test_authenticate_user_with_correct_password():
 @pytest.mark.anyio
 async def test_authenticate_user_with_wrong_password_returns_none():
     db = AsyncMock()
-    from app.utils.password import hash_password
+    from utils.password import hash_password
     mock_user = MagicMock()
     mock_user.password_hash = hash_password("password123")
     db.execute = AsyncMock(return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=mock_user)))

@@ -1,5 +1,5 @@
 import pytest
-from app.utils.jwt import create_token, verify_token
+from utils.jwt import create_token, verify_token
 
 
 def test_create_and_verify_token():

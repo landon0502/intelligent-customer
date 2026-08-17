@@ -1,4 +1,4 @@
-from app.utils.response import success, error
+from utils.response import success, error
 
 
 def test_success_returns_code_zero():
