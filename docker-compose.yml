@@ -1,53 +1,111 @@
+name: intelligent-customer
+
 services:
-  # web:
-  #   build: ./apps/web
-  #   ports:
-  #     - "3000:3000"
-  #   depends_on:
-  #     - api
-
-  ai-service:
-    build: ./apps/service
-    depends_on:
-      - redis
-      - mysql
-    networks:
-      - internal
-
   mysql:
     image: mysql:8.0
-    restart: always
-    command: --character-set-server=utf8mb4
-      --collation-server=utf8mb4_general_ci
+    container_name: intelligent-customer-mysql
+    restart: unless-stopped
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_general_ci
     environment:
       MYSQL_ROOT_PASSWORD: "00000000"
-      MYSQL_DATABASE: intelligent-customer
+      MYSQL_DATABASE: intellgent-customer-db   # 与后端 .env 的 DB_NAME 一致（现有库名即此）
       TZ: Asia/Shanghai
     ports:
       - "3306:3306"
     volumes:
-      - mysql_data:/var/lib/mysql
+      - ling-diary_mysql_data:/var/lib/mysql   # external，保留现有数据
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p00000000 --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
 
   redis:
-    image: redis:latest
+    image: redis:7-alpine
+    container_name: intelligent-customer-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
     ports:
       - "6379:6379"
-  postgres:
-    image: postgres:16
-    container_name: langchain-postgres
-
-    environment:
-      POSTGRES_USER: langchain
-      POSTGRES_PASSWORD: 123456
-      POSTGRES_DB: langgraph
-
-    ports:
-      - "5432:5432"
-
     volumes:
-      - ./postgres/data:/var/lib/postgresql/data
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
 
-    restart: always
+  chroma:
+    image: chromadb/chroma:latest
+    container_name: intelligent-customer-chroma
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - /Users/superhuan/chroma_data:/chroma/chroma   # bind mount 保留现有向量
+    healthcheck:
+      # 镜像内无 curl/wget/python（已验证），只有 bash → 用 /dev/tcp
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8000"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  service:
+    build:
+      context: .
+      dockerfile: apps/service/Dockerfile
+    container_name: intelligent-customer-service
+    restart: unless-stopped
+    env_file:
+      - apps/service/.env          # APP_PORT/DB_*/JWT/ADMIN_PASSWORD/CHROMA_* 等
+    environment:                    # compose environment 优先于 env_file
+      DB_HOST: mysql
+      REDIS_HOST: redis
+      CHROMA_HOST: chroma
+      EMBEDDING_DEVICE: cpu
+    ports:
+      - "8009:8009"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      chroma:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8009/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8009   # 浏览器直连宿主映射端口（CORS 模式）
+        NEXT_PUBLIC_API_BASE_URL: /api
+    container_name: intelligent-customer-web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/login').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
 
 volumes:
-  mysql_data:
+  ling-diary_mysql_data:
+    external: true                    # 复用现有卷，保留数据
+  redis_data:
+    driver: local

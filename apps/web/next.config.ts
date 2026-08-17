@@ -4,7 +4,8 @@ import createNextIntlPlugin from "next-intl/plugin"
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts")
 
 const nextConfig: NextConfig = {
-  transpilePackages: ["@intelligent-customer/ui"],
+  output: "standalone", // Docker 运行时自包含
+  transpilePackages: ["@intelligent-customer/ui", "@intelligent-customer/fetch-client"],
   /* config options here */
   async rewrites() {
     // 仅在开发环境（development）开启本地代理，解决跨域问题

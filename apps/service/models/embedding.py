@@ -3,6 +3,8 @@
 纯函数，无全局状态。由 ComponentRegistry 调用。
 """
 
+import os
+
 from langchain_huggingface import HuggingFaceEmbeddings
 
 
@@ -19,6 +21,6 @@ def create_embeddings(config: dict) -> HuggingFaceEmbeddings:
 
     return HuggingFaceEmbeddings(
         model_name=model_name,
-        model_kwargs={"device": "mps"},
+        model_kwargs={"device": os.getenv("EMBEDDING_DEVICE", "mps")},
         encode_kwargs={"normalize_embeddings": True},
     )
