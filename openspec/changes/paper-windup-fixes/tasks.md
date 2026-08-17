@@ -40,5 +40,5 @@
 ## 组 6：全量验证
 
 ### Task 8: 全量测试与回归
-- [ ] `cd apps/service && .venv/bin/python -m pytest tests/ -q` 全量通过（含新增用例）
-- [ ] 确认既有会话/知识库/上传相关测试无回归
+- [x] `cd apps/service && .venv/bin/python -m pytest tests/ -q` 全量通过（含新增用例）
+- [x] 确认既有会话/知识库/上传相关测试无回归
