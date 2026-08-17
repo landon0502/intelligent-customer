@@ -11,9 +11,9 @@
 - [x] 单测：禁用兜底工具拒绝、未知工具拒绝、正常启停写库 + 热更新被调用
 
 ### Task 3: Agent 动态绑定与动态提示词
-- [ ] `agent/prompts.py`：拆出静态工具描述表 `TOOL_DESCRIPTIONS`（name → 描述文本，沿用现有 SYSTEM_PROMPT 中 1-6 工具描述）与固定提示词段（决策规则/回答规范/格式要求）；新增 `build_system_prompt(enabled_names)` 按启用工具生成动态 SYSTEM_PROMPT（禁用工具的描述与调用引导同步移除）
-- [ ] `agent/factory.py`：新增 `filter_tools(tool_states)` 从 `ALL_TOOLS` 过滤出启用工具；`create_customer_agent(agent_llm, tools, system_prompt)` 接收注入的过滤工具集与动态提示词
-- [ ] 单测：禁用某工具后 `filter_tools` 结果不含该工具；`build_system_prompt` 结果不含该工具描述
+- [x] `agent/prompts.py`：拆出静态工具描述表 `TOOL_DESCRIPTIONS`（name → 描述文本，沿用现有 SYSTEM_PROMPT 中 1-6 工具描述）与固定提示词段（决策规则/回答规范/格式要求）；新增 `build_system_prompt(enabled_names)` 按启用工具生成动态 SYSTEM_PROMPT（禁用工具的描述与调用引导同步移除）
+- [x] `agent/factory.py`：新增 `filter_tools(tool_states)` 从 `ALL_TOOLS` 过滤出启用工具；`create_customer_agent(agent_llm, tools, system_prompt)` 接收注入的过滤工具集与动态提示词
+- [x] 单测：禁用某工具后 `filter_tools` 结果不含该工具；`build_system_prompt` 结果不含该工具描述
 
 ### Task 4: lifespan 接线与 llm 变更对称刷新
 - [ ] `app/lifespan.py` `_agent_factory` 改为闭包捕获 provider，读取 `tools` 分类配置 → `filter_tools` + `build_system_prompt` → 注入 `create_customer_agent`

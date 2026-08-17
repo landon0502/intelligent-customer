@@ -437,7 +437,7 @@ git commit -m "feat(service): 新增工具启停服务层 list_tool_states/updat
   - `filter_tools(tool_states: dict[str, str]) -> list`（`agent/factory.py`）
   - 供 Task4 的 lifespan `_agent_factory` 使用。
 
-- [ ] **Step 1: 写失败测试**
+- [x] **Step 1: 写失败测试**
 
 在 `apps/service/tests/test_agent_tools.py` 中写入：
 
@@ -526,12 +526,12 @@ def test_create_customer_agent_receives_injected_tools_and_prompt():
     assert "当用户要求办理企业业务、提交申请时使用" not in content
 ```
 
-- [ ] **Step 2: 运行确认失败**
+- [x] **Step 2: 运行确认失败**
 
 Run: `cd apps/service && .venv/bin/python -m pytest tests/test_agent_tools.py -q`
 Expected: FAIL —— `build_system_prompt` / `filter_tools` / `TOOL_DESCRIPTIONS` 尚未定义。
 
-- [ ] **Step 3: 重写 `agent/prompts.py`**
+- [x] **Step 3: 重写 `agent/prompts.py`**
 
 整文件替换为：
 
@@ -621,7 +621,7 @@ def build_system_prompt(enabled_names: list[str]) -> str:
 SYSTEM_PROMPT = build_system_prompt(ALL_TOOL_NAMES)
 ```
 
-- [ ] **Step 4: 在 `agent/factory.py` 新增 `filter_tools`**
+- [x] **Step 4: 在 `agent/factory.py` 新增 `filter_tools`**
 
 ```python
 def filter_tools(tool_states: dict[str, str]) -> list:
@@ -631,12 +631,12 @@ def filter_tools(tool_states: dict[str, str]) -> list:
 
 `create_customer_agent` 保持不动（签名已支持注入 `tools` / `system_prompt`）。
 
-- [ ] **Step 5: 运行确认通过**
+- [x] **Step 5: 运行确认通过**
 
 Run: `cd apps/service && .venv/bin/python -m pytest tests/test_agent_tools.py tests/test_tools.py -q`
 Expected: PASS。
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add apps/service/agent/prompts.py apps/service/agent/factory.py apps/service/tests/test_agent_tools.py
