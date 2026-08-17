@@ -917,7 +917,7 @@ git commit -m "feat: 工单服务层（TK-YYYYMMDD-XXXX 生成 + 列表/详情/�
 - Produces: `POST /api/tickets`（登录）、`GET /api/tickets?status=`（admin）、`GET /api/tickets/{no}`（admin）、`PATCH /api/tickets/{no}/status`（admin）。响应 `TicketItem` 含 `username`（提交用户，前端展示用）。
 - 说明：API 层薄封装不写单测，功能验证在 Task 7.1/7.2 端到端完成。本任务以「导入成功 + 既有测试不回归」为验收。
 
-- [ ] **Step 1: 实现接口**
+- [x] **Step 1: 实现接口**
 
 `apps/service/api/tickets.py`：
 
@@ -1068,7 +1068,7 @@ async def update_ticket_status_api(
     return success(data=_ticket_to_item(ticket, usernames))
 ```
 
-- [ ] **Step 2: 注册路由**
+- [x] **Step 2: 注册路由**
 
 `apps/service/api/__init__.py` 末尾追加：
 
@@ -1088,7 +1088,7 @@ app.include_router(tickets_router)
 
 （在 `app.include_router(enterprise_router)` 之后追加 `app.include_router(tickets_router)`。）
 
-- [ ] **Step 3: 验证导入 + 既有测试不回归**
+- [x] **Step 3: 验证导入 + 既有测试不回归**
 
 Run: `cd apps/service && .venv/bin/python -c "from api.tickets import router; print(len(router.routes))"`
 Expected: 输出 `4`
@@ -1096,7 +1096,7 @@ Expected: 输出 `4`
 Run: `cd apps/service && .venv/bin/python -m pytest tests/ -q`
 Expected: 全部通过（不回归）
 
-- [ ] **Step 4: 提交**
+- [x] **Step 4: 提交**
 
 ```bash
 cd /Users/superhuan/Documents/project/intelligent-customer
