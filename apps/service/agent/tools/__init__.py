@@ -21,3 +21,7 @@ ALL_TOOLS = [
     transfer_human,
     clarify,
 ]
+
+# 工具名列表（t.name 为 LangChain StructuredTool / @tool 装饰函数的工具名），
+# 供服务层/提示词层按名称消费。
+ALL_TOOL_NAMES = [t.name for t in ALL_TOOLS]

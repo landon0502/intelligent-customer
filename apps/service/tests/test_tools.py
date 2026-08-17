@@ -46,3 +46,106 @@ async def test_init_default_configs_inserts_tools_keys():
     assert len(tool_added) == 6
     assert all(c.value == "enabled" for c in tool_added)
     assert all(c.key.startswith("tools.") for c in tool_added)
+
+
+from services.tools import (
+    list_tool_states,
+    update_tool_state,
+    UnknownToolError,
+    GuardedToolError,
+)
+from agent.tools import ALL_TOOL_NAMES
+
+
+def _config_row(key, value):
+    row = MagicMock()
+    row.key = key
+    row.value = value
+    return row
+
+
+@pytest.mark.anyio
+async def test_list_tool_states_reads_and_defaults_missing():
+    """读取 tools 分类并归一化 key；缺失工具默认 enabled。"""
+    db = AsyncMock()
+    result = MagicMock()
+    result.scalars.return_value.all.return_value = [
+        _config_row("tools.knowledge_base_query", "enabled"),
+        _config_row("tools.ticket_submit", "disabled"),
+    ]
+    db.execute = AsyncMock(return_value=result)
+
+    states = await list_tool_states(db)
+
+    assert states["knowledge_base_query"] == "enabled"
+    assert states["ticket_submit"] == "disabled"
+    # 缺失（未入库）工具默认 enabled
+    assert states["clarify"] == "enabled"
+    assert set(states.keys()) == set(ALL_TOOL_NAMES)
+
+
+@pytest.mark.anyio
+async def test_update_tool_state_unknown_tool_raises():
+    db = AsyncMock()
+    provider = MagicMock()
+    registry = AsyncMock()
+
+    with pytest.raises(UnknownToolError):
+        await update_tool_state(db, "no_such_tool", True, provider, registry)
+
+
+@pytest.mark.anyio
+async def test_update_tool_state_guarded_tool_disable_raises():
+    db = AsyncMock()
+    provider = MagicMock()
+    registry = AsyncMock()
+
+    with pytest.raises(GuardedToolError):
+        await update_tool_state(db, "transfer_human", False, provider, registry)
+
+
+@pytest.mark.anyio
+async def test_update_tool_state_writes_invalidates_refreshes():
+    """正常启停：写库 + invalidate("tools") + refresh("agent")。"""
+    db = AsyncMock()
+    existing = MagicMock()
+    existing.value = "enabled"
+    db.execute = AsyncMock(
+        return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=existing))
+    )
+    db.commit = AsyncMock()
+    provider = MagicMock()
+    registry = AsyncMock()
+    registry.refresh = AsyncMock(return_value=True)
+
+    name, enabled, refresh_ok = await update_tool_state(
+        db, "knowledge_base_query", False, provider, registry
+    )
+
+    assert (name, enabled, refresh_ok) == ("knowledge_base_query", False, True)
+    assert existing.value == "disabled"
+    db.commit.assert_called_once()
+    provider.invalidate.assert_called_once_with("tools")
+    registry.refresh.assert_called_once_with("agent")
+
+
+@pytest.mark.anyio
+async def test_update_tool_state_inserts_missing_key():
+    """配置行不存在时插入（description 来自 TOOL_DESCRIPTIONS）。"""
+    db = AsyncMock()
+    db.execute = AsyncMock(
+        return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=None))
+    )
+    db.add = MagicMock()
+    db.commit = AsyncMock()
+    provider = MagicMock()
+    registry = AsyncMock()
+    registry.refresh = AsyncMock(return_value=True)
+
+    await update_tool_state(db, "clarify", True, provider, registry)
+
+    inserted = [c.args[0] for c in db.add.call_args_list]
+    assert len(inserted) == 1
+    assert inserted[0].key == "tools.clarify"
+    assert inserted[0].category == "tools"
+    assert inserted[0].value == "enabled"
