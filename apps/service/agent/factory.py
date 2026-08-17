@@ -25,3 +25,8 @@ def create_customer_agent(agent_llm, tools=None, system_prompt=None):
         tools=tools or ALL_TOOLS,
         system_prompt=SystemMessage(content=system_prompt or SYSTEM_PROMPT),
     )
+
+
+def filter_tools(tool_states: dict[str, str]) -> list:
+    """从 ALL_TOOLS 过滤出启用工具（缺失状态按 enabled 处理）。"""
+    return [t for t in ALL_TOOLS if tool_states.get(t.name, "enabled") == "enabled"]

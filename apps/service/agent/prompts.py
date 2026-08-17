@@ -1,17 +1,21 @@
-"""Agent Prompt 模板 —— 定义系统提示词和角色设定。"""
+"""Agent Prompt 模板 —— 定义系统提示词和角色设定。
 
-SYSTEM_PROMPT = """\
-你是一个专业、友好的智能客服助手，服务于企业客户的智能客服。你需要根据用户的问题选择合适的工具来提供帮助，或直接回复简单问题。
+工具描述集中在 TOOL_DESCRIPTIONS（单一来源），禁用工具即从
+build_system_prompt 生成的「可用工具」段移除其描述与编号。
+"""
 
-## 可用工具及适用场景
+from agent.tools import ALL_TOOL_NAMES
 
-1. **knowledge_base_query** — 当用户询问业务流程、办理条件、服务规范、常见问题等知识性问题时使用
-2. **enterprise_query** — 当用户提供业务编号或询问企业业务流程、办理条件时使用
-3. **ticket_submit** — 当用户要求办理企业业务、提交申请时使用
-4. **ticket_status** — 当用户询问办理进度、工单状态时使用
-5. **transfer_human** — 当你判断无法处理或需要人工介入时使用
-6. **clarify** — 当用户意图不明确，需要追问澄清时使用
+TOOL_DESCRIPTIONS: dict[str, str] = {
+    "knowledge_base_query": "当用户询问业务流程、办理条件、服务规范、常见问题等知识性问题时使用",
+    "enterprise_query": "当用户提供业务编号或询问企业业务流程、办理条件时使用",
+    "ticket_submit": "当用户要求办理企业业务、提交申请时使用",
+    "ticket_status": "当用户询问办理进度、工单状态时使用",
+    "transfer_human": "当你判断无法处理或需要人工介入时使用",
+    "clarify": "当用户意图不明确，需要追问澄清时使用",
+}
 
+PROMPT_FIXED = """\
 ## 决策规则
 
 - **优先判断是否涉及企业业务**：如果用户提到业务编号或要求办理业务（提交申请、查询进度），使用 enterprise_query、ticket_submit 或 ticket_status
@@ -53,3 +57,27 @@ SYSTEM_PROMPT = """\
 
 请严格按照此格式输出。
 """
+
+
+def build_system_prompt(enabled_names: list[str]) -> str:
+    """按启用工具动态生成系统提示词。
+
+    Args:
+        enabled_names: 启用的工具名列表（按此顺序编号）
+
+    Returns:
+        完整系统提示词：引言 + 「可用工具及适用场景」动态段 + 固定段。
+    """
+    header = (
+        "你是一个专业、友好的智能客服助手，服务于企业客户的智能客服。"
+        "你需要根据用户的问题选择合适的工具来提供帮助，或直接回复简单问题。"
+    )
+    tool_lines = [
+        f"{i}. **{name}** — {TOOL_DESCRIPTIONS.get(name, '')}"
+        for i, name in enumerate(enabled_names, start=1)
+    ]
+    tool_block = "\n".join(tool_lines)
+    return "\n\n".join([header, "## 可用工具及适用场景", tool_block, PROMPT_FIXED])
+
+
+SYSTEM_PROMPT = build_system_prompt(ALL_TOOL_NAMES)

@@ -5,22 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from schemas.system_config import SystemConfig
 from agent.tools import ALL_TOOL_NAMES
+from agent.prompts import TOOL_DESCRIPTIONS
 from services.config import get_configs_by_category
-
-try:
-    # TOOL_DESCRIPTIONS 由 Task3 在 agent/prompts.py 提供（name → 短描述，单一来源）
-    from agent.prompts import TOOL_DESCRIPTIONS
-except ImportError:
-    # Task3 尚未落地，桥接到与 Task3 一致的静态描述表，保证本任务可先行开发、单测可过；
-    # Task3 落地后上方 import 成功，本兜底分支不再执行（可随后续清理删除）。
-    TOOL_DESCRIPTIONS: dict[str, str] = {
-        "knowledge_base_query": "当用户询问业务流程、办理条件、服务规范、常见问题等知识性问题时使用",
-        "enterprise_query": "当用户提供业务编号或询问企业业务流程、办理条件时使用",
-        "ticket_submit": "当用户要求办理企业业务、提交申请时使用",
-        "ticket_status": "当用户询问办理进度、工单状态时使用",
-        "transfer_human": "当你判断无法处理或需要人工介入时使用",
-        "clarify": "当用户意图不明确，需要追问澄清时使用",
-    }
 
 GUARDED_TOOLS = {"transfer_human", "clarify"}
 _DEFAULT_STATE = "enabled"
