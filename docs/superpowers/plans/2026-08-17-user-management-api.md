@@ -944,16 +944,16 @@ git commit -m "feat(web): users 页接入真实接口去 mock（列表/搜索/�
 - Consumes: Task 1–3 后端全部改动；既有测试基线（约 124 个既有用例）
 - Produces: 全量 `pytest` 通过证据
 
-- [ ] **Step 1: 运行全量 pytest**
+- [x] **Step 1: 运行全量 pytest**
 
 Run: `cd apps/service && .venv/bin/python -m pytest tests/ -q`
 Expected: 全部通过，总数 = 既有（约 124）+ 新增（test_user_management.py 11 个）；0 failed。特别确认 `test_auth_service.py`（user-auth）未回归。
 
-- [ ] **Step 2: 若失败，进入 systematic-debugging 流程**
+- [x] **Step 2: 若失败，进入 systematic-debugging 流程**
 
 加载 systematic-debugging 技能定位根因，修复后重跑直至全绿；修复涉及源码时按当前 Comet 阶段完成确认与 commit（`git add` 相关文件 + `git commit -m "fix(service): ..."`）。
 
-- [ ] **Step 3: Commit（仅当修复了回归）**
+- [x] **Step 3: Commit（仅当修复了回归）**
 
 ```bash
 git add <修复涉及的文件>
