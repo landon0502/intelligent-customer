@@ -1441,17 +1441,17 @@ git commit -m "feat(web): tools 页去 mock 对接真实接口，兜底工具置
 
 **Interfaces:** 承接 Task1-7 全部产物。
 
-- [ ] **Step 1: 后端全量测试**
+- [x] **Step 1: 后端全量测试**
 
 Run: `cd apps/service && .venv/bin/python -m pytest tests/ -q`
 Expected: 全量通过（含新增 `test_tools.py` / `test_agent_tools.py` / `test_lifespan_agent.py` / `test_tools_api.py` 用例，且既有用例不回归——尤其 `SYSTEM_PROMPT` 重构后 `test_chat_endpoint.py` 等仍通过）。
 
-- [ ] **Step 2: 前端构建**
+- [x] **Step 2: 前端构建**
 
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer && npm run build`
 Expected: turbo build 成功（含 `/tools` 路由）。
 
-- [ ] **Step 3: 端到端验证（admin 登录）**
+- [x] **Step 3: 端到端验证（admin 登录）**
 
 启动后端：`cd apps/service && .venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8001`
 
@@ -1492,11 +1492,11 @@ curl -s -X PATCH http://localhost:8001/api/tools/knowledge_base_query \
 
 热更新验证：Task4 的集成测试已断言 `registry.refresh("agent")` 后新 Agent 绑定的工具集与动态提示词与 `tools` 分类配置一致；如上重启后端后以 admin 打开前端「工具配置」页，确认列表真实渲染、开关切换后刷新、兜底行置灰。
 
-- [ ] **Step 4: 数据清理**
+- [x] **Step 4: 数据清理**
 
 确认步骤 7 已将 `knowledge_base_query` 恢复为 `enabled`；最终 `GET /api/tools` 应为 6 工具全 `enabled`（`transfer_human`/`clarify` 恒为 enabled）。无脏数据残留。
 
-- [ ] **Step 5: Commit（如需，验证期间的辅助改动）**
+- [x] **Step 5: Commit（如需，验证期间的辅助改动）**
 
 如验证中发现需修正的小问题，按对应 Task 修复并单独 commit；如无改动则跳过。
 

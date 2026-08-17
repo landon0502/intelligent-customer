@@ -41,7 +41,7 @@
 ## 组 3：全量验证
 
 ### Task 8: 全量测试与端到端验证
-- [ ] `cd apps/service && .venv/bin/python -m pytest tests/ -q` 全量通过（含新增用例）
-- [ ] `npm run build` 构建成功（含 `/tools` 路由）
-- [ ] 端到端（admin 登录）：GET /api/tools 返回 6 工具全 enabled → PATCH 禁用 `knowledge_base_query` → 状态持久化 + 热更新生效（agent SYSTEM_PROMPT 不含该工具描述、不再调用该工具）→ PATCH 禁用 `transfer_human` 返回 40004 → 恢复 `knowledge_base_query` 为 enabled → 前端 tools 页真实列表渲染 + 开关切换刷新 + 兜底工具置灰
-- [ ] 测试数据清理，无脏数据残留
+- [x] `cd apps/service && .venv/bin/python -m pytest tests/ -q` 全量通过（含新增用例）
+- [x] `npm run build` 构建成功（含 `/tools` 路由）
+- [x] 端到端（admin 登录）：GET /api/tools 返回 6 工具全 enabled → PATCH 禁用 `knowledge_base_query` → 状态持久化 + 热更新生效（agent SYSTEM_PROMPT 不含该工具描述、不再调用该工具）→ PATCH 禁用 `transfer_human` 返回 40004 → 恢复 `knowledge_base_query` 为 enabled → 前端 tools 页真实列表渲染 + 开关切换刷新 + 兜底工具置灰
+- [x] 测试数据清理，无脏数据残留
