@@ -507,7 +507,7 @@ git commit -m "feat: 启动时幂等初始化企业业务种子数据"
 **Interfaces:**
 - Produces: `ServiceTicket`（`__tablename__ = "service_tickets"`，字段 `id/ticket_no/user_id/conversation_id/business_code/content/status/created_at/updated_at`），供 Task 2.2 服务层使用。
 
-- [ ] **Step 1: 创建 ORM 模型文件**
+- [x] **Step 1: 创建 ORM 模型文件**
 
 `apps/service/schemas/ticket.py`：
 
@@ -554,7 +554,7 @@ class ServiceTicket(Base):
     )
 ```
 
-- [ ] **Step 2: 注册到两处模型来源**
+- [x] **Step 2: 注册到两处模型来源**
 
 `apps/service/schemas/__init__.py` 末尾追加：
 
@@ -568,7 +568,7 @@ from schemas.ticket import ServiceTicket
 from schemas.ticket import ServiceTicket  # noqa: F401
 ```
 
-- [ ] **Step 3: 验证导入 + 既有测试不回归**
+- [x] **Step 3: 验证导入 + 既有测试不回归**
 
 Run: `cd apps/service && .venv/bin/python -c "from schemas.ticket import ServiceTicket; print(ServiceTicket.__tablename__)"`
 Expected: 输出 `service_tickets`
@@ -576,7 +576,7 @@ Expected: 输出 `service_tickets`
 Run: `cd apps/service && .venv/bin/python -m pytest tests/test_enterprise_biz.py -q`
 Expected: 6 passed
 
-- [ ] **Step 4: 提交**
+- [x] **Step 4: 提交**
 
 ```bash
 cd /Users/superhuan/Documents/project/intelligent-customer
