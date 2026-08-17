@@ -6,9 +6,9 @@
 - [x] 单测：`init_default_configs` 后 `tools` 分类 6 项全部为 `enabled`
 
 ### Task 2: 工具启停服务层
-- [ ] 新增 `services/tools.py`：`list_tool_states(db)` 读取 `tools` 分类返回 `{工具名: enabled/disabled}`，缺失项按默认 `enabled`
-- [ ] `update_tool_state(db, name, enabled, provider, registry)`：校验工具存在于 `ALL_TOOLS`（不存在抛 `ValueError`）→ 校验 `transfer_human`/`clarify` 不允许禁用（抛 `ValueError`）→ 写 `system_configs` → `provider.invalidate("tools")` → `registry.refresh("agent")` → 返回新状态
-- [ ] 单测：禁用兜底工具拒绝、未知工具拒绝、正常启停写库 + 热更新被调用
+- [x] 新增 `services/tools.py`：`list_tool_states(db)` 读取 `tools` 分类返回 `{工具名: enabled/disabled}`，缺失项按默认 `enabled`
+- [x] `update_tool_state(db, name, enabled, provider, registry)`：校验工具存在于 `ALL_TOOLS`（不存在抛 `ValueError`）→ 校验 `transfer_human`/`clarify` 不允许禁用（抛 `ValueError`）→ 写 `system_configs` → `provider.invalidate("tools")` → `registry.refresh("agent")` → 返回新状态
+- [x] 单测：禁用兜底工具拒绝、未知工具拒绝、正常启停写库 + 热更新被调用
 
 ### Task 3: Agent 动态绑定与动态提示词
 - [ ] `agent/prompts.py`：拆出静态工具描述表 `TOOL_DESCRIPTIONS`（name → 描述文本，沿用现有 SYSTEM_PROMPT 中 1-6 工具描述）与固定提示词段（决策规则/回答规范/格式要求）；新增 `build_system_prompt(enabled_names)` 按启用工具生成动态 SYSTEM_PROMPT（禁用工具的描述与调用引导同步移除）

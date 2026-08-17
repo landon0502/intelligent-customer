@@ -188,7 +188,7 @@ git commit -m "feat(service): 新增 tools 分类默认启停配置（6 工具�
   - `async def list_tool_states(db) -> dict[str, str]`：`{工具名: "enabled"/"disabled"}`，缺失项默认 `enabled`
   - `async def update_tool_state(db, name, enabled, provider, registry) -> tuple[str, bool, bool]`：返回 `(name, enabled, refresh_ok)`；未知工具抛 `UnknownToolError`、兜底禁用抛 `GuardedToolError`。
 
-- [ ] **Step 1: 先补 `ALL_TOOL_NAMES`（Task3 依赖项，提前落地一行）**
+- [x] **Step 1: 先补 `ALL_TOOL_NAMES`（Task3 依赖项，提前落地一行）**
 
 在 `apps/service/agent/tools/__init__.py` 末尾追加：
 
@@ -198,7 +198,7 @@ ALL_TOOL_NAMES = [t.name for t in ALL_TOOLS]
 
 （`t.name` 为 LangChain StructuredTool / @tool 装饰函数的工具名。）
 
-- [ ] **Step 2: 写失败测试**
+- [x] **Step 2: 写失败测试**
 
 在 `apps/service/tests/test_tools.py` 追加：
 
@@ -306,12 +306,12 @@ async def test_update_tool_state_inserts_missing_key():
     assert inserted[0].value == "enabled"
 ```
 
-- [ ] **Step 3: 运行确认失败**
+- [x] **Step 3: 运行确认失败**
 
 Run: `cd apps/service && .venv/bin/python -m pytest tests/test_tools.py -q`
 Expected: FAIL —— `from services.tools import ...` ImportError。
 
-- [ ] **Step 4: 实现 `services/tools.py`**
+- [x] **Step 4: 实现 `services/tools.py`**
 
 ```python
 """工具启停服务 —— 读取 tools 分类配置、更新启停并触发热更新。"""
@@ -406,12 +406,12 @@ async def update_tool_state(
 
 > 说明：`services/tools.py` 顶层的 import 链为 `services.tools → agent.prompts → agent.tools → 各 tool 模块`，tool 模块不反向 import 本模块，无循环依赖。
 
-- [ ] **Step 5: 运行确认通过**
+- [x] **Step 5: 运行确认通过**
 
 Run: `cd apps/service && .venv/bin/python -m pytest tests/test_tools.py -q`
 Expected: PASS（新增 5 个用例 + Task1 2 个用例）。
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add apps/service/services/tools.py apps/service/tests/test_tools.py apps/service/agent/tools/__init__.py
