@@ -1426,7 +1426,7 @@ git commit -m "feat: 企业/工单工具 async 化（真实落库 service_ticket
 - Consumes: `async_session_factory`、`agent/tools/context.py` 的 get 函数（Task 3.3）、`services.ticket.create_ticket`（Task 2.2）
 - Produces: async 工具 `transfer_human`（函数名与 `ALL_TOOLS` 引用保持不变，docstring 微调补充工单说明）。
 
-- [ ] **Step 1: 写失败测试**
+- [x] **Step 1: 写失败测试**
 
 `apps/service/tests/test_ticket_service.py` 追加（模块顶部新增 `from agent.tools.chat import transfer_human`）：
 
@@ -1445,12 +1445,12 @@ async def test_transfer_human_creates_human_ticket():
     assert kwargs["business_code"] == "HUMAN"
 ```
 
-- [ ] **Step 2: 运行测试确认失败**
+- [x] **Step 2: 运行测试确认失败**
 
 Run: `cd apps/service && .venv/bin/python -m pytest tests/test_ticket_service.py -v`
 Expected: 新增用例失败（transfer_human 仍为同步，无法 await）
 
-- [ ] **Step 3: 实现 async transfer_human**
+- [x] **Step 3: 实现 async transfer_human**
 
 `apps/service/agent/tools/chat.py` 整体替换为：
 
@@ -1512,7 +1512,7 @@ def clarify(question: str) -> str:
     return question
 ```
 
-- [ ] **Step 4: 运行测试确认通过**
+- [x] **Step 4: 运行测试确认通过**
 
 Run: `cd apps/service && .venv/bin/python -m pytest tests/test_ticket_service.py -v`
 Expected: 15 passed（含 `test_transfer_human_creates_human_ticket`）
@@ -1520,7 +1520,7 @@ Expected: 15 passed（含 `test_transfer_human_creates_human_ticket`）
 Run: `cd apps/service && .venv/bin/python -m pytest tests/ -q`
 Expected: 全量不回归（含既有 chat/tools 相关用例）
 
-- [ ] **Step 5: 提交**
+- [x] **Step 5: 提交**
 
 ```bash
 cd /Users/superhuan/Documents/project/intelligent-customer
