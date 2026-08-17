@@ -34,8 +34,8 @@
 ## 组 5：文档入库（P3）
 
 ### Task 7: 20 份企业 PDF 入库
-- [ ] 启动后端（admin 登录）→ 上传 `~/Desktop/bg/rag-test-docs-enterprise/` 下 20 份 PDF
-- [ ] 确认 20 份文档全部入库、状态可检索（`ready`），无失败残留
+- [x] 启动后端（admin 登录）→ 上传 `~/Desktop/bg/rag-test-docs-enterprise/` 下 20 份 PDF
+- [x] 确认 20 份文档全部入库、状态可检索（`ready`），无失败残留
 
 ## 组 6：全量验证
 
