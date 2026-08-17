@@ -1,8 +1,9 @@
 """企业业务服务与工具层测试 —— AsyncMock db session / patch 服务函数。"""
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
+from agent.tools.enterprise import enterprise_query
 from schemas.enterprise_biz import EnterpriseBiz
 from services.enterprise import (
     list_businesses,
@@ -93,3 +94,26 @@ async def test_seed_enterprise_businesses_skips_when_exists():
     await seed_enterprise_businesses(db)
     assert db.add.call_count == 0
     db.commit.assert_not_awaited()
+
+
+# ========== 工具层 ==========
+
+@pytest.mark.anyio
+async def test_enterprise_query_hit():
+    biz = _make_biz("B-001")
+    with patch("services.enterprise.get_business_by_code", new_callable=AsyncMock, return_value=biz):
+        result = await enterprise_query.ainvoke({"service_code": "B-001"})
+    assert "企业开户" in result
+    assert "办理条件" in result
+
+
+@pytest.mark.anyio
+async def test_enterprise_query_miss_lists_available():
+    with patch("services.enterprise.get_business_by_code", new_callable=AsyncMock, return_value=None), patch(
+        "services.enterprise.list_businesses",
+        new_callable=AsyncMock,
+        return_value=[_make_biz("B-001"), _make_biz("B-002")],
+    ):
+        result = await enterprise_query.ainvoke({"service_code": "B-999"})
+    assert "未找到业务编号 B-999" in result
+    assert "企业开户" in result

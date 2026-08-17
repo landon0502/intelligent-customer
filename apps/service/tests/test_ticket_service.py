@@ -13,6 +13,7 @@ from agent.tools.context import (
     get_current_user_id,
     get_current_conversation_id,
 )
+from agent.tools.enterprise import ticket_submit, ticket_status
 from schemas.ticket import ServiceTicket
 from services.ticket import (
     create_ticket,
@@ -246,3 +247,37 @@ def test_context_var_set_get_reset():
     reset_user_context()
     assert get_current_user_id() is None
     assert get_current_conversation_id() is None
+
+
+# ========== 工具层 ==========
+
+@pytest.mark.anyio
+async def test_ticket_submit_returns_ticket_no():
+    create_mock = AsyncMock(return_value=_make_ticket("TK-20260817-0001", status="open"))
+    with patch("services.ticket.create_ticket", create_mock):
+        result = await ticket_submit.ainvoke(
+            {"business_code": "B-001", "customer_name": "张三", "description": "办理企业开户"}
+        )
+    assert "TK-20260817-0001" in result
+    _, kwargs = create_mock.call_args
+    assert kwargs["business_code"] == "B-001"
+    assert kwargs["content"] == "办理企业开户"
+    assert kwargs["user_id"] is None  # 未注入 ContextVar 时降级
+
+
+@pytest.mark.anyio
+async def test_ticket_status_returns_real_status():
+    with patch(
+        "services.ticket.get_ticket_by_no",
+        new_callable=AsyncMock,
+        return_value=_make_ticket("TK-20260817-0001", status="processing"),
+    ):
+        result = await ticket_status.ainvoke({"ticket_id": "TK-20260817-0001"})
+    assert "processing" in result
+
+
+@pytest.mark.anyio
+async def test_ticket_status_not_found():
+    with patch("services.ticket.get_ticket_by_no", new_callable=AsyncMock, return_value=None):
+        result = await ticket_status.ainvoke({"ticket_id": "TK-00000000-0000"})
+    assert "未找到工单" in result
