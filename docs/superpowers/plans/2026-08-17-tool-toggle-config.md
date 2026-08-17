@@ -825,7 +825,7 @@ git commit -m "feat(service): agent slot 绑定 tools 分类，llm 变更对称�
   - `PATCH /api/tools/{name}`（admin）：body `{enabled: bool}`；成功 → `{ name, enabled, refresh_ok }`；兜底禁用 → 40004；未知工具 → 40005；非 admin → 40003
   - `api/__init__.py` 导出 `tools_router`；`app/main.py` include。
 
-- [ ] **Step 1: 写失败测试**
+- [x] **Step 1: 写失败测试**
 
 在 `apps/service/tests/test_tools_api.py` 写入：
 
@@ -946,12 +946,12 @@ def test_patch_unknown_tool_returns_40005():
     assert resp.json()["code"] == 40005
 ```
 
-- [ ] **Step 2: 运行确认失败**
+- [x] **Step 2: 运行确认失败**
 
 Run: `cd apps/service && .venv/bin/python -m pytest tests/test_tools_api.py -q`
 Expected: FAIL —— `api/tools` 模块不存在。
 
-- [ ] **Step 3: 实现 `api/tools.py`**
+- [x] **Step 3: 实现 `api/tools.py`**
 
 ```python
 """工具启停接口 —— 列表与启停切换（仅管理员）。"""
@@ -1025,7 +1025,7 @@ async def update_tool(
     )
 ```
 
-- [ ] **Step 4: 注册路由**
+- [x] **Step 4: 注册路由**
 
 `apps/service/api/__init__.py` 末尾追加：
 
@@ -1048,12 +1048,12 @@ app.include_router(users_router)
 app.include_router(tools_router)
 ```
 
-- [ ] **Step 5: 运行确认通过**
+- [x] **Step 5: 运行确认通过**
 
 Run: `cd apps/service && .venv/bin/python -m pytest tests/test_tools_api.py -q`
 Expected: PASS（6 个用例）。
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add apps/service/api/tools.py apps/service/api/__init__.py apps/service/app/main.py apps/service/tests/test_tools_api.py

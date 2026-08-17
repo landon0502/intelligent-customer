@@ -23,9 +23,9 @@
 ## 组 2：接口与前端
 
 ### Task 5: api/tools.py 接口与路由注册
-- [ ] 新增 `api/tools.py`：`GET /api/tools`（admin 校验，返回全部工具 name/description/enabled）+ `PATCH /api/tools/{name}`（admin 校验，body `{enabled: bool}`，调用 `update_tool_state`；`ValueError` → 40004，未知工具 → 40005，非 admin → 40003）
-- [ ] 注册 `api/__init__.py` + `app/main.py` 两处路由
-- [ ] 单测：GET 非 admin 40003、PATCH 成功/兜底禁用 40004/未知工具 40005
+- [x] 新增 `api/tools.py`：`GET /api/tools`（admin 校验，返回全部工具 name/description/enabled）+ `PATCH /api/tools/{name}`（admin 校验，body `{enabled: bool}`，调用 `update_tool_state`；`ValueError` → 40004，未知工具 → 40005，非 admin → 40003）
+- [x] 注册 `api/__init__.py` + `app/main.py` 两处路由
+- [x] 单测：GET 非 admin 40003、PATCH 成功/兜底禁用 40004/未知工具 40005
 
 ### Task 6: 前端 services 与 useServices
 - [ ] 新增 `apps/web/services/tools.ts`：`ToolItem` 类型（name/description/enabled）+ `getToolsApi()` + `updateToolApi(name, enabled)`（fetchClient 封装）
