@@ -24,6 +24,9 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 # 允许的文件类型
 ALLOWED_EXTENSIONS = {"pdf", "docx", "doc", "txt"}
 
+# 上传大小上限（20MB）
+MAX_UPLOAD_SIZE = 20 * 1024 * 1024
+
 # 后台文档处理任务集合 —— 保存 asyncio.create_task 引用防止任务被 GC 回收
 _pending_tasks: set[asyncio.Task] = set()
 
@@ -37,6 +40,33 @@ def _track_task(task: asyncio.Task) -> None:
 def _get_file_extension(filename: str) -> str:
     """获取文件扩展名（小写）"""
     return filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
+
+
+def _validate_content(file_content: bytes, ext: str) -> None:
+    """校验上传内容有效性：PDF 可解析且非空，其他文本类文件非空。
+
+    Args:
+        file_content: 上传文件字节
+        ext: 小写扩展名
+
+    Raises:
+        ValueError: 内容无效（损坏/为空）
+    """
+    if ext == "pdf":
+        from io import BytesIO
+
+        from pypdf import PdfReader
+
+        try:
+            reader = PdfReader(BytesIO(file_content))
+            if len(reader.pages) == 0:
+                raise ValueError("PDF 内容为空")
+        except Exception as e:
+            if isinstance(e, ValueError) and str(e) == "PDF 内容为空":
+                raise
+            raise ValueError(f"PDF 文件无法解析: {e}") from e
+    elif not file_content.strip():
+        raise ValueError("文件内容为空")
 
 
 async def _process_document(
@@ -81,6 +111,13 @@ async def upload_document(
     ext = _get_file_extension(filename)
     if ext not in ALLOWED_EXTENSIONS:
         raise ValueError(f"不支持的文件类型: {ext}，仅支持 {', '.join(ALLOWED_EXTENSIONS)}")
+
+    # 大小校验：超过 20MB 拒绝
+    if len(file_content) > MAX_UPLOAD_SIZE:
+        raise ValueError("文件大小超过 20MB 上限")
+
+    # 内容校验：PDF 可解析且非空，其他文本类文件非空
+    _validate_content(file_content, ext)
 
     # 生成唯一文件名避免冲突
     unique_name = f"{uuid.uuid4().hex}.{ext}"

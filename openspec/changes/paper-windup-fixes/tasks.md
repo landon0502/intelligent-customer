@@ -11,9 +11,9 @@
 ## 组 2：上传安全强化（S7）
 
 ### Task 3: 上传大小与内容校验
-- [ ] `services/knowledge.py` `upload_document`：增加 20MB 大小上限校验（超限拒绝）
-- [ ] 增加内容校验：`pypdf` 解析失败或页数为空 → 拒绝（内容无效提示）
-- [ ] 单测：超 20MB 拒绝、损坏 PDF 拒绝、正常 PDF 通过
+- [x] `services/knowledge.py` `upload_document`：增加 20MB 大小上限校验（超限拒绝）
+- [x] 增加内容校验：`pypdf` 解析失败或页数为空 → 拒绝（内容无效提示）
+- [x] 单测：超 20MB 拒绝、损坏 PDF 拒绝、正常 PDF 通过
 
 ## 组 3：依赖清理（O1）
 
