@@ -177,7 +177,7 @@ git commit -m "feat: 新增 enterprise_biz ORM 模型并注册"
   - `async def seed_enterprise_businesses(db: AsyncSession) -> None`
   - 供 Task 1.3 API、Task 3.1 `enterprise_query` 使用。
 
-- [ ] **Step 1: 写失败测试**
+- [x] **Step 1: 写失败测试**
 
 `apps/service/tests/test_enterprise_biz.py` 追加（保持 `import pytest`、新增 `from unittest.mock import AsyncMock, MagicMock`）：
 
@@ -261,12 +261,12 @@ async def test_seed_enterprise_businesses_skips_when_exists():
     db.commit.assert_not_awaited()
 ```
 
-- [ ] **Step 2: 运行测试确认失败**
+- [x] **Step 2: 运行测试确认失败**
 
 Run: `cd apps/service && .venv/bin/python -m pytest tests/test_enterprise_biz.py -v`
 Expected: 失败，`ModuleNotFoundError: No module named 'services.enterprise'`
 
-- [ ] **Step 3: 实现服务层**
+- [x] **Step 3: 实现服务层**
 
 `apps/service/services/enterprise.py`：
 
@@ -333,12 +333,12 @@ async def seed_enterprise_businesses(db: AsyncSession) -> None:
         logger.info("企业业务种子初始化: 插入 %d 条", inserted)
 ```
 
-- [ ] **Step 4: 运行测试确认通过**
+- [x] **Step 4: 运行测试确认通过**
 
 Run: `cd apps/service && .venv/bin/python -m pytest tests/test_enterprise_biz.py -v`
 Expected: 6 passed（模型 1 + 服务层 5）
 
-- [ ] **Step 5: 提交**
+- [x] **Step 5: 提交**
 
 ```bash
 cd /Users/superhuan/Documents/project/intelligent-customer
