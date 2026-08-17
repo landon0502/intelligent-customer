@@ -10,7 +10,7 @@
 ## 2. P6 工单落库与 API
 
 - [x] 2.1 新增 `apps/service/schemas/ticket.py`（`service_tickets` 表：id/ticket_no(唯一)/user_id/conversation_id/business_code/content/status(open·processing·closed)/created_at/updated_at），注册 `database/models.py` 与 `schemas/__init__.py`
-- [ ] 2.2 新增 `apps/service/services/ticket.py`：`create_ticket()`（生成 `TK-YYYYMMDD-XXXX`）/ `list_tickets(status?)` / `get_ticket_by_no()` / `update_status()`
+- [x] 2.2 新增 `apps/service/services/ticket.py`：`create_ticket()`（生成 `TK-YYYYMMDD-XXXX`）/ `list_tickets(status?)` / `get_ticket_by_no()` / `update_status()`
 - [ ] 2.3 新增 `apps/service/api/tickets.py`：`POST /api/tickets`（创建，登录）、`GET /api/tickets`（列表 + 状态筛选，admin）、`GET /api/tickets/{no}`（admin）、状态更新接口，注册 `api/__init__.py` + `app/main.py`
 
 ## 3. P5/P6 工具 async 化

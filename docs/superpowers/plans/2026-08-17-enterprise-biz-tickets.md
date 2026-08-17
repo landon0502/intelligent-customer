@@ -602,7 +602,7 @@ git commit -m "feat: 新增 service_tickets ORM 模型并注册"
   - `async def update_status(db, ticket_no: str, status: str) -> ServiceTicket | None`（非法值抛 `ValueError`）
   - 供 Task 2.3 API、Task 3.1/3.2 工具使用。
 
-- [ ] **Step 1: 写失败测试**
+- [x] **Step 1: 写失败测试**
 
 `apps/service/tests/test_ticket_service.py`（新建）：
 
@@ -772,12 +772,12 @@ async def test_update_status_not_found_returns_none():
     assert ticket is None
 ```
 
-- [ ] **Step 2: 运行测试确认失败**
+- [x] **Step 2: 运行测试确认失败**
 
 Run: `cd apps/service && .venv/bin/python -m pytest tests/test_ticket_service.py -v`
 Expected: 失败，`ModuleNotFoundError: No module named 'services.ticket'`
 
-- [ ] **Step 3: 实现服务层**
+- [x] **Step 3: 实现服务层**
 
 `apps/service/services/ticket.py`：
 
@@ -890,12 +890,12 @@ async def update_status(
     return ticket
 ```
 
-- [ ] **Step 4: 运行测试确认通过**
+- [x] **Step 4: 运行测试确认通过**
 
 Run: `cd apps/service && .venv/bin/python -m pytest tests/test_ticket_service.py -v`
 Expected: 10 passed（全部服务层用例）
 
-- [ ] **Step 5: 提交**
+- [x] **Step 5: 提交**
 
 ```bash
 cd /Users/superhuan/Documents/project/intelligent-customer
