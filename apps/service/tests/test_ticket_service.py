@@ -120,6 +120,25 @@ async def test_create_ticket_retries_on_integrity_error():
 
 
 @pytest.mark.anyio
+async def test_create_ticket_raises_runtime_error_when_retries_exhausted():
+    prefix = _today_prefix()
+    db = AsyncMock()
+    db.add = MagicMock()
+    db.commit = AsyncMock(side_effect=IntegrityError("INSERT", {}, Exception("dup")))
+    db.rollback = AsyncMock()
+    db.refresh = AsyncMock()
+    with patch(
+        "services.ticket._next_ticket_no",
+        new=AsyncMock(return_value=f"{prefix}0001"),
+    ):
+        with pytest.raises(RuntimeError):
+            await create_ticket(db, "B-001", "test")
+    # 两次 attempt 均冲突：commit 与 rollback 各执行两次后抛 RuntimeError
+    assert db.commit.await_count == 2
+    assert db.rollback.await_count == 2
+
+
+@pytest.mark.anyio
 async def test_list_tickets_no_filter():
     db = AsyncMock()
     result = MagicMock()
@@ -131,6 +150,10 @@ async def test_list_tickets_no_filter():
     tickets = await list_tickets(db)
     assert len(tickets) == 2
     assert tickets[0].ticket_no == "TK-20260817-0002"
+    # 无 status 时不加过滤条件；按创建时间倒序
+    stmt = db.execute.await_args.args[0]
+    assert stmt.whereclause is None
+    assert "service_tickets.created_at DESC" in str(stmt.compile())
 
 
 @pytest.mark.anyio
@@ -144,6 +167,12 @@ async def test_list_tickets_with_status_filter():
     tickets = await list_tickets(db, TICKET_STATUS_PROCESSING)
     assert len(tickets) == 1
     assert tickets[0].status == TICKET_STATUS_PROCESSING
+    # 断言 status 过滤条件真实构造并传入正确枚举值；按创建时间倒序
+    stmt = db.execute.await_args.args[0]
+    assert stmt.whereclause is not None
+    assert "service_tickets.status" in str(stmt.whereclause)
+    assert stmt.compile().params.get("status_1") == TICKET_STATUS_PROCESSING
+    assert "service_tickets.created_at DESC" in str(stmt.compile())
 
 
 @pytest.mark.anyio
