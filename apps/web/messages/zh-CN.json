@@ -149,7 +149,10 @@
     "toolOutputBusinessInfo": "业务办理说明",
     "toolOutputTicket": "工单受理结果/状态",
     "toolOutputNotify": "转人工通知",
-    "toolOutputQuestion": "追问语句"
+    "toolOutputQuestion": "追问语句",
+    "toggleSuccess": "工具状态已更新",
+    "guardedToolTip": "兜底工具不可禁用",
+    "toggleFailed": "操作失败，请重试"
   },
   "tickets": {
     "title": "🎫 工单管理",

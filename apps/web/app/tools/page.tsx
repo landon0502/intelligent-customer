@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useCallback, useState } from "react"
 import { useTranslations } from "next-intl"
 import { Search, Wrench, ToggleLeft, ToggleRight } from "lucide-react"
+import { toast } from "sonner"
 
 import { Button } from "@intelligent-customer/ui/components/button"
 import { Input } from "@intelligent-customer/ui/components/input"
@@ -16,79 +17,63 @@ import {
   TableHeader,
   TableRow,
 } from "@intelligent-customer/ui/components/table"
+import useToolServices from "./useServices"
 
-// 模拟数据
-interface ToolItem {
-  id: number
-  name: string
+// 前端静态展示元数据（i18n 键映射 + 实现标记），与后端返回的 name/enabled 合并渲染
+interface ToolMeta {
   triggerKey: string
   inputKey: string | null
   outputKey: string
-  status: string
   implemented: boolean
 }
 
-const mockTools: ToolItem[] = [
-  {
-    id: 1,
-    name: "knowledge_base_query",
+const toolMeta: Record<string, ToolMeta> = {
+  knowledge_base_query: {
     triggerKey: "toolTriggerKnowledge",
     inputKey: "toolInputQuestion",
     outputKey: "toolOutputChunks",
-    status: "enabled",
     implemented: true,
   },
-  {
-    id: 2,
-    name: "enterprise_query",
+  enterprise_query: {
     triggerKey: "toolTriggerEnterprise",
     inputKey: "toolInputServiceCode",
     outputKey: "toolOutputBusinessInfo",
-    status: "enabled",
     implemented: true,
   },
-  {
-    id: 3,
-    name: "ticket_submit",
+  ticket_submit: {
     triggerKey: "toolTriggerSubmit",
     inputKey: "toolInputSubmit",
     outputKey: "toolOutputTicket",
-    status: "enabled",
     implemented: true,
   },
-  {
-    id: 4,
-    name: "ticket_status",
+  ticket_status: {
     triggerKey: "toolTriggerStatus",
     inputKey: "toolInputServiceCode",
     outputKey: "toolOutputTicket",
-    status: "enabled",
-    implemented: false,
+    implemented: true,
   },
-  {
-    id: 5,
-    name: "transfer_human",
+  transfer_human: {
     triggerKey: "toolTriggerHuman",
     inputKey: null,
     outputKey: "toolOutputNotify",
-    status: "enabled",
     implemented: true,
   },
-  {
-    id: 6,
-    name: "clarify",
+  clarify: {
     triggerKey: "toolTriggerClarify",
     inputKey: null,
     outputKey: "toolOutputQuestion",
-    status: "enabled",
     implemented: true,
   },
-]
+}
+
+// 兜底工具：后端硬校验不可禁用，前端行开关置灰
+const GUARDED_TOOLS = new Set(["transfer_human", "clarify"])
 
 export default function ToolsPage() {
   const t = useTranslations("tools")
+  const { tools, toggleTool } = useToolServices()
+
   const [searchQuery, setSearchQuery] = useState("")
-  const [tools, setTools] = useState(mockTools)
 
   const filteredTools = tools.filter(
     (tool) =>
@@ -96,18 +81,17 @@ export default function ToolsPage() {
       tool.name.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
-  function toggleTool(id: number) {
-    setTools((prev) =>
-      prev.map((tool) =>
-        tool.id === id
-          ? {
-              ...tool,
-              status: tool.status === "enabled" ? "disabled" : "enabled",
-            }
-          : tool
-      )
-    )
-  }
+  const handleToggle = useCallback(
+    async (name: string, enabled: boolean) => {
+      try {
+        await toggleTool(name, enabled)
+        toast.success(t("toggleSuccess"))
+      } catch {
+        // 错误已由 fetchClient 拦截器统一处理
+      }
+    },
+    [toggleTool, t]
+  )
 
   return (
     <div className="space-y-6">
@@ -118,7 +102,7 @@ export default function ToolsPage() {
           <p className="mt-1 text-sm text-muted-foreground">
             {t("toolCount", { count: tools.length })} ·{" "}
             {t("enabledCount", {
-              count: tools.filter((tool) => tool.status === "enabled").length,
+              count: tools.filter((tool) => tool.enabled).length,
             })}
           </p>
         </div>
@@ -149,77 +133,85 @@ export default function ToolsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredTools.map((tool) => (
-                <TableRow key={tool.id}>
-                  <TableCell className="font-medium">
-                    <div className="flex items-center gap-2">
-                      <Wrench className="size-4 text-muted-foreground" />
-                      <code className="text-sm">{tool.name}</code>
-                    </div>
-                  </TableCell>
-                  <TableCell className="max-w-[200px]">
-                    {t(tool.triggerKey as Parameters<typeof t>[0])}
-                  </TableCell>
-                  <TableCell className="text-sm">
-                    {tool.inputKey
-                      ? t(tool.inputKey as Parameters<typeof t>[0])
-                      : "—"}
-                  </TableCell>
-                  <TableCell className="text-sm">
-                    {t(tool.outputKey as Parameters<typeof t>[0])}
-                  </TableCell>
-                  <TableCell>
-                    {tool.implemented ? (
-                      <Badge
-                        variant="default"
-                        className="bg-green-100 text-green-700 hover:bg-green-100"
-                      >
-                        {t("implemented")}
-                      </Badge>
-                    ) : (
-                      <Badge
-                        variant="secondary"
-                        className="bg-yellow-100 text-yellow-700 hover:bg-yellow-100"
-                      >
-                        {t("simulated")}
-                      </Badge>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        tool.status === "enabled" ? "default" : "outline"
-                      }
-                      className={
-                        tool.status === "enabled"
-                          ? "bg-primary/10 text-primary hover:bg-primary/10"
-                          : ""
-                      }
-                    >
-                      {tool.status === "enabled" ? t("enabled") : t("disabled")}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => toggleTool(tool.id)}
-                    >
-                      {tool.status === "enabled" ? (
-                        <>
-                          <ToggleRight className="mr-1 size-4 text-primary" />
-                          {t("disable")}
-                        </>
+              {filteredTools.map((tool) => {
+                const meta = toolMeta[tool.name]
+                const isGuarded = GUARDED_TOOLS.has(tool.name)
+                return (
+                  <TableRow key={tool.name}>
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-2">
+                        <Wrench className="size-4 text-muted-foreground" />
+                        <code className="text-sm">{tool.name}</code>
+                      </div>
+                    </TableCell>
+                    <TableCell className="max-w-[200px]">
+                      {meta
+                        ? t(meta.triggerKey as Parameters<typeof t>[0])
+                        : tool.description}
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      {meta?.inputKey
+                        ? t(meta.inputKey as Parameters<typeof t>[0])
+                        : "—"}
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      {meta
+                        ? t(meta.outputKey as Parameters<typeof t>[0])
+                        : "—"}
+                    </TableCell>
+                    <TableCell>
+                      {meta?.implemented ? (
+                        <Badge
+                          variant="default"
+                          className="bg-green-100 text-green-700 hover:bg-green-100"
+                        >
+                          {t("implemented")}
+                        </Badge>
                       ) : (
-                        <>
-                          <ToggleLeft className="mr-1 size-4 text-muted-foreground" />
-                          {t("enable")}
-                        </>
+                        <Badge
+                          variant="secondary"
+                          className="bg-yellow-100 text-yellow-700 hover:bg-yellow-100"
+                        >
+                          {t("simulated")}
+                        </Badge>
                       )}
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={tool.enabled ? "default" : "outline"}
+                        className={
+                          tool.enabled
+                            ? "bg-primary/10 text-primary hover:bg-primary/10"
+                            : ""
+                        }
+                      >
+                        {tool.enabled ? t("enabled") : t("disabled")}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled={isGuarded}
+                        title={isGuarded ? t("guardedToolTip") : undefined}
+                        onClick={() => handleToggle(tool.name, !tool.enabled)}
+                      >
+                        {tool.enabled ? (
+                          <>
+                            <ToggleRight className="mr-1 size-4 text-primary" />
+                            {t("disable")}
+                          </>
+                        ) : (
+                          <>
+                            <ToggleLeft className="mr-1 size-4 text-muted-foreground" />
+                            {t("enable")}
+                          </>
+                        )}
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
             </TableBody>
           </Table>
         </CardContent>

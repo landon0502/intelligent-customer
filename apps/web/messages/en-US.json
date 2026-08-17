@@ -149,7 +149,10 @@
     "toolOutputBusinessInfo": "Business process info",
     "toolOutputTicket": "Ticket status/result",
     "toolOutputNotify": "Transfer notification",
-    "toolOutputQuestion": "Clarification question"
+    "toolOutputQuestion": "Clarification question",
+    "toggleSuccess": "Tool status updated",
+    "guardedToolTip": "Guarded tools cannot be disabled",
+    "toggleFailed": "Operation failed, please retry"
   },
   "tickets": {
     "title": "🎫 Ticket Management",
