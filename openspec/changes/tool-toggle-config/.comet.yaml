@@ -1,6 +1,6 @@
 workflow: full
 language: zh-CN
-phase: verify
+phase: archive
 context_compression: off
 build_mode: subagent-driven-development
 build_pause: null
@@ -13,12 +13,12 @@ auto_transition: true
 base_ref: be6cbbb20e8682d2e5c8b4e377c64efee26c11db
 design_doc: docs/superpowers/specs/2026-08-17-tool-toggle-config-design.md
 plan: docs/superpowers/plans/2026-08-17-tool-toggle-config.md
-verify_result: pending
+verify_result: pass
 verification_report: docs/superpowers/reports/2026-08-17-tool-toggle-config-verify.md
-branch_status: pending
+branch_status: handled
 created_at: 2026-08-17
-verified_at: null
-archive_confirmation: null
+verified_at: 2026-08-17
+archive_confirmation: pending
 archived: false
 direct_override: null
 handoff_context: openspec/changes/tool-toggle-config/.comet/handoff/design-context.json
