@@ -16,9 +16,9 @@
 - [x] 单测：禁用某工具后 `filter_tools` 结果不含该工具；`build_system_prompt` 结果不含该工具描述
 
 ### Task 4: lifespan 接线与 llm 变更对称刷新
-- [ ] `app/lifespan.py` `_agent_factory` 改为闭包捕获 provider，读取 `tools` 分类配置 → `filter_tools` + `build_system_prompt` → 注入 `create_customer_agent`
-- [ ] `services/config.py` `_apply_config_changes` 增加：`llm` 分类变更时额外 `refresh("agent")`（对齐 embedding→vectorstore 既有模式，保证 Agent 持有的 LLM 引用同步）
-- [ ] 验证：启动后 `registry.get("agent")` 绑定的工具与 `tools` 分类配置一致
+- [x] `app/lifespan.py` `_agent_factory` 改为闭包捕获 provider，读取 `tools` 分类配置 → `filter_tools` + `build_system_prompt` → 注入 `create_customer_agent`
+- [x] `services/config.py` `_apply_config_changes` 增加：`llm` 分类变更时额外 `refresh("agent")`（对齐 embedding→vectorstore 既有模式，保证 Agent 持有的 LLM 引用同步）
+- [x] 验证：启动后 `registry.get("agent")` 绑定的工具与 `tools` 分类配置一致
 
 ## 组 2：接口与前端
 

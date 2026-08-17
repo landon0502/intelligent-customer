@@ -658,7 +658,7 @@ git commit -m "feat(agent): 动态系统提示词 build_system_prompt + filter_t
   - `app/lifespan.py`：`_agent_factory(config)` 闭包按 `config`（tools 分类，key 含 `tools.` 前缀）归一化 → `filter_tools` → `build_system_prompt` → `create_customer_agent(agent_llm, tools=enabled, system_prompt=system_prompt)`；`registry.register("agent", _agent_factory, "tools")`。
   - `services/config.py` `_apply_config_changes`：`llm` 分类变更时额外 `refresh("agent")`（对称 embedding→vectorstore 先例）。
 
-- [ ] **Step 1: 写失败测试（集成：真实 `_register_components`）**
+- [x] **Step 1: 写失败测试（集成：真实 `_register_components`）**
 
 在 `apps/service/tests/test_lifespan_agent.py` 写入：
 
@@ -745,12 +745,12 @@ async def test_apply_config_changes_refreshes_agent_on_llm_change():
     assert result["llm"]["agent"] is True
 ```
 
-- [ ] **Step 2: 运行确认失败**
+- [x] **Step 2: 运行确认失败**
 
 Run: `cd apps/service && .venv/bin/python -m pytest tests/test_lifespan_agent.py tests/test_tools.py -q`
 Expected: FAIL —— agent 仍注册为 `llm` 分类、`_apply_config_changes` 无 llm 对称刷新。
 
-- [ ] **Step 3: 改 `app/lifespan.py`**
+- [x] **Step 3: 改 `app/lifespan.py`**
 
 在 `_register_components` 中：
 
@@ -779,7 +779,7 @@ Expected: FAIL —— agent 仍注册为 `llm` 分类、`_apply_config_changes` 
     registry.register("agent", _agent_factory, "tools")
 ```
 
-- [ ] **Step 4: 改 `services/config.py` `_apply_config_changes`**
+- [x] **Step 4: 改 `services/config.py` `_apply_config_changes`**
 
 在现有 `# 特殊处理：embedding 变更时额外刷新 vectorstore` 块之后追加：
 
@@ -796,12 +796,12 @@ Expected: FAIL —— agent 仍注册为 `llm` 分类、`_apply_config_changes` 
             logger.warning("llm 变更后 agent 刷新失败（旧组件继续服务）")
 ```
 
-- [ ] **Step 5: 运行确认通过**
+- [x] **Step 5: 运行确认通过**
 
 Run: `cd apps/service && .venv/bin/python -m pytest tests/test_lifespan_agent.py tests/test_tools.py -q`
 Expected: PASS。
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add apps/service/app/lifespan.py apps/service/services/config.py apps/service/tests/test_lifespan_agent.py apps/service/tests/test_tools.py
