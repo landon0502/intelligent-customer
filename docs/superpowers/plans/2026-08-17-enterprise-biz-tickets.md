@@ -1609,7 +1609,7 @@ git commit -m "feat(web): 工单 API 服务封装（列表/状态更新）"
 - Produces: `/tickets` 页面（工单表 + 顶部状态筛选 + 每行状态更新下拉 + 空态 + toast），经 `layout.tsx` 的 `AuthGuard` + `AppLayout` 包裹。
 - i18n 文案键（本任务引用的 `t("...")`，Task 4.3 补齐两份 messages）。
 
-- [ ] **Step 1: 实现 useServices**
+- [x] **Step 1: 实现 useServices**
 
 `apps/web/app/tickets/useServices.ts`：
 
@@ -1653,7 +1653,7 @@ export default function useTicketServices() {
 }
 ```
 
-- [ ] **Step 2: 实现页面**
+- [x] **Step 2: 实现页面**
 
 `apps/web/app/tickets/page.tsx`：
 
@@ -1848,7 +1848,7 @@ export default function TicketsPage() {
 }
 ```
 
-- [ ] **Step 3: 实现 layout**
+- [x] **Step 3: 实现 layout**
 
 `apps/web/app/tickets/layout.tsx`：
 
@@ -1869,12 +1869,12 @@ export default function TicketsLayout({
 }
 ```
 
-- [ ] **Step 4: 类型检查**
+- [x] **Step 4: 类型检查**
 
 Run: `cd apps/web && pnpm typecheck`
 Expected: 无类型错误（i18n 文案键未定义不会导致 tsc 报错；运行时缺失会在 Task 4.3 补齐后消除）
 
-- [ ] **Step 5: 提交**
+- [x] **Step 5: 提交**
 
 ```bash
 cd /Users/superhuan/Documents/project/intelligent-customer

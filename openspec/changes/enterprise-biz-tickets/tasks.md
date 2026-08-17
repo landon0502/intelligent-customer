@@ -22,7 +22,7 @@
 ## 4. P6 前端工单管理页
 
 - [x] 4.1 新增 `apps/web/services/tickets.ts`（fetchClient 封装类型 + 接口）
-- [ ] 4.2 新增 `apps/web/app/tickets/useServices.ts` + `page.tsx`（工单列表 + 状态筛选/更新）
+- [x] 4.2 新增 `apps/web/app/tickets/useServices.ts` + `page.tsx`（工单列表 + 状态筛选/更新）
 - [ ] 4.3 `apps/web/config/menu.ts` 加"工单管理"菜单项（admin）与 `titleKeyMap`；i18n `messages/zh-CN.json`、`en-US.json` 补 `layout.menuTickets` 与 tickets 页文案
 
 ## 5. S1 安全默认值加固
