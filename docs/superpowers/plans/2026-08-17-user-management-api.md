@@ -659,7 +659,7 @@ git commit -m "feat(web): users 页 useUserServices 状态 Hook（useRequest 列
 - Consumes: Task 5 的 `useUserServices`（`users` / `createControl` / `createUser` / `removeUser`）；既有 `useTranslations("users")` / `useTranslations("common")` key；`tickets` 页的 `formatCreatedAt` 本地化格式惯例
 - Produces: 本 change 的最终页面交付（真实列表 + 本地搜索过滤 + 受控新增表单 + admin 行删除置灰 + toast）
 
-- [ ] **Step 1: 追加 i18n key（zh-CN）**
+- [x] **Step 1: 追加 i18n key（zh-CN）**
 
 在 `apps/web/messages/zh-CN.json` 的 `users` 命名空间内，`"rolePlaceholder": "请选择角色"` 之后追加：
 
@@ -668,7 +668,7 @@ git commit -m "feat(web): users 页 useUserServices 状态 Hook（useRequest 列
   "deleteUserSuccess": "用户已删除"
 ```
 
-- [ ] **Step 2: 追加 i18n key（en-US）**
+- [x] **Step 2: 追加 i18n key（en-US）**
 
 在 `apps/web/messages/en-US.json` 的 `users` 命名空间内追加对应英文键（先查看该文件 `users` 块结构，在 `rolePlaceholder` 之后插入，保持 JSON 合法）：
 
@@ -677,7 +677,7 @@ git commit -m "feat(web): users 页 useUserServices 状态 Hook（useRequest 列
   "deleteUserSuccess": "User deleted"
 ```
 
-- [ ] **Step 3: 替换 page.tsx**
+- [x] **Step 3: 替换 page.tsx**
 
 整文件替换 `apps/web/app/users/page.tsx` 为（核心改动：删除 `mockUsers`、接入 `useUserServices`、搜索过滤 `users`、新增受控表单、删除按钮 `user.role === "admin"` 置灰、`formatCreatedAt` 本地化、成功 toast 后刷新由 hook 内部 `listControl.run()` 完成）：
 
@@ -921,12 +921,12 @@ export default function UsersPage() {
 }
 ```
 
-- [ ] **Step 4: typecheck 验证**
+- [x] **Step 4: typecheck 验证**
 
 Run: `cd apps/web && pnpm typecheck`
 Expected: 本 change 涉及文件（`services/users.ts`、`app/users/useServices.ts`、`app/users/page.tsx`、`messages/*.json`）0 新增错误。
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/app/users/page.tsx apps/web/messages/zh-CN.json apps/web/messages/en-US.json
