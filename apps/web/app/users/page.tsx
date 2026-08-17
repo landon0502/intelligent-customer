@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useCallback, useState } from "react"
 import { useTranslations } from "next-intl"
 import { Search, UserPlus, Trash2, Shield, User } from "lucide-react"
+import { toast } from "sonner"
 
 import { Button } from "@intelligent-customer/ui/components/button"
 import { Input } from "@intelligent-customer/ui/components/input"
@@ -31,26 +32,62 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@intelligent-customer/ui/components/select"
+import useUserServices from "./useServices"
 
-// 模拟数据
-const mockUsers = [
-  { id: 1, username: "admin", role: "admin", createdAt: "2026-07-01 08:00" },
-  { id: 2, username: "zhang_san", role: "user", createdAt: "2026-07-10 14:30" },
-  { id: 3, username: "li_si", role: "user", createdAt: "2026-07-12 09:15" },
-  { id: 4, username: "wang_wu", role: "user", createdAt: "2026-07-15 16:45" },
-  { id: 5, username: "zhao_liu", role: "admin", createdAt: "2026-07-18 11:20" },
-]
+function formatCreatedAt(dateStr: string): string {
+  try {
+    return new Date(dateStr).toLocaleString("zh-CN", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    })
+  } catch {
+    return dateStr
+  }
+}
 
 export default function UsersPage() {
   const t = useTranslations("users")
   const tCommon = useTranslations("common")
+  const { users, createControl, createUser, removeUser } = useUserServices()
+
   const [searchQuery, setSearchQuery] = useState("")
   const [addOpen, setAddOpen] = useState(false)
+  const [username, setUsername] = useState("")
+  const [password, setPassword] = useState("")
+  const [role, setRole] = useState("user")
 
-  const filteredUsers = mockUsers.filter(
+  const filteredUsers = users.filter(
     (user) =>
       !searchQuery ||
       user.username.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
+  const handleAddUser = useCallback(async () => {
+    try {
+      await createUser(username, password, role)
+      toast.success(t("addUserSuccess"))
+      setAddOpen(false)
+      setUsername("")
+      setPassword("")
+      setRole("user")
+    } catch {
+      // 错误已由 fetchClient 拦截器统一处理
+    }
+  }, [createUser, username, password, role, t])
+
+  const handleDeleteUser = useCallback(
+    async (id: number) => {
+      try {
+        await removeUser(id)
+        toast.success(t("deleteUserSuccess"))
+      } catch {
+        // 错误已由 fetchClient 拦截器统一处理
+      }
+    },
+    [removeUser, t]
   )
 
   return (
@@ -60,7 +97,7 @@ export default function UsersPage() {
         <div>
           <h1 className="text-xl font-semibold">{t("title")}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {t("userCount", { count: mockUsers.length })}
+            {t("userCount", { count: users.length })}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -89,20 +126,29 @@ export default function UsersPage() {
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
                   <Label>{t("colUsername")}</Label>
-                  <Input placeholder={t("usernamePlaceholder")} />
+                  <Input
+                    placeholder={t("usernamePlaceholder")}
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>{t("colPassword")}</Label>
                   <Input
                     type="password"
                     placeholder={t("passwordPlaceholder")}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>{t("colRole")}</Label>
-                  <Select>
+                  <Select
+                    value={role}
+                    onValueChange={(v) => setRole(v ?? "user")}
+                  >
                     <SelectTrigger>
-                      <SelectValue placeholder={t("rolePlaceholder")} />
+                      <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="user">
@@ -114,7 +160,11 @@ export default function UsersPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                <Button className="w-full" onClick={() => setAddOpen(false)}>
+                <Button
+                  className="w-full"
+                  disabled={createControl.loading}
+                  onClick={handleAddUser}
+                >
                   {t("addUserConfirm")}
                 </Button>
               </div>
@@ -166,14 +216,15 @@ export default function UsersPage() {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-muted-foreground">
-                    {user.createdAt}
+                    {formatCreatedAt(user.created_at)}
                   </TableCell>
                   <TableCell className="text-right">
                     <Button
                       variant="ghost"
                       size="icon-sm"
                       className="text-destructive hover:text-destructive"
-                      disabled={user.username === "admin"}
+                      disabled={user.role === "admin"}
+                      onClick={() => handleDeleteUser(user.id)}
                     >
                       <Trash2 className="size-4" />
                     </Button>

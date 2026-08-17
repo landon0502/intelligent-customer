@@ -85,7 +85,9 @@
     "colActions": "Actions",
     "usernamePlaceholder": "Enter username",
     "passwordPlaceholder": "Enter password",
-    "rolePlaceholder": "Select role"
+    "rolePlaceholder": "Select role",
+    "addUserSuccess": "User created successfully",
+    "deleteUserSuccess": "User deleted"
   },
   "config": {
     "title": "⚙️ System Config",

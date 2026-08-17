@@ -85,7 +85,9 @@
     "colActions": "操作",
     "usernamePlaceholder": "请输入用户名",
     "passwordPlaceholder": "请输入密码",
-    "rolePlaceholder": "请选择角色"
+    "rolePlaceholder": "请选择角色",
+    "addUserSuccess": "用户创建成功",
+    "deleteUserSuccess": "用户已删除"
   },
   "config": {
     "title": "⚙️ 系统配置",
