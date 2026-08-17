@@ -12,6 +12,8 @@ from schemas.user import User
 from schemas.ticket import ServiceTicket
 from auth.security import get_current_user
 from services.ticket import (
+    TICKET_STATUS_PROCESSING,
+    TICKET_STATUS_CLOSED,
     create_ticket,
     list_tickets,
     get_ticket_by_no,
@@ -20,6 +22,9 @@ from services.ticket import (
 from utils.response import success, error
 
 router = APIRouter(prefix="/api/tickets", tags=["tickets"])
+
+# PATCH 状态更新仅允许 processing/closed，open 仅作初始状态不可回退
+_PATCHABLE_STATUSES = {TICKET_STATUS_PROCESSING, TICKET_STATUS_CLOSED}
 
 
 class TicketCreateRequest(BaseModel):
@@ -134,6 +139,8 @@ async def update_ticket_status_api(
     """更新工单状态（admin），body {"status": "processing"|"closed"}"""
     if current_user.role != "admin":
         return error(code=40003, message="仅管理员可操作工单")
+    if req.status not in _PATCHABLE_STATUSES:
+        return error(code=40004, message=f"非法工单状态: {req.status}")
     try:
         ticket = await update_status(db, no, req.status)
     except ValueError as e:
