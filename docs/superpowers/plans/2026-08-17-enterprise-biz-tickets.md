@@ -1123,7 +1123,7 @@ git commit -m "feat: 工单接口（创建/列表/详情/状态更新，admin �
   - `def get_current_conversation_id() -> int | None`
   - 供 Task 3.1/3.2 工具读取；`api/chat.py` 在 `agent.astream` 前后 set/reset。
 
-- [ ] **Step 1: 写失败测试**
+- [x] **Step 1: 写失败测试**
 
 `apps/service/tests/test_ticket_service.py` 追加：
 
@@ -1152,12 +1152,12 @@ def test_context_var_set_get_reset():
     assert get_current_conversation_id() is None
 ```
 
-- [ ] **Step 2: 运行测试确认失败**
+- [x] **Step 2: 运行测试确认失败**
 
 Run: `cd apps/service && .venv/bin/python -m pytest tests/test_ticket_service.py -v`
 Expected: 失败，`ModuleNotFoundError: No module named 'agent.tools.context'`
 
-- [ ] **Step 3: 实现 ContextVar 模块**
+- [x] **Step 3: 实现 ContextVar 模块**
 
 `apps/service/agent/tools/context.py`：
 
@@ -1198,7 +1198,7 @@ def get_current_conversation_id() -> int | None:
     return _current_conversation_id.get()
 ```
 
-- [ ] **Step 4: 在 `chat_stream` 中 set/reset**
+- [x] **Step 4: 在 `chat_stream` 中 set/reset**
 
 `apps/service/api/chat.py` 的 `event_generator` 开头与 `finally` 修改：
 
@@ -1221,7 +1221,7 @@ def get_current_conversation_id() -> int | None:
 
 （即：`agent.astream` 迭代前 `set_user_context(current_user.id, req.conversation_id)`，`finally` 中第一句 `reset_user_context()`。工具执行发生在 `astream` 迭代期间，因此能读到当前请求上下文；请求结束无论成功失败均重置，防止跨请求泄漏。）
 
-- [ ] **Step 5: 运行测试确认通过**
+- [x] **Step 5: 运行测试确认通过**
 
 Run: `cd apps/service && .venv/bin/python -m pytest tests/test_ticket_service.py -v`
 Expected: 11 passed（原 10 + ContextVar 1）
@@ -1229,7 +1229,7 @@ Expected: 11 passed（原 10 + ContextVar 1）
 Run: `cd apps/service && .venv/bin/python -m pytest tests/test_chat_endpoint.py -q`
 Expected: 通过（chat 端点既有用例不回归）
 
-- [ ] **Step 6: 提交**
+- [x] **Step 6: 提交**
 
 ```bash
 cd /Users/superhuan/Documents/project/intelligent-customer
