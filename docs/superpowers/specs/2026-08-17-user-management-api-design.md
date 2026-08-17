@@ -2,6 +2,8 @@
 comet_change: user-management-api
 role: technical-design
 canonical_spec: openspec
+archived-with: 2026-08-17-user-management-api
+status: final
 ---
 
 # Design: 用户管理真实接口（后端 users API + 前端去 mock）

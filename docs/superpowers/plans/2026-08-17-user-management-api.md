@@ -2,6 +2,7 @@
 change: user-management-api
 design-doc: docs/superpowers/specs/2026-08-17-user-management-api-design.md
 base-ref: 89e9827463d743dd65ad68a70dbd4ce623e8a1f7
+archived-with: 2026-08-17-user-management-api
 ---
 
 # 用户管理真实接口（后端 users API + 前端去 mock）实施计划
