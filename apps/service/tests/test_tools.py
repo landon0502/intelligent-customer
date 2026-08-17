@@ -149,3 +149,18 @@ async def test_update_tool_state_inserts_missing_key():
     assert inserted[0].key == "tools.clarify"
     assert inserted[0].category == "tools"
     assert inserted[0].value == "enabled"
+
+
+@pytest.mark.anyio
+async def test_apply_config_changes_refreshes_agent_on_llm_change():
+    """llm 分类变更时对称额外刷新 agent（agent slot 已解耦为 tools 分类）。"""
+    from services.config import _apply_config_changes
+
+    registry = AsyncMock()
+    registry.refresh_category = AsyncMock(return_value={"agent_llm": True})
+    registry.refresh = AsyncMock(return_value=True)
+
+    result = await _apply_config_changes({"llm"}, registry)
+
+    registry.refresh.assert_called_once_with("agent")
+    assert result["llm"]["agent"] is True

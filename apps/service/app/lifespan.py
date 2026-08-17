@@ -43,7 +43,8 @@ def _register_components(registry: ComponentRegistry) -> None:
     from models.factory import create_agent_llm, create_rag_llm
     from models.embedding import create_embeddings
     from rag.ingestion.vectorstore import create_chroma_client, create_vectorstore
-    from agent.factory import create_customer_agent
+    from agent.factory import create_customer_agent, filter_tools
+    from agent.prompts import build_system_prompt
 
     provider = registry._provider
 
@@ -75,13 +76,19 @@ def _register_components(registry: ComponentRegistry) -> None:
 
     registry.register("vectorstore", _vectorstore_factory, "vectorstore")
 
-    # 6. agent — config_category: llm
-    #    factory 需要已创建的 agent_llm
+    # 6. agent — config_category: tools
+    #    factory 需要已创建的 agent_llm + tools 分类配置；
+    #    config 是 tools 分类配置（key 含 "tools." 前缀），归一化后过滤启用工具。
     def _agent_factory(config: dict):
         agent_llm = registry.get("agent_llm")
-        return create_customer_agent(agent_llm)
+        states = {k.split(".", 1)[-1]: v for k, v in config.items()}
+        enabled = filter_tools(states)
+        system_prompt = build_system_prompt([t.name for t in enabled])
+        return create_customer_agent(
+            agent_llm, tools=enabled, system_prompt=system_prompt
+        )
 
-    registry.register("agent", _agent_factory, "llm")
+    registry.register("agent", _agent_factory, "tools")
 
 
 @asynccontextmanager

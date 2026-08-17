@@ -275,4 +275,15 @@ async def _apply_config_changes(
         else:
             logger.warning("embedding 变更后 vectorstore 刷新失败（旧组件继续服务）")
 
+    # 特殊处理：llm 变更时额外刷新 agent
+    # agent slot 的 config_category 已改为 tools，单纯 refresh_category("llm")
+    # 不再覆盖 agent；agent 内部持有 agent_llm 引用，需显式重建拿到新 LLM。
+    if "llm" in categories:
+        agent_refresh = await registry.refresh("agent")
+        result.setdefault("llm", {})["agent"] = agent_refresh
+        if agent_refresh:
+            logger.info("llm 变更后 agent 刷新成功")
+        else:
+            logger.warning("llm 变更后 agent 刷新失败（旧组件继续服务）")
+
     return result
