@@ -1166,9 +1166,9 @@ git commit -m "feat(web): 新增 tools 接口封装与 useToolServices 启停 ho
 - Consumes: `useToolServices()`（Task6，返回 `tools` / `toggleTool`）；后端 GET 返回的 `ToolItem[]`（`name`/`description`/`enabled`）。
 - Produces: 去 mock 后的 tools 页：静态 `toolMeta` 元数据（i18n 键 + implemented）与后端 `name`/`enabled` 合并渲染；开关调 PATCH；`transfer_human`/`clarify` 行开关置灰。
 
-- [ ] **Step 1: 写失败（typecheck）先行验证点**：无独立测试框架，本 Task 以 `pnpm typecheck` + 本地渲染验证作为验收。
+- [x] **Step 1: 写失败（typecheck）先行验证点**：无独立测试框架，本 Task 以 `pnpm typecheck` + 本地渲染验证作为验收。
 
-- [ ] **Step 2: 替换 `apps/web/app/tools/page.tsx`**
+- [x] **Step 2: 替换 `apps/web/app/tools/page.tsx`**
 
 整文件替换为：
 
@@ -1396,7 +1396,7 @@ export default function ToolsPage() {
 }
 ```
 
-- [ ] **Step 3: 补充 i18n**
+- [x] **Step 3: 补充 i18n**
 
 在 `apps/web/messages/zh-CN.json` 的 `"tools"` 对象末尾（`"toolOutputQuestion"` 之后）追加：
 
@@ -1416,7 +1416,7 @@ export default function ToolsPage() {
 
 （注意 JSON 末尾逗号规则：`"toolOutputQuestion"` 与新增键之间加逗号，最后一项不带逗号。）
 
-- [ ] **Step 4: typecheck + 本地验证**
+- [x] **Step 4: typecheck + 本地验证**
 
 Run: `cd /Users/superhuan/Documents/project/intelligent-customer && pnpm typecheck`
 Expected: PASS。
@@ -1426,7 +1426,7 @@ Expected: PASS。
 - 点击某工具开关 → 调 PATCH → 成功 toast + 列表刷新
 - `transfer_human` / `clarify` 两行开关置灰不可点（hover 显示「兜底工具不可禁用」）
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/app/tools/page.tsx apps/web/messages/zh-CN.json apps/web/messages/en-US.json

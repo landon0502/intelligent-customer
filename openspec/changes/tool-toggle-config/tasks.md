@@ -33,10 +33,10 @@
 - [x] `pnpm typecheck` 无本文件新增错误
 
 ### Task 7: page.tsx 去 mock 与 i18n
-- [ ] `page.tsx` 去除 `mockTools`：保留前端静态展示元数据映射（name → triggerKey/inputKey/outputKey/i18n、implemented 标记），与后端返回的 name/enabled 合并渲染
-- [ ] 开关切换调用 PATCH 接口 → 成功后刷新列表；`transfer_human`/`clarify` 行开关置灰不可操作
-- [ ] i18n `zh-CN.json`/`en-US.json` 补充 tools 相关提示（如兜底工具不可禁用、操作失败）
-- [ ] `pnpm typecheck` + 本地验证页面真实渲染
+- [x] `page.tsx` 去除 `mockTools`：保留前端静态展示元数据映射（name → triggerKey/inputKey/outputKey/i18n、implemented 标记），与后端返回的 name/enabled 合并渲染
+- [x] 开关切换调用 PATCH 接口 → 成功后刷新列表；`transfer_human`/`clarify` 行开关置灰不可操作
+- [x] i18n `zh-CN.json`/`en-US.json` 补充 tools 相关提示（如兜底工具不可禁用、操作失败）
+- [x] `pnpm typecheck` + 本地验证页面真实渲染
 
 ## 组 3：全量验证
 
