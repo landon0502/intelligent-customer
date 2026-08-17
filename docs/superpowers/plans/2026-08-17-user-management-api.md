@@ -524,7 +524,7 @@ git commit -m "test(service): 用户管理测试文件补全 tasks 1.3 全部 10
   - `export async function createUserApi(username: string, password: string, role: string): Promise<ApiResponse<User>>`
   - `export async function deleteUserApi(id: number): Promise<ApiResponse<{ success: boolean }>>`
 
-- [ ] **Step 1: 写文件**
+- [x] **Step 1: 写文件**
 
 新建 `apps/web/services/users.ts`（镜像 `apps/web/services/tickets.ts` 的封装风格；`fetchClient` 的 `baseURL` 已含 `/api`，故路径写 `/users` 与后端 `prefix="/api/users"` 对应）：
 
@@ -559,12 +559,12 @@ export async function deleteUserApi(id: number) {
 }
 ```
 
-- [ ] **Step 2: typecheck 验证**
+- [x] **Step 2: typecheck 验证**
 
 Run: `cd apps/web && pnpm typecheck`
 Expected: 本文件 0 新增错误（`__tests__` 14 个基线存量错误忽略）。
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add apps/web/services/users.ts
