@@ -28,7 +28,7 @@
 ## 5. S1 安全默认值加固
 
 - [x] 5.1 `configs/config.py` 提供 `validate_security_defaults()`，`lifespan` 启动时校验弱默认值并 `logger.warning`
-- [ ] 5.2 `.env`：`JWT_SECRET` 改强随机、`ADMIN_PASSWORD` 改强密码（`DB_PASSWORD` 不动）
+- [x] 5.2 `.env`：`JWT_SECRET` 改强随机、`ADMIN_PASSWORD` 改强密码（`DB_PASSWORD` 不动）
 
 ## 6. 测试
 

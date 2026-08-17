@@ -2060,12 +2060,12 @@ git commit -m "feat: 启动时校验安全默认值并告警"
 **Interfaces:**
 - Produces: 强随机 `JWT_SECRET`（`secrets.token_hex(32)` 生成）、强 `ADMIN_PASSWORD`；`DB_PASSWORD` 与其余配置保持不变。
 
-- [ ] **Step 1: 生成强随机 JWT_SECRET**
+- [x] **Step 1: 生成强随机 JWT_SECRET**
 
 Run: `cd apps/service && .venv/bin/python -c "import secrets; print(secrets.token_hex(32))"`
 Expected: 输出 64 位十六进制字符串（形如 `a1b2...`，记下备用）
 
-- [ ] **Step 2: 修改 .env**
+- [x] **Step 2: 修改 .env**
 
 `apps/service/.env` 中：
 
@@ -2078,12 +2078,12 @@ ADMIN_PASSWORD=<强密码，如 Admin#2026Secure>
 
 > 注意：`seed_admin_user` 仅在 admin 不存在时创建。若本地库已存在 admin（旧密码哈希），改 `.env` 不会覆盖已有用户。Task 7.1 重启前，若需要让新 `ADMIN_PASSWORD` 生效，手动执行一条 SQL 删除已有 admin 行（`DELETE FROM users WHERE username='admin';`），启动时将以新密码重建。
 
-- [ ] **Step 3: 验证弱值告警消失**
+- [x] **Step 3: 验证弱值告警消失**
 
 Run: `cd apps/service && .venv/bin/python -c "from configs.config import validate_security_defaults; validate_security_defaults()"`
 Expected: 无 `安全告警` 输出
 
-- [ ] **Step 4: 提交**
+- [x] **Step 4: 提交**
 
 ```bash
 cd /Users/superhuan/Documents/project/intelligent-customer
