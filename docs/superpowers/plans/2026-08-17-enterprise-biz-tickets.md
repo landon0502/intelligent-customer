@@ -1544,7 +1544,7 @@ git commit -m "feat: transfer_human async 化并生成 HUMAN 哨兵工单"
   - `export async function updateTicketStatusApi(ticketNo: string, status: TicketStatus)`
   - 供 Task 4.2 `useServices.ts` 使用。
 
-- [ ] **Step 1: 实现服务封装**
+- [x] **Step 1: 实现服务封装**
 
 `apps/web/services/tickets.ts`：
 
@@ -1582,12 +1582,12 @@ export async function updateTicketStatusApi(ticketNo: string, status: TicketStat
 }
 ```
 
-- [ ] **Step 2: 类型检查**
+- [x] **Step 2: 类型检查**
 
 Run: `cd apps/web && pnpm typecheck`
 Expected: 无类型错误
 
-- [ ] **Step 3: 提交**
+- [x] **Step 3: 提交**
 
 ```bash
 cd /Users/superhuan/Documents/project/intelligent-customer
