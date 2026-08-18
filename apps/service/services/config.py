@@ -106,6 +106,32 @@ DEFAULT_CONFIGS: dict[str, dict] = {
         "category": "vectorstore",
         "description": "集合名称",
     },
+    # Reranker 重排序（默认关闭，启用时懒加载 Qwen3-Reranker）
+    "rerank.enabled": {
+        "value": "false",
+        "category": "rerank",
+        "description": "是否启用 Reranker 重排序（true/false）",
+    },
+    "rerank.model": {
+        "value": "Qwen/Qwen3-Reranker-0.6B",
+        "category": "rerank",
+        "description": "Reranker 模型名称",
+    },
+    "rerank.device": {
+        "value": "cpu",
+        "category": "rerank",
+        "description": "Reranker 推理设备（cpu/mps/cuda）",
+    },
+    "rerank.candidates": {
+        "value": "20",
+        "category": "rerank",
+        "description": "重排前向量召回候选集大小",
+    },
+    "rerank.recall_threshold": {
+        "value": "0.1",
+        "category": "rerank",
+        "description": "重排前候选集宽松向量相似度阈值",
+    },
     # 工具启停（默认全启用；transfer_human / clarify 为兜底工具，后端禁止禁用）
     "tools.knowledge_base_query": {
         "value": "enabled",

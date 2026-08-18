@@ -6,7 +6,9 @@
     "logout": "Log Out",
     "settings": "Settings",
     "roleAdmin": "Admin",
-    "roleUser": "User"
+    "roleUser": "User",
+    "confirm": "Confirm",
+    "cancel": "Cancel"
   },
   "layout": {
     "menuChat": "Smart Chat",
@@ -36,7 +38,9 @@
     "emptySession": "Select or create a session to start chatting",
     "selectSession": "Select a session",
     "loading": "Loading...",
-    "stop": "Stop"
+    "stop": "Stop",
+    "deleteSessionTitle": "Delete Session",
+    "deleteSessionDesc": "Delete session \"{title}\"? This cannot be undone."
   },
   "knowledge": {
     "title": "📚 Knowledge Base",
@@ -62,6 +66,8 @@
     "uploading": "Uploading...",
     "deleteSuccess": "Deleted successfully",
     "deleteFailed": "Delete failed",
+    "deleteDocTitle": "Delete Document",
+    "deleteDocDesc": "Delete document \"{filename}\"? It will need to be re-uploaded.",
     "noDocuments": "No documents yet",
     "noResults": "No results found",
     "searching": "Searching...",
@@ -87,13 +93,16 @@
     "passwordPlaceholder": "Enter password",
     "rolePlaceholder": "Select role",
     "addUserSuccess": "User created successfully",
-    "deleteUserSuccess": "User deleted"
+    "deleteUserSuccess": "User deleted",
+    "deleteUserTitle": "Delete User",
+    "deleteUserDesc": "Delete user \"{username}\"? This cannot be undone."
   },
   "config": {
     "title": "⚙️ System Config",
     "tabLlm": "LLM Model",
     "tabEmbedding": "Embedding",
     "tabVectorStore": "Vector Store",
+    "tabReranker": "Reranker",
     "llmTitle": "LLM Model Configuration",
     "llmProvider": "Provider",
     "llmModel": "Model Name",
@@ -112,6 +121,14 @@
     "vsHost": "Host",
     "vsPort": "Port",
     "vsCollection": "Collection",
+    "rerankerTitle": "Reranker Configuration",
+    "rerankEnabled": "Enable Reranking",
+    "rerankEnabledOn": "Enabled",
+    "rerankDisabled": "Disabled",
+    "rerankDevice": "Device",
+    "rerankModel": "Model",
+    "rerankCandidates": "Candidates",
+    "rerankRecallThreshold": "Recall Threshold",
     "providerZhipu": "Zhipu",
     "providerDeepseek": "DeepSeek",
     "providerOpenai": "OpenAI",

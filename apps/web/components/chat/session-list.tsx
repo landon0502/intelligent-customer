@@ -1,7 +1,9 @@
 "use client"
 
+import { useState } from "react"
 import { useTranslations } from "next-intl"
 import { Plus, X } from "lucide-react"
+import { ConfirmDialog } from "@/components/confirm-dialog"
 
 export interface DisplaySession {
   id: number
@@ -32,6 +34,9 @@ export function SessionList({
   onDelete,
 }: SessionListProps) {
   const t = useTranslations("chat")
+  const [pendingDelete, setPendingDelete] = useState<DisplaySession | null>(
+    null
+  )
 
   return (
     <div className="flex w-64 flex-col border-r bg-background">
@@ -62,7 +67,7 @@ export function SessionList({
                 <button
                   onClick={(e) => {
                     e.stopPropagation()
-                    onDelete(session.id)
+                    setPendingDelete(session)
                   }}
                   className="p-0.5 text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-foreground"
                   aria-label="Delete session"
@@ -77,6 +82,19 @@ export function SessionList({
           ))}
         </div>
       </div>
+
+      <ConfirmDialog
+        open={pendingDelete !== null}
+        onOpenChange={(open) => !open && setPendingDelete(null)}
+        title={t("deleteSessionTitle")}
+        description={t("deleteSessionDesc", {
+          title: pendingDelete?.title ?? "",
+        })}
+        onConfirm={() => {
+          if (pendingDelete) onDelete(pendingDelete.id)
+          setPendingDelete(null)
+        }}
+      />
     </div>
   )
 }

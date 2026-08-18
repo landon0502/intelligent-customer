@@ -24,6 +24,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@intelligent-customer/ui/components/dialog"
+import { ConfirmDialog } from "@/components/confirm-dialog"
 import { Label } from "@intelligent-customer/ui/components/label"
 import {
   Select,
@@ -51,13 +52,18 @@ function formatCreatedAt(dateStr: string): string {
 export default function UsersPage() {
   const t = useTranslations("users")
   const tCommon = useTranslations("common")
-  const { users, createControl, createUser, removeUser } = useUserServices()
+  const { users, createControl, createUser, removeUser, deleteControl } =
+    useUserServices()
 
   const [searchQuery, setSearchQuery] = useState("")
   const [addOpen, setAddOpen] = useState(false)
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [role, setRole] = useState("user")
+  const [deleteTarget, setDeleteTarget] = useState<{
+    id: number
+    username: string
+  } | null>(null)
 
   const filteredUsers = users.filter(
     (user) =>
@@ -83,6 +89,7 @@ export default function UsersPage() {
       try {
         await removeUser(id)
         toast.success(t("deleteUserSuccess"))
+        setDeleteTarget(null)
       } catch {
         // 错误已由 fetchClient 拦截器统一处理
       }
@@ -224,7 +231,7 @@ export default function UsersPage() {
                       size="icon-sm"
                       className="text-destructive hover:text-destructive"
                       disabled={user.role === "admin"}
-                      onClick={() => handleDeleteUser(user.id)}
+                      onClick={() => setDeleteTarget(user)}
                     >
                       <Trash2 className="size-4" />
                     </Button>
@@ -235,6 +242,17 @@ export default function UsersPage() {
           </Table>
         </CardContent>
       </Card>
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        title={t("deleteUserTitle")}
+        description={t("deleteUserDesc", {
+          username: deleteTarget?.username ?? "",
+        })}
+        loading={deleteControl.loading}
+        onConfirm={() => deleteTarget && handleDeleteUser(deleteTarget.id)}
+      />
     </div>
   )
 }

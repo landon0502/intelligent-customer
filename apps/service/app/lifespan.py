@@ -43,6 +43,7 @@ def _register_components(registry: ComponentRegistry) -> None:
     from models.factory import create_agent_llm, create_rag_llm
     from models.embedding import create_embeddings
     from rag.ingestion.vectorstore import create_chroma_client, create_vectorstore
+    from rag.retrieval.reranker import create_reranker
     from agent.factory import create_customer_agent, filter_tools
     from agent.prompts import build_system_prompt
 
@@ -75,6 +76,10 @@ def _register_components(registry: ComponentRegistry) -> None:
         return create_vectorstore(config, embeddings, client)
 
     registry.register("vectorstore", _vectorstore_factory, "vectorstore")
+
+    # 5.5 reranker — config_category: rerank
+    #    默认关闭（rerank.enabled=false），启用时懒加载 Qwen3-Reranker 模型
+    registry.register("reranker", create_reranker, "rerank")
 
     # 6. agent — config_category: tools
     #    factory 需要已创建的 agent_llm + tools 分类配置；

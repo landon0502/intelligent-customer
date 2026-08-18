@@ -37,9 +37,12 @@ import {
   fromEmbeddingConfig,
   toVectorStoreConfig,
   fromVectorStoreConfig,
+  toRerankerConfig,
+  fromRerankerConfig,
   type LlmConfig,
   type EmbeddingConfig,
   type VectorStoreConfig,
+  type RerankerConfig,
 } from "@/services/config"
 
 export default function ConfigPage() {
@@ -66,6 +69,13 @@ export default function ConfigPage() {
     port: "8000",
     collection: "knowledge_base",
   })
+  const [reranker, setReranker] = useState<RerankerConfig>({
+    enabled: "false",
+    model: "Qwen/Qwen3-Reranker-0.6B",
+    device: "cpu",
+    candidates: "20",
+    recall_threshold: "0.1",
+  })
 
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState<string | null>(null)
@@ -80,6 +90,7 @@ export default function ConfigPage() {
           setLlm(toLlmConfig(items))
           setEmbedding(toEmbeddingConfig(items))
           setVectorStore(toVectorStoreConfig(items))
+          setReranker(toRerankerConfig(items))
         }
       } catch {
         if (!cancelled) toast.error("加载配置失败")
@@ -98,7 +109,9 @@ export default function ConfigPage() {
       if (category === "llm") configs = fromLlmConfig(llm)
       else if (category === "embedding")
         configs = fromEmbeddingConfig(embedding)
-      else configs = fromVectorStoreConfig(vectorStore)
+      else if (category === "vectorstore")
+        configs = fromVectorStoreConfig(vectorStore)
+      else configs = fromRerankerConfig(reranker)
 
       await updateConfigs(configs)
       toast.success(t("save") + " ✓")
@@ -128,6 +141,7 @@ export default function ConfigPage() {
           <TabsTrigger value="llm">{t("tabLlm")}</TabsTrigger>
           <TabsTrigger value="embedding">{t("tabEmbedding")}</TabsTrigger>
           <TabsTrigger value="vectorstore">{t("tabVectorStore")}</TabsTrigger>
+          <TabsTrigger value="reranker">{t("tabReranker")}</TabsTrigger>
         </TabsList>
 
         {/* LLM 配置 */}
@@ -350,6 +364,107 @@ export default function ConfigPage() {
                   disabled={saving === "vectorstore"}
                 >
                   {saving === "vectorstore" ? (
+                    <Loader2 className="mr-2 size-4 animate-spin" />
+                  ) : (
+                    <Save className="mr-2 size-4" />
+                  )}
+                  {t("save")}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Reranker 重排序配置 */}
+        <TabsContent value="reranker" className="mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">
+                {t("rerankerTitle")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>{t("rerankEnabled")}</Label>
+                  <Select
+                    value={reranker.enabled}
+                    onValueChange={(v) =>
+                      v && setReranker({ ...reranker, enabled: v })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="false">
+                        {t("rerankDisabled")}
+                      </SelectItem>
+                      <SelectItem value="true">{t("rerankEnabledOn")}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>{t("rerankDevice")}</Label>
+                  <Select
+                    value={reranker.device}
+                    onValueChange={(v) =>
+                      v && setReranker({ ...reranker, device: v })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="cpu">CPU</SelectItem>
+                      <SelectItem value="mps">MPS</SelectItem>
+                      <SelectItem value="cuda">CUDA</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>{t("rerankModel")}</Label>
+                  <Input
+                    value={reranker.model}
+                    onChange={(e) =>
+                      setReranker({ ...reranker, model: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>{t("rerankCandidates")}</Label>
+                  <Input
+                    type="number"
+                    min="1"
+                    value={reranker.candidates}
+                    onChange={(e) =>
+                      setReranker({ ...reranker, candidates: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>{t("rerankRecallThreshold")}</Label>
+                  <Input
+                    type="number"
+                    step="0.05"
+                    min="0"
+                    max="1"
+                    value={reranker.recall_threshold}
+                    onChange={(e) =>
+                      setReranker({
+                        ...reranker,
+                        recall_threshold: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end pt-2">
+                <Button
+                  onClick={() => handleSave("reranker")}
+                  disabled={saving === "reranker"}
+                >
+                  {saving === "reranker" ? (
                     <Loader2 className="mr-2 size-4 animate-spin" />
                   ) : (
                     <Save className="mr-2 size-4" />

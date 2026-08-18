@@ -6,7 +6,9 @@
     "logout": "退出登录",
     "settings": "系统设置",
     "roleAdmin": "管理员",
-    "roleUser": "普通用户"
+    "roleUser": "普通用户",
+    "confirm": "确认",
+    "cancel": "取消"
   },
   "layout": {
     "menuChat": "智能对话",
@@ -36,7 +38,9 @@
     "emptySession": "选择或创建一个会话开始对话",
     "selectSession": "请选择一个会话",
     "loading": "加载中...",
-    "stop": "停止"
+    "stop": "停止",
+    "deleteSessionTitle": "删除会话",
+    "deleteSessionDesc": "确定要删除会话「{title}」吗？此操作不可撤销。"
   },
   "knowledge": {
     "title": "📚 知识库管理",
@@ -62,6 +66,8 @@
     "uploading": "上传中...",
     "deleteSuccess": "删除成功",
     "deleteFailed": "删除失败",
+    "deleteDocTitle": "删除文档",
+    "deleteDocDesc": "确定要删除文档「{filename}」吗？删除后需重新上传。",
     "noDocuments": "暂无文档",
     "noResults": "未找到相关结果",
     "searching": "搜索中...",
@@ -87,13 +93,16 @@
     "passwordPlaceholder": "请输入密码",
     "rolePlaceholder": "请选择角色",
     "addUserSuccess": "用户创建成功",
-    "deleteUserSuccess": "用户已删除"
+    "deleteUserSuccess": "用户已删除",
+    "deleteUserTitle": "删除用户",
+    "deleteUserDesc": "确定要删除用户「{username}」吗？此操作不可撤销。"
   },
   "config": {
     "title": "⚙️ 系统配置",
     "tabLlm": "LLM 模型",
     "tabEmbedding": "Embedding",
     "tabVectorStore": "向量数据库",
+    "tabReranker": "Reranker 重排序",
     "llmTitle": "LLM 模型配置",
     "llmProvider": "提供商",
     "llmModel": "模型名称",
@@ -112,6 +121,14 @@
     "vsHost": "主机地址",
     "vsPort": "端口",
     "vsCollection": "集合名称",
+    "rerankerTitle": "Reranker 重排序配置",
+    "rerankEnabled": "启用重排序",
+    "rerankEnabledOn": "启用",
+    "rerankDisabled": "关闭",
+    "rerankDevice": "推理设备",
+    "rerankModel": "模型名称",
+    "rerankCandidates": "召回候选数",
+    "rerankRecallThreshold": "召回阈值",
     "providerZhipu": "智谱",
     "providerDeepseek": "DeepSeek",
     "providerOpenai": "OpenAI",

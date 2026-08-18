@@ -76,9 +76,7 @@ async def chat_stream(
     else:
         # 兼容：如果前端未发送 messages，从 DB 加载历史
         recent = await get_recent_messages(db, req.conversation_id, limit=20)
-        history_messages = [
-
-        ]
+        history_messages = []
         for msg in recent:
             if msg.role == "user":
                 history_messages.append(HumanMessage(content=msg.content))

@@ -6,8 +6,8 @@
     .venv/bin/python -m rag.evaluation.benchmark --mode rag           # RAG（需知识库已入库 + Chroma）
     .venv/bin/python -m rag.evaluation.benchmark --mode both --limit 5  # 两者各跑前 5 题
 
-输出：控制台准确率对比表 + report.json（题目数/答对数/准确率）。
-支撑论文"RAG 较纯 LLM 提升 35 个百分点"结论。
+输出：控制台准确率对比表 + report.json（整体与直接/换说法/多轮追问分档的题目数/答对数/准确率）。
+支撑论文"RAG 较纯 LLM 提升约 46.7 个百分点"结论（30 题企业文档，三档各 10 题）。
 """
 
 import argparse
@@ -28,6 +28,8 @@ REPORT_FILE = Path(__file__).parent / "report.json"
 
 # 每次 LLM 调用的重试次数（网络波动/长响应超时容错）
 MAX_RETRIES = 3
+# 单次 LLM 调用硬超时（秒），防止连接挂死导致评估卡住
+CALL_TIMEOUT = 120
 
 
 def _content(resp) -> str:
@@ -35,6 +37,17 @@ def _content(resp) -> str:
     if hasattr(resp, "content"):
         return str(resp.content)
     return str(resp)
+
+
+def _full_query(q: dict) -> str:
+    """构造发送给模型的完整提问。
+
+    多轮追问题拼接模拟对话历史，使代词式追问可独立理解；
+    直接/换说法题直接用问题原文。
+    """
+    if q.get("type") == "多轮追问" and q.get("context"):
+        return f"对话历史：\n{q['context']}\n\n当前提问：{q['question']}"
+    return q["question"]
 
 
 async def _load_provider():
@@ -59,15 +72,21 @@ async def _init_rag_env(provider):
 
 
 async def _call_with_retry(coro_factory, desc: str) -> str:
-    """调用 LLM 并重试（网络波动/长响应超时容错）。"""
+    """调用 LLM 并重试（网络波动/长响应超时容错）。
+
+    每次调用用 asyncio.wait_for 硬超时兜底，避免连接挂死阻塞整个评估。
+    """
     last_exc = None
     for attempt in range(1, MAX_RETRIES + 1):
         try:
-            return await coro_factory()
+            return await asyncio.wait_for(coro_factory(), timeout=CALL_TIMEOUT)
+        except asyncio.TimeoutError:
+            last_exc = TimeoutError(f"{desc} 超时（>{CALL_TIMEOUT}s）")
+            print(f"    [重试 {attempt}/{MAX_RETRIES}] {desc}: 超时", flush=True)
         except Exception as e:  # noqa: BLE001 — 评估脚本需容忍任何网络/API 错误
             last_exc = e
             print(f"    [重试 {attempt}/{MAX_RETRIES}] {desc}: {type(e).__name__}", flush=True)
-            await asyncio.sleep(1)
+        await asyncio.sleep(1)
     raise last_exc
 
 
@@ -105,14 +124,18 @@ async def run_mode(mode: str, questions: list[dict], llm, limit: int | None) -> 
     results = []
     subset = questions if limit is None else questions[:limit]
     for i, q in enumerate(subset, 1):
-        print(f"  [{i}/{len(subset)}] 题：{q['question'][:50]}...", flush=True)
+        qtype = q.get("type", "直接")
+        print(f"  [{i}/{len(subset)}] [{qtype}] 题：{q['question'][:40]}...", flush=True)
+        full_query = _full_query(q)
         answer = await (
-            answer_pure(llm, q["question"]) if mode == "pure" else answer_rag(q["question"])
+            answer_pure(llm, full_query) if mode == "pure" else answer_rag(full_query)
         )
         correct = await judge(llm, q["answer"], answer)
         results.append(
             {
                 "question": q["question"],
+                "type": qtype,
+                "context": q.get("context"),
                 "reference": q["answer"],
                 "answer": answer[:500],
                 "correct": correct,
@@ -124,12 +147,24 @@ async def run_mode(mode: str, questions: list[dict], llm, limit: int | None) -> 
 def _summarize(mode: str, results: list[dict]) -> dict:
     n = len(results)
     correct = sum(1 for r in results if r["correct"])
-    return {
+    summary = {
         "mode": mode,
         "total": n,
         "correct": correct,
         "accuracy": round(correct / n, 4) if n else 0,
     }
+    # 按提问方式分档统计（直接/换说法/多轮追问），缺失档位补零
+    by_type = {}
+    for t in ("直接", "换说法", "多轮追问"):
+        subset = [r for r in results if r.get("type") == t]
+        c = sum(1 for r in subset if r["correct"])
+        by_type[t] = {
+            "total": len(subset),
+            "correct": c,
+            "accuracy": round(c / len(subset), 4) if subset else 0,
+        }
+    summary["by_type"] = by_type
+    return summary
 
 
 async def main() -> None:
@@ -171,11 +206,15 @@ async def main() -> None:
         details["rag"] = await run_mode("rag", questions, llm, args.limit)
         summaries.append(_summarize("rag", details["rag"]))
 
-    # 输出对比表
-    print("\n===== 准确率对比 =====")
-    print(f"{'模式':<8}{'题目数':<8}{'答对数':<8}{'准确率':<10}")
+    # 输出对比表（整体 + 按提问方式分档）
+    print("\n===== 准确率对比（整体 + 按提问方式分档）=====")
     for s in summaries:
-        print(f"{s['mode']:<8}{s['total']:<8}{s['correct']:<8}{s['accuracy']:.1%}")
+        print(f"\n--- {s['mode']} 模式 ---")
+        print(f"{'类型':<8}{'题目数':<8}{'答对数':<8}{'准确率':<10}")
+        print(f"{'整体':<8}{s['total']:<8}{s['correct']:<8}{s['accuracy']:.1%}")
+        for t in ("直接", "换说法", "多轮追问"):
+            b = s["by_type"][t]
+            print(f"{t:<8}{b['total']:<8}{b['correct']:<8}{b['accuracy']:.1%}")
     if len(summaries) == 2:
         delta = summaries[1]["accuracy"] - summaries[0]["accuracy"]
         print(f"\nRAG 较纯 LLM 提升：{delta:+.1%}")

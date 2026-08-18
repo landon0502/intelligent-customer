@@ -31,6 +31,14 @@ export interface VectorStoreConfig {
   collection: string
 }
 
+export interface RerankerConfig {
+  enabled: string
+  model: string
+  device: string
+  candidates: string
+  recall_threshold: string
+}
+
 /** 获取所有配置 */
 export async function getConfigs(category?: string): Promise<ConfigItem[]> {
   const params = category ? `?category=${category}` : ""
@@ -125,6 +133,33 @@ export function fromVectorStoreConfig(cfg: VectorStoreConfig): ConfigItem[] {
       key: "vectorstore.collection",
       value: cfg.collection,
       category: "vectorstore",
+    },
+  ]
+}
+
+/** 配置项列表 → RerankerConfig 对象 */
+export function toRerankerConfig(items: ConfigItem[]): RerankerConfig {
+  const map = Object.fromEntries(items.map((i) => [i.key, i.value]))
+  return {
+    enabled: map["rerank.enabled"] ?? "false",
+    model: map["rerank.model"] ?? "Qwen/Qwen3-Reranker-0.6B",
+    device: map["rerank.device"] ?? "cpu",
+    candidates: map["rerank.candidates"] ?? "20",
+    recall_threshold: map["rerank.recall_threshold"] ?? "0.1",
+  }
+}
+
+/** RerankerConfig 对象 → 配置项列表 */
+export function fromRerankerConfig(cfg: RerankerConfig): ConfigItem[] {
+  return [
+    { key: "rerank.enabled", value: cfg.enabled, category: "rerank" },
+    { key: "rerank.model", value: cfg.model, category: "rerank" },
+    { key: "rerank.device", value: cfg.device, category: "rerank" },
+    { key: "rerank.candidates", value: cfg.candidates, category: "rerank" },
+    {
+      key: "rerank.recall_threshold",
+      value: cfg.recall_threshold,
+      category: "rerank",
     },
   ]
 }

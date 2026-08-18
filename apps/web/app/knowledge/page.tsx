@@ -29,6 +29,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@intelligent-customer/ui/components/dialog"
+import { ConfirmDialog } from "@/components/confirm-dialog"
 import { toast } from "sonner"
 
 function FileTypeIcon({ type }: { type: string }) {
@@ -103,6 +104,10 @@ export default function KnowledgePage() {
   const [retrievalQuery, setRetrievalQuery] = useState("")
   const [showResults, setShowResults] = useState(false)
   const [uploadOpen, setUploadOpen] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState<{
+    id: number
+    filename: string
+  } | null>(null)
 
   // 页面加载时获取文档列表
   useEffect(() => {
@@ -149,6 +154,7 @@ export default function KnowledgePage() {
       try {
         await removeDocument(id)
         toast.success(t("deleteSuccess"))
+        setDeleteTarget(null)
         documentsControl.run()
       } catch {
         toast.error(t("deleteFailed"))
@@ -290,7 +296,7 @@ export default function KnowledgePage() {
                           deleteControl.params?.[0] === doc.id &&
                           deleteControl.loading
                         }
-                        onClick={() => handleDelete(doc.id)}
+                        onClick={() => setDeleteTarget(doc)}
                       >
                         <Trash2 className="size-4" />
                       </Button>
@@ -355,6 +361,17 @@ export default function KnowledgePage() {
           )}
         </CardContent>
       </Card>
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        title={t("deleteDocTitle")}
+        description={t("deleteDocDesc", {
+          filename: deleteTarget?.filename ?? "",
+        })}
+        loading={deleteControl.loading}
+        onConfirm={() => deleteTarget && handleDelete(deleteTarget.id)}
+      />
     </div>
   )
 }
