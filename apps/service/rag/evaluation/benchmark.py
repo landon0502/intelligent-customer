@@ -14,13 +14,20 @@ import argparse
 import asyncio
 import json
 import logging
+import os
 import sys
 from pathlib import Path
+
+# 评估环境：禁用 LangSmith 追踪（避免 DNS 噪音与无关请求）
+os.environ.setdefault("LANGSMITH_TRACING", "false")
 
 logging.basicConfig(level=logging.WARNING, format="%(levelname)s %(name)s: %(message)s")
 
 QUESTIONS_FILE = Path(__file__).parent / "questions.json"
 REPORT_FILE = Path(__file__).parent / "report.json"
+
+# 每次 LLM 调用的重试次数（网络波动/长响应超时容错）
+MAX_RETRIES = 3
 
 
 def _content(resp) -> str:
@@ -51,9 +58,22 @@ async def _init_rag_env(provider):
     return registry
 
 
+async def _call_with_retry(coro_factory, desc: str) -> str:
+    """调用 LLM 并重试（网络波动/长响应超时容错）。"""
+    last_exc = None
+    for attempt in range(1, MAX_RETRIES + 1):
+        try:
+            return await coro_factory()
+        except Exception as e:  # noqa: BLE001 — 评估脚本需容忍任何网络/API 错误
+            last_exc = e
+            print(f"    [重试 {attempt}/{MAX_RETRIES}] {desc}: {type(e).__name__}", flush=True)
+            await asyncio.sleep(1)
+    raise last_exc
+
+
 async def answer_pure(llm, question: str) -> str:
     """纯 LLM 直答。"""
-    resp = await llm.ainvoke(question)
+    resp = await _call_with_retry(lambda: llm.ainvoke(question), f"answer[{question[:20]}]")
     return _content(resp)
 
 
@@ -76,7 +96,7 @@ async def judge(llm, reference: str, answer: str) -> bool:
         f"参考答案：{reference}\n\n模型回答：{answer[:800]}\n\n"
         "只输出一个数字：1（准确/要点一致）或 0（不准确或答非所问）。"
     )
-    resp = await llm.ainvoke(prompt)
+    resp = await _call_with_retry(lambda: llm.ainvoke(prompt), "judge")
     return _content(resp).strip().startswith("1")
 
 
@@ -128,10 +148,10 @@ async def main() -> None:
     llm_config = await provider.get_category("llm")
 
     # 评估脚本需要更长生成时间（产品配置 llm.timeout 较短，如 15s）；
-    # 深拷贝覆盖为 60s，避免长问题回答超时。
+    # 深拷贝覆盖为 120s + 重试，容忍长问题回答与网络波动。
     bench_config = dict(llm_config)
-    bench_config["llm.timeout"] = "60"
-    bench_config["llm.max_retries"] = "1"
+    bench_config["llm.timeout"] = "120"
+    bench_config["llm.max_retries"] = str(MAX_RETRIES)
 
     # 纯 LLM 模式直接创建；RAG 模式还需初始化 registry
     llm = create_agent_llm(bench_config)
