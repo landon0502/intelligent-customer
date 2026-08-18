@@ -42,8 +42,8 @@ def _register_components(registry: ComponentRegistry) -> None:
     """
     from models.factory import create_agent_llm, create_rag_llm
     from models.embedding import create_embeddings
+    from models.reranker import create_reranker
     from rag.ingestion.vectorstore import create_chroma_client, create_vectorstore
-    from rag.retrieval.reranker import create_reranker
     from agent.factory import create_customer_agent, filter_tools
     from agent.prompts import build_system_prompt
 

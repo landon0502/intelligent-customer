@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from rag.retrieval.retriever import RetrievalResult, retrieve
-from rag.retrieval.reranker import DEFAULT_RERANKER_MODEL, Reranker, create_reranker
+from models.reranker import DEFAULT_RERANKER_MODEL, Reranker, create_reranker
 
 
 class _FakeDoc:
