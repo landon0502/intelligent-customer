@@ -5,11 +5,10 @@ import logging
 
 from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from langchain_core.messages import HumanMessage, AIMessage, AIMessageChunk
 
-from database.session import get_db
+from database.session import async_session_factory
 from schemas.user import User
 from schemas.chat_schema import ChatSendRequest
 from auth.security import get_current_user
@@ -32,7 +31,6 @@ router = APIRouter(prefix="/api/chat", tags=["chat"])
 async def chat_stream(
     req: ChatSendRequest,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
     agent=Depends(get_agent_async),
 ):
     """发送消息（UIMessageStream SSE 流式），自动持久化用户消息和助手回复"""
@@ -48,40 +46,43 @@ async def chat_stream(
         for ev in events:
             yield f"data: {json.dumps(ev, ensure_ascii=False)}\n\n"
 
-    # 验证会话归属
-    conv = await get_conversation_by_id(db, req.conversation_id, current_user.id)
-    if not conv:
-        return StreamingResponse(
-            _error_sse("会话不存在"),
-            media_type="text/event-stream",
-            headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
-        )
+    # 会话校验 + 用户消息持久化：使用短生命周期 session，流式开始前即释放，
+    # 避免长 SSE 流全程占用连接池导致并发下连接耗尽（压测定位的瓶颈）。
+    async with async_session_factory() as db:
+        # 验证会话归属
+        conv = await get_conversation_by_id(db, req.conversation_id, current_user.id)
+        if not conv:
+            return StreamingResponse(
+                _error_sse("会话不存在"),
+                media_type="text/event-stream",
+                headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+            )
 
-    # 从请求体提取 UIMessage[] 并转换为 LangChain 历史
-    # 如果前端发送了 messages，使用前端历史；否则从 DB 加载
-    if req.messages:
-        history_messages = ui_messages_to_langchain(req.messages)
-        # 持久化用户消息（取最后一条 user 消息的文本）
-        user_text = ""
-        for msg in reversed(req.messages):
-            if msg.get("role") == "user":
-                user_text = "".join(
-                    p.get("text", "")
-                    for p in msg.get("parts", [])
-                    if p.get("type") == "text"
-                )
-                break
-        if user_text:
-            await create_message(db, req.conversation_id, "user", user_text)
-    else:
-        # 兼容：如果前端未发送 messages，从 DB 加载历史
-        recent = await get_recent_messages(db, req.conversation_id, limit=20)
-        history_messages = []
-        for msg in recent:
-            if msg.role == "user":
-                history_messages.append(HumanMessage(content=msg.content))
-            elif msg.role == "assistant":
-                history_messages.append(AIMessage(content=msg.content))
+        # 从请求体提取 UIMessage[] 并转换为 LangChain 历史
+        # 如果前端发送了 messages，使用前端历史；否则从 DB 加载
+        if req.messages:
+            history_messages = ui_messages_to_langchain(req.messages)
+            # 持久化用户消息（取最后一条 user 消息的文本）
+            user_text = ""
+            for msg in reversed(req.messages):
+                if msg.get("role") == "user":
+                    user_text = "".join(
+                        p.get("text", "")
+                        for p in msg.get("parts", [])
+                        if p.get("type") == "text"
+                    )
+                    break
+            if user_text:
+                await create_message(db, req.conversation_id, "user", user_text)
+        else:
+            # 兼容：如果前端未发送 messages，从 DB 加载历史
+            recent = await get_recent_messages(db, req.conversation_id, limit=20)
+            history_messages = []
+            for msg in recent:
+                if msg.role == "user":
+                    history_messages.append(HumanMessage(content=msg.content))
+                elif msg.role == "assistant":
+                    history_messages.append(AIMessage(content=msg.content))
 
     # 收集完整回复用于持久化
     full_response: list[str] = []
@@ -116,12 +117,13 @@ async def chat_stream(
                 yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
         finally:
             reset_user_context()
-            # 流结束后持久化助手回复，存入数据库
+            # 流结束后持久化助手回复：新开短生命周期 session，不占流式期间连接
             if full_response:
                 try:
-                    await create_message(
-                        db, req.conversation_id, "assistant", "".join(full_response)
-                    )
+                    async with async_session_factory() as db:
+                        await create_message(
+                            db, req.conversation_id, "assistant", "".join(full_response)
+                        )
                 except Exception as e:
                     logger.error("持久化助手回复失败: %s", e)
 

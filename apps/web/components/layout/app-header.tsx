@@ -81,6 +81,8 @@ export function AppHeader() {
     logout()
   }
 
+  const handleSetting = () => router.push("/config")
+
   if (!user) {
     return (
       <header className="flex h-14 shrink-0 items-center justify-between border-b bg-background px-4">
@@ -166,7 +168,7 @@ export function AppHeader() {
               <DropdownMenuSeparator />
 
               {/* System settings (placeholder) */}
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={handleSetting}>
                 <Settings className="size-4" />
                 {tCommon("settings")}
               </DropdownMenuItem>

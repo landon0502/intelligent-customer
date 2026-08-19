@@ -56,6 +56,10 @@ class Settings:
     # ========== 日志 ==========
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
 
+    # ========== 并发控制 ==========
+    # 同时进行的 SSE 对话流上限：限制涌入量避免本地 MPS 推理/DB 连接过载
+    CHAT_CONCURRENCY: int = int(os.getenv("CHAT_CONCURRENCY", "15"))
+
     # ========== JWT ==========
     JWT_SECRET: str = os.getenv("JWT_SECRET", "change-me-in-production")
     JWT_EXPIRE_MINUTES: int = int(os.getenv("JWT_EXPIRE_MINUTES", "10080"))

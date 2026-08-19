@@ -40,6 +40,7 @@ dependencies = [
     "torch>=2.13.0",
     "transformers>=5.14.1",
     "langsmith>=0.10.10",
+    "locust>=2.46.3",
 ]
 
 [dependency-groups]
