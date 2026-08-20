@@ -39,10 +39,13 @@ import {
   fromVectorStoreConfig,
   toRerankerConfig,
   fromRerankerConfig,
+  toRagLlmConfig,
+  fromRagLlmConfig,
   type LlmConfig,
   type EmbeddingConfig,
   type VectorStoreConfig,
   type RerankerConfig,
+  type RagLlmConfig,
 } from "@/services/config"
 
 export default function ConfigPage() {
@@ -76,6 +79,15 @@ export default function ConfigPage() {
     candidates: "20",
     recall_threshold: "0.1",
   })
+  const [ragLlm, setRagLlm] = useState<RagLlmConfig>({
+    model: "",
+    api_key: "",
+    base_url: "",
+    temperature: "0.3",
+    max_tokens: "512",
+    timeout: "15",
+    max_retries: "1",
+  })
 
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState<string | null>(null)
@@ -91,6 +103,7 @@ export default function ConfigPage() {
           setEmbedding(toEmbeddingConfig(items))
           setVectorStore(toVectorStoreConfig(items))
           setReranker(toRerankerConfig(items))
+          setRagLlm(toRagLlmConfig(items))
         }
       } catch {
         if (!cancelled) toast.error("加载配置失败")
@@ -107,6 +120,7 @@ export default function ConfigPage() {
     try {
       let configs
       if (category === "llm") configs = fromLlmConfig(llm)
+      else if (category === "ragllm") configs = fromRagLlmConfig(ragLlm)
       else if (category === "embedding")
         configs = fromEmbeddingConfig(embedding)
       else if (category === "vectorstore")
@@ -139,6 +153,7 @@ export default function ConfigPage() {
       <Tabs defaultValue="llm">
         <TabsList>
           <TabsTrigger value="llm">{t("tabLlm")}</TabsTrigger>
+          <TabsTrigger value="ragllm">{t("tabRagLlm")}</TabsTrigger>
           <TabsTrigger value="embedding">{t("tabEmbedding")}</TabsTrigger>
           <TabsTrigger value="vectorstore">{t("tabVectorStore")}</TabsTrigger>
           <TabsTrigger value="reranker">{t("tabReranker")}</TabsTrigger>
@@ -237,6 +252,108 @@ export default function ConfigPage() {
                   disabled={saving === "llm"}
                 >
                   {saving === "llm" ? (
+                    <Loader2 className="mr-2 size-4 animate-spin" />
+                  ) : (
+                    <Save className="mr-2 size-4" />
+                  )}
+                  {t("save")}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* RAG LLM 配置 */}
+        <TabsContent value="ragllm" className="mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">{t("ragLlmTitle")}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                {t("ragLlmFallbackHint")}
+              </p>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>{t("ragLlmModel")}</Label>
+                  <Input
+                    value={ragLlm.model}
+                    onChange={(e) =>
+                      setRagLlm({ ...ragLlm, model: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>{t("ragLlmApiKey")}</Label>
+                  <Input
+                    type="password"
+                    value={ragLlm.api_key}
+                    placeholder={ragLlm.api_key ? "••••••••" : ""}
+                    onChange={(e) =>
+                      setRagLlm({ ...ragLlm, api_key: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>{t("ragLlmBaseUrl")}</Label>
+                  <Input
+                    value={ragLlm.base_url}
+                    placeholder="请输入base_url"
+                    onChange={(e) =>
+                      setRagLlm({ ...ragLlm, base_url: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>{t("ragLlmTemperature")}</Label>
+                  <Input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    max="2"
+                    value={ragLlm.temperature}
+                    onChange={(e) =>
+                      setRagLlm({ ...ragLlm, temperature: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>{t("ragLlmMaxTokens")}</Label>
+                  <Input
+                    type="number"
+                    value={ragLlm.max_tokens}
+                    onChange={(e) =>
+                      setRagLlm({ ...ragLlm, max_tokens: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>{t("ragLlmTimeout")}</Label>
+                  <Input
+                    type="number"
+                    value={ragLlm.timeout}
+                    onChange={(e) =>
+                      setRagLlm({ ...ragLlm, timeout: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>{t("ragLlmMaxRetries")}</Label>
+                  <Input
+                    type="number"
+                    value={ragLlm.max_retries}
+                    onChange={(e) =>
+                      setRagLlm({ ...ragLlm, max_retries: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end pt-2">
+                <Button
+                  onClick={() => handleSave("ragllm")}
+                  disabled={saving === "ragllm"}
+                >
+                  {saving === "ragllm" ? (
                     <Loader2 className="mr-2 size-4 animate-spin" />
                   ) : (
                     <Save className="mr-2 size-4" />

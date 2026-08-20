@@ -39,6 +39,16 @@ export interface RerankerConfig {
   recall_threshold: string
 }
 
+export interface RagLlmConfig {
+  model: string
+  api_key: string
+  base_url: string
+  temperature: string
+  max_tokens: string
+  timeout: string
+  max_retries: string
+}
+
 /** 获取所有配置 */
 export async function getConfigs(category?: string): Promise<ConfigItem[]> {
   const params = category ? `?category=${category}` : ""
@@ -161,5 +171,36 @@ export function fromRerankerConfig(cfg: RerankerConfig): ConfigItem[] {
       value: cfg.recall_threshold,
       category: "rerank",
     },
+  ]
+}
+
+/** 配置项列表 → RagLlmConfig 对象 */
+export function toRagLlmConfig(items: ConfigItem[]): RagLlmConfig {
+  const map = Object.fromEntries(items.map((i) => [i.key, i.value]))
+  return {
+    model: map["rag_llm.model"] ?? "",
+    api_key: map["rag_llm.api_key"] ?? "",
+    base_url: map["rag_llm.base_url"] ?? "",
+    temperature: map["rag_llm.temperature"] ?? "0.3",
+    max_tokens: map["rag_llm.max_tokens"] ?? "512",
+    timeout: map["rag_llm.timeout"] ?? "15",
+    max_retries: map["rag_llm.max_retries"] ?? "1",
+  }
+}
+
+/** RagLlmConfig 对象 → 配置项列表 */
+export function fromRagLlmConfig(cfg: RagLlmConfig): ConfigItem[] {
+  return [
+    { key: "rag_llm.model", value: cfg.model, category: "rag_llm" },
+    { key: "rag_llm.api_key", value: cfg.api_key, category: "rag_llm" },
+    { key: "rag_llm.base_url", value: cfg.base_url, category: "rag_llm" },
+    {
+      key: "rag_llm.temperature",
+      value: cfg.temperature,
+      category: "rag_llm",
+    },
+    { key: "rag_llm.max_tokens", value: cfg.max_tokens, category: "rag_llm" },
+    { key: "rag_llm.timeout", value: cfg.timeout, category: "rag_llm" },
+    { key: "rag_llm.max_retries", value: cfg.max_retries, category: "rag_llm" },
   ]
 }
