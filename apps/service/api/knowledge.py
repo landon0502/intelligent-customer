@@ -1,8 +1,7 @@
 """知识库管理接口 —— 文档上传、列表、删除、检索测试。"""
 
-from fastapi import APIRouter, Depends, UploadFile, File
+from fastapi import APIRouter, Depends, UploadFile, File, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from database.session import get_db
 from schemas.user import User
 from schemas.document_schema import (
@@ -44,9 +43,11 @@ async def upload_knowledge_document(
         status=doc.status,
     ).model_dump())
 
-
 @router.get("/documents")
 async def list_documents(
+    keyword: str = '',
+    page: int = 1,
+    page_size: int = Query(10, alias="pageSize"),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
@@ -54,9 +55,8 @@ async def list_documents(
     if current_user.role != "admin":
         return error(code=40003, message="仅管理员可查看文档列表")
 
-    docs = await get_documents(db)
-    items = [DocumentItem.model_validate(d) for d in docs]
-    return success(data=items)
+    docs = await get_documents(db, keyword=keyword, page=page, page_size=page_size)
+    return success(data=docs)
 
 
 @router.delete("/documents/{document_id}")

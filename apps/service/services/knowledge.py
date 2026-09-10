@@ -5,7 +5,7 @@ import logging
 import os
 import uuid
 
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.session import async_session_factory
@@ -14,13 +14,16 @@ from configs.config import settings
 from rag.ingestion import ingest_document, delete_from_vectorstore
 from rag.retrieval import retrieve
 from rag.generation import generate_answer
+from schemas.common import PageResult
+from schemas.document import DocumentResponse
 
 logger = logging.getLogger("intelligent-customer.knowledge")
 
 # 文件上传存储目录
 UPLOAD_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
-
+# 对外暴露的相对前缀
+UPLOAD_URL_PREFIX = "/data/uploads"
 # 允许的文件类型
 ALLOWED_EXTENSIONS = {"pdf", "docx", "doc", "txt"}
 
@@ -30,6 +33,10 @@ MAX_UPLOAD_SIZE = 20 * 1024 * 1024
 # 后台文档处理任务集合 —— 保存 asyncio.create_task 引用防止任务被 GC 回收
 _pending_tasks: set[asyncio.Task] = set()
 
+def to_relative_path(abs_path: str) -> str:
+    """把绝对路径转成 /data/uploads/xxx.pdf 形式"""
+    filename = os.path.basename(abs_path)
+    return f"{UPLOAD_URL_PREFIX}/{filename}"
 
 def _track_task(task: asyncio.Task) -> None:
     """保存任务引用并在完成后自动清理。"""
@@ -130,7 +137,7 @@ async def upload_document(
     # 创建数据库记录
     doc = Document(
         filename=filename,
-        file_path=file_path,
+        file_path=to_relative_path(str(file_content)),
         file_type=ext,
         chunk_count=0,
         status="processing",
@@ -148,12 +155,22 @@ async def upload_document(
     return doc
 
 
-async def get_documents(db: AsyncSession) -> list[Document]:
+async def get_documents(db: AsyncSession, keyword: str, page:int, page_size: int) -> PageResult[DocumentResponse]:
     """获取所有文档列表，按上传时间倒序"""
+    offset = (page - 1) * page_size
+
+    #total
+    count_stmt = select(func.count()).select_from(Document)
+    total = await db.scalar(count_stmt) or 0
+    # data
+    stmt = (select(Document).where(Document.filename.contains(keyword, autoescape=True)).order_by(Document.uploaded_at.desc()).offset(offset).limit(page_size))
     result = await db.execute(
-        select(Document).order_by(Document.uploaded_at.desc())
+        stmt
     )
-    return list(result.scalars().all())
+    orm_docs = list(result.scalars().all())
+    # 关键：转成 Pydantic 模型
+    data = [DocumentResponse.model_validate(d) for d in orm_docs]
+    return PageResult(list=data, page=page, page_size=page_size, total=total)
 
 
 async def get_document_by_id(db: AsyncSession, document_id: int) -> Document | None:

@@ -49,6 +49,11 @@ export interface RagLlmConfig {
   max_retries: string
 }
 
+/** 批量更新配置请求体 */
+export interface UpdateConfigsParams {
+  configs: ConfigItem[]
+}
+
 /** 获取所有配置 */
 export async function getConfigs(category?: string): Promise<ConfigItem[]> {
   const params = category ? `?category=${category}` : ""
@@ -60,7 +65,10 @@ export async function getConfigs(category?: string): Promise<ConfigItem[]> {
 export async function updateConfigs(
   configs: ConfigItem[]
 ): Promise<{ updated: number }> {
-  const response = await fetchClient.put<{ updated: number }>("/config", {
+  const response = await fetchClient.put<
+    { updated: number },
+    UpdateConfigsParams
+  >("/config", {
     configs,
   })
   return response.data

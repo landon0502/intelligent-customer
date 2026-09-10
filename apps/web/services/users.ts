@@ -9,6 +9,12 @@ export interface User {
   created_at: string
 }
 
+export interface CreateUserParams {
+  username: string
+  password: string
+  role: string
+}
+
 // ========== 用户管理接口 ==========
 
 export async function getUsersApi() {
@@ -20,7 +26,11 @@ export async function createUserApi(
   password: string,
   role: string
 ) {
-  return fetchClient.post<User>("/users", { username, password, role })
+  return fetchClient.post<User, CreateUserParams>("/users", {
+    username,
+    password,
+    role,
+  })
 }
 
 export async function deleteUserApi(id: number) {

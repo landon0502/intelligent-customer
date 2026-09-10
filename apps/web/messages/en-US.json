@@ -8,7 +8,10 @@
     "roleAdmin": "Admin",
     "roleUser": "User",
     "confirm": "Confirm",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "pageInfo": "Page {page} of {totalPages}",
+    "prevPage": "Previous",
+    "nextPage": "Next"
   },
   "layout": {
     "menuChat": "Smart Chat",
@@ -69,6 +72,7 @@
     "deleteDocTitle": "Delete Document",
     "deleteDocDesc": "Delete document \"{filename}\"? It will need to be re-uploaded.",
     "noDocuments": "No documents yet",
+    "previewFile": "Preview in new tab",
     "noResults": "No results found",
     "searching": "Searching...",
     "retrievalTest": "🔍 Retrieval Test",

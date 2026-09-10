@@ -4,7 +4,7 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-
+from fastapi.staticfiles import StaticFiles
 from database import mysql
 from database.session import get_db, async_session_factory
 from configs.config import settings
@@ -101,7 +101,8 @@ async def lifespan(_app: FastAPI):
     """启动时初始化 Provider + Registry，关闭时释放资源。"""
     from configs.config import validate_security_defaults
     validate_security_defaults()
-
+    logger.info("挂载data静态资源")
+    _app.mount("/data", StaticFiles(directory="data"), name="data")
     logger.info("启动中...  创建数据库表")
     async with mysql.engine.begin() as conn:
         await conn.run_sync(mysql.Base.metadata.create_all)

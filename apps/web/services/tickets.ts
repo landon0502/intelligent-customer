@@ -1,4 +1,5 @@
 import { fetchClient } from "@/lib/fetch"
+import type { FetchPaginationParams, PaginationResponse } from "@/types/global"
 
 // ========== 类型定义 ==========
 
@@ -17,15 +18,30 @@ export interface Ticket {
   updated_at: string
 }
 
+export interface GetTicketsParams extends FetchPaginationParams {
+  status?: TicketStatus
+}
+
+export interface UpdateTicketStatusParams {
+  status: TicketStatus
+}
+
 // ========== 工单接口 ==========
 
-export async function getTicketsApi(status?: TicketStatus | "") {
-  return fetchClient.get<Ticket[]>(
+export async function getTicketsApi({
+  status,
+  page,
+  pageSize,
+}: GetTicketsParams) {
+  return fetchClient.get<PaginationResponse<Ticket>, GetTicketsParams>(
     "/tickets",
-    status ? { status } : undefined
+    { status: status || undefined, page, pageSize }
   )
 }
 
 export async function updateTicketStatusApi(ticketNo: string, status: TicketStatus) {
-  return fetchClient.patch<Ticket>(`/tickets/${ticketNo}/status`, { status })
+  return fetchClient.patch<Ticket, UpdateTicketStatusParams>(
+    `/tickets/${ticketNo}/status`,
+    { status }
+  )
 }

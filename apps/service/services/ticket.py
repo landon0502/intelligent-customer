@@ -71,14 +71,29 @@ async def create_ticket(
 
 
 async def list_tickets(
-    db: AsyncSession, status: str | None = None
-) -> list[ServiceTicket]:
-    """获取工单列表；status 可选过滤，按创建时间倒序。"""
+    db: AsyncSession,
+    status: str | None = None,
+    page: int = 1,
+    page_size: int = 10,
+) -> tuple[list[ServiceTicket], int]:
+    """分页获取工单列表；status 可选过滤，按创建时间倒序。
+
+    返回 (当页数据, 总条数)。
+    """
+    filters = [ServiceTicket.status == status] if status else []
+
+    count_stmt = select(func.count()).select_from(ServiceTicket)
+    if filters:
+        count_stmt = count_stmt.where(*filters)
+    total = await db.scalar(count_stmt) or 0
+
     stmt = select(ServiceTicket).order_by(ServiceTicket.created_at.desc())
-    if status:
-        stmt = stmt.where(ServiceTicket.status == status)
+    if filters:
+        stmt = stmt.where(*filters)
+    stmt = stmt.offset((page - 1) * page_size).limit(page_size)
+
     result = await db.execute(stmt)
-    return list(result.scalars().all())
+    return list(result.scalars().all()), int(total)
 
 
 async def get_ticket_by_no(

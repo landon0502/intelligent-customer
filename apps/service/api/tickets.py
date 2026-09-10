@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.session import get_db
 from schemas.user import User
+from schemas.common import PageResult
 from schemas.ticket import ServiceTicket
 from auth.security import get_current_user
 from services.ticket import (
@@ -101,16 +102,22 @@ async def list_tickets_api(
     status: str | None = Query(
         default=None, description="按状态筛选 open/processing/closed"
     ),
+    page: int = 1,
+    page_size: int = Query(10, alias="pageSize"),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """工单列表 + 状态筛选（admin）"""
+    """工单列表 + 状态筛选 + 分页（admin）"""
     if current_user.role != "admin":
         return error(code=40003, message="仅管理员可查看工单")
-    tickets = await list_tickets(db, status)
+    tickets, total = await list_tickets(db, status, page=page, page_size=page_size)
     usernames = await _build_username_map(db, tickets)
     items = [_ticket_to_item(t, usernames) for t in tickets]
-    return success(data=items)
+    return success(
+        data=PageResult(
+            list=items, total=total, page=page, page_size=page_size
+        ).model_dump()
+    )
 
 
 @router.get("/{no}")

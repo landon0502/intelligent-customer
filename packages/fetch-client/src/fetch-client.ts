@@ -94,10 +94,10 @@ export class FetchClient {
 
   // ==================== 核心请求方法 ====================
 
-  async request<T = unknown>(
+  async request<T = unknown, B = unknown>(
     url: string,
     method: HttpMethod = "GET",
-    body?: unknown,
+    body?: B,
     config?: FetchRequestConfig
   ): Promise<ApiResponse<T>> {
     const mergedConfig: FetchRequestConfig = {
@@ -306,32 +306,50 @@ export class FetchClient {
 
   // ==================== 便捷方法 ====================
 
-  get<T = unknown>(
+  get<T = unknown, P extends object = Record<string, unknown>>(
     url: string,
-    params?: Record<string, unknown>,
+    params?: P,
     config?: FetchRequestConfig
   ) {
-    return this.request<T>(url, "GET", undefined, { ...config, params });
+    return this.request<T>(url, "GET", undefined, {
+      ...config,
+      params: params as Record<string, unknown> | undefined,
+    });
   }
 
-  post<T = unknown>(url: string, body?: unknown, config?: FetchRequestConfig) {
-    return this.request<T>(url, "POST", body, config);
-  }
-
-  put<T = unknown>(url: string, body?: unknown, config?: FetchRequestConfig) {
-    return this.request<T>(url, "PUT", body, config);
-  }
-
-  patch<T = unknown>(url: string, body?: unknown, config?: FetchRequestConfig) {
-    return this.request<T>(url, "PATCH", body, config);
-  }
-
-  delete<T = unknown>(
+  post<T = unknown, B = unknown>(
     url: string,
-    params?: Record<string, unknown>,
+    body?: B,
     config?: FetchRequestConfig
   ) {
-    return this.request<T>(url, "DELETE", undefined, { ...config, params });
+    return this.request<T, B>(url, "POST", body, config);
+  }
+
+  put<T = unknown, B = unknown>(
+    url: string,
+    body?: B,
+    config?: FetchRequestConfig
+  ) {
+    return this.request<T, B>(url, "PUT", body, config);
+  }
+
+  patch<T = unknown, B = unknown>(
+    url: string,
+    body?: B,
+    config?: FetchRequestConfig
+  ) {
+    return this.request<T, B>(url, "PATCH", body, config);
+  }
+
+  delete<T = unknown, P extends object = Record<string, unknown>>(
+    url: string,
+    params?: P,
+    config?: FetchRequestConfig
+  ) {
+    return this.request<T>(url, "DELETE", undefined, {
+      ...config,
+      params: params as Record<string, unknown> | undefined,
+    });
   }
 
   // ==================== 文件上传 ====================

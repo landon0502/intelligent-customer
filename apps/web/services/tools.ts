@@ -14,6 +14,10 @@ export interface ToolUpdateResult {
   refresh_ok: boolean
 }
 
+export interface UpdateToolParams {
+  enabled: boolean
+}
+
 // ========== 工具启停接口 ==========
 
 export async function getToolsApi() {
@@ -21,5 +25,8 @@ export async function getToolsApi() {
 }
 
 export async function updateToolApi(name: string, enabled: boolean) {
-  return fetchClient.patch<ToolUpdateResult>(`/tools/${name}`, { enabled })
+  return fetchClient.patch<ToolUpdateResult, UpdateToolParams>(
+    `/tools/${name}`,
+    { enabled }
+  )
 }

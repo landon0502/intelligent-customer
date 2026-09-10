@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "@intelligent-customer/ui/components/select"
 import { toast } from "sonner"
+import { PaginationFooter } from "@/components/pagination-footer"
 import type { TicketStatus } from "@/services/tickets"
 
 const STATUS_OPTIONS: { value: string; labelKey: string }[] = [
@@ -73,13 +74,19 @@ export default function TicketsPage() {
   const {
     statusFilter,
     setStatusFilter,
+    page,
+    setPage,
+    pageSize,
     tickets,
+    total,
     updateControl,
     updateStatus,
   } = useTicketServices()
 
-  // 列表加载与状态筛选重拉已由 useServices 的 refreshDeps 机制接管，
+  // 列表加载与状态筛选/翻页重拉已由 useServices 的 refreshDeps 机制接管，
   // 页面不再手写 useEffect（避免依赖 listControl 对象身份造成无限循环）
+
+  const totalPages = Math.max(1, Math.ceil(total / pageSize))
 
   const handleStatusChange = useCallback(
     async (ticketNo: string, status: TicketStatus) => {
@@ -100,7 +107,7 @@ export default function TicketsPage() {
         <div>
           <h1 className="text-xl font-semibold">{t("title")}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {t("ticketCount", { count: tickets.length })}
+            {t("ticketCount", { count: total })}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -179,6 +186,11 @@ export default function TicketsPage() {
             </TableBody>
           </Table>
         </CardContent>
+        <PaginationFooter
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+        />
       </Card>
     </div>
   )

@@ -18,6 +18,10 @@ export interface Message {
   created_at: string
 }
 
+export interface CreateConversationParams {
+  title?: string
+}
+
 // ========== 会话接口 ==========
 
 export async function getConversationsApi() {
@@ -25,7 +29,10 @@ export async function getConversationsApi() {
 }
 
 export async function createConversationApi(title?: string) {
-  return fetchClient.post<{ id: number; title: string; status: string }>("/conversations", {
+  return fetchClient.post<
+    { id: number; title: string; status: string },
+    CreateConversationParams
+  >("/conversations", {
     title: title || undefined,
   })
 }

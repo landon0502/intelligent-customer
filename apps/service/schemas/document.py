@@ -4,9 +4,8 @@ from datetime import datetime, timezone
 
 from sqlalchemy import Integer, String, DateTime, ForeignKey, Enum as SAEnum
 from sqlalchemy.orm import Mapped, mapped_column
-
 from database.mysql import Base
-
+from pydantic import BaseModel, ConfigDict, field_validator
 
 class Document(Base):
     __tablename__ = "documents"
@@ -28,3 +27,18 @@ class Document(Base):
     uploaded_at: Mapped[datetime] = mapped_column(
         DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
     )
+
+class DocumentResponse(BaseModel):
+    id: str
+    filename: str
+    file_path: str
+    chunk_count: int
+    status: str
+    file_type: str
+    uploaded_by: int
+    uploaded_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+    @field_validator("id", mode="before")
+    @classmethod
+    def id_to_str(cls, v):
+        return str(v)

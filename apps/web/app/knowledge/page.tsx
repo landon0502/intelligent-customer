@@ -1,9 +1,11 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import { useTranslations } from "next-intl"
 import { Upload, Search, Trash2, FileText, File, FileImage } from "lucide-react"
 import useKnowledgeServices from "./useServices"
+import { toDocumentFileUrl } from "@/services/knowledge"
+import type { FetchPaginationParams } from "@/types/global"
 
 import { Button } from "@intelligent-customer/ui/components/button"
 import { Input } from "@intelligent-customer/ui/components/input"
@@ -30,6 +32,7 @@ import {
   DialogTrigger,
 } from "@intelligent-customer/ui/components/dialog"
 import { ConfirmDialog } from "@/components/confirm-dialog"
+import { PaginationFooter } from "@/components/pagination-footer"
 import { toast } from "sonner"
 
 function FileTypeIcon({ type }: { type: string }) {
@@ -84,12 +87,16 @@ function formatUploadTime(dateStr: string): string {
   }
 }
 
+/** 每页条数，与后端 Query(alias="pageSize") 对应 */
+const PAGE_SIZE = 10
+
 export default function KnowledgePage() {
   const t = useTranslations("knowledge")
 
   const {
     documentsControl,
     documents,
+    total,
     totalChunks,
     uploadControl,
     uploadDocument,
@@ -100,19 +107,39 @@ export default function KnowledgePage() {
     searchKnowledge,
   } = useKnowledgeServices()
 
+  // run 由 ahooks useMemoizedFn 包装，引用稳定，可安全作为 effect 依赖
+  const { run: runDocuments } = documentsControl
+
   const [searchQuery, setSearchQuery] = useState("")
   const [retrievalQuery, setRetrievalQuery] = useState("")
   const [showResults, setShowResults] = useState(false)
   const [uploadOpen, setUploadOpen] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<{
-    id: number
+    id: string
     filename: string
   } | null>(null)
 
-  // 页面加载时获取文档列表
+  const [page, setPage] = useState(1)
+  // 已提交给后端的搜索关键字（回车后才写入）
+  const [keyword, setKeyword] = useState("")
+
+  const fetchParams = useMemo<FetchPaginationParams>(
+    () => ({ page, pageSize: PAGE_SIZE, keyword: keyword || undefined }),
+    [page, keyword]
+  )
+
+  // 回车后才提交搜索：写入关键字并回到第 1 页
+  const handleSearch = useCallback(() => {
+    const next = searchQuery.trim()
+    if (next === keyword && page === 1) return
+    setKeyword(next)
+    setPage(1)
+  }, [searchQuery, keyword, page])
+
+  // 页面加载 / 翻页 / 关键字变化时拉取文档列表
   useEffect(() => {
-    documentsControl.run()
-  }, [])
+    runDocuments(fetchParams)
+  }, [fetchParams, runDocuments])
 
   // 上传的异步处理在接口返回后才完成（processing → ready/failed），
   // 这里轮询文档列表直至全部处理完成或超时，让状态自动反映到 UI
@@ -125,10 +152,12 @@ export default function KnowledgePage() {
         clearInterval(timer)
         return
       }
-      documentsControl.run()
+      runDocuments(fetchParams)
     }, 2000)
     return () => clearInterval(timer)
-  }, [hasProcessing, documentsControl])
+  }, [hasProcessing, fetchParams, runDocuments])
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
   // 上传文档
   const handleUpload = useCallback(
@@ -140,27 +169,31 @@ export default function KnowledgePage() {
         await uploadDocument(file)
         toast.success(t("uploadSuccess"))
         setUploadOpen(false)
-        documentsControl.run()
+        // 服务端按上传时间倒序，新文档在第 1 页
+        if (page === 1) runDocuments(fetchParams)
+        else setPage(1)
       } catch {
         toast.error(t("uploadFailed"))
       }
     },
-    [t, uploadDocument, documentsControl]
+    [t, uploadDocument, page, runDocuments, fetchParams]
   )
 
   // 删除文档
   const handleDelete = useCallback(
-    async (id: number) => {
+    async (id: string) => {
       try {
         await removeDocument(id)
         toast.success(t("deleteSuccess"))
         setDeleteTarget(null)
-        documentsControl.run()
+        // 删掉当前页最后一条时回退一页，避免停在空页
+        if (documents.length === 1 && page > 1) setPage(page - 1)
+        else runDocuments(fetchParams)
       } catch {
         toast.error(t("deleteFailed"))
       }
     },
-    [t, removeDocument, documentsControl]
+    [t, removeDocument, documents.length, page, runDocuments, fetchParams]
   )
 
   // 检索测试
@@ -174,12 +207,6 @@ export default function KnowledgePage() {
     }
   }, [retrievalQuery, searchKnowledge])
 
-  const filteredDocs = documents.filter(
-    (doc) =>
-      !searchQuery ||
-      doc.filename.toLowerCase().includes(searchQuery.toLowerCase())
-  )
-
   return (
     <div className="space-y-6">
       {/* 标题栏 */}
@@ -187,7 +214,7 @@ export default function KnowledgePage() {
         <div>
           <h1 className="text-xl font-semibold">{t("title")}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {t("docCount", { count: documents.length })} ·{" "}
+            {t("docCount", { count: total })} ·{" "}
             {t("chunkCount", { count: totalChunks })}
           </p>
         </div>
@@ -198,6 +225,7 @@ export default function KnowledgePage() {
               placeholder={t("searchPlaceholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
               className="w-60 pl-9"
             />
           </div>
@@ -257,7 +285,7 @@ export default function KnowledgePage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredDocs.length === 0 ? (
+              {documents.length === 0 ? (
                 <TableRow>
                   <TableCell
                     colSpan={6}
@@ -267,12 +295,20 @@ export default function KnowledgePage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredDocs.map((doc) => (
+                documents.map((doc) => (
                   <TableRow key={doc.id}>
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-2">
                         <FileTypeIcon type={doc.file_type} />
-                        {doc.filename}
+                        <a
+                          href={toDocumentFileUrl(doc.file_path)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title={t("previewFile")}
+                          className="text-blue-600 underline-offset-4 hover:underline dark:text-blue-400"
+                        >
+                          {doc.filename}
+                        </a>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -307,6 +343,11 @@ export default function KnowledgePage() {
             </TableBody>
           </Table>
         </CardContent>
+        <PaginationFooter
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+        />
       </Card>
 
       {/* 检索测试 */}
