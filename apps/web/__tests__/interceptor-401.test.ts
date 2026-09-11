@@ -14,8 +14,8 @@ describe("401 interceptor", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useFakeTimers();
-    delete (window as Record<string, unknown>).location;
-    (window as Record<string, unknown>).location = { href: "", pathname: "/dashboard" };
+    delete (window as unknown as Record<string, unknown>).location;
+    (window as unknown as Record<string, unknown>).location = { href: "", pathname: "/dashboard" };
   });
 
   afterEach(() => {

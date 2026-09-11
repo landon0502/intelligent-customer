@@ -1,6 +1,8 @@
 """应用生命周期管理 — 启动时创建 Provider + Registry，关闭时释放资源。"""
 
+import asyncio
 import logging
+import time
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -130,8 +132,35 @@ async def lifespan(_app: FastAPI):
     _app.state.config_provider = provider
     _app.state.registry = registry
 
+    # 预热：注册只建槽位、不创建实例，真正的实例化发生在首个请求
+    # （app/dependencies.py 的 ensure_initialized）。若不预热，第一个 chat / 知识库
+    # 请求会卡在本地 embedding 权重的载入上，而 /health 不碰 registry、健康检查照常通过，
+    # 现象上就是"容器 healthy 但第一个请求超时"。
+    # 失败只记日志、不阻断启动 —— 仍可退回懒加载路径，由请求时抛出具体错误。
+    logger.info("预热组件（加载本地模型）...")
+    started = time.monotonic()
+    try:
+        # "agent" 在注册顺序最后，会按依赖顺序把 embedding / chroma / vectorstore /
+        # reranker 等前置组件一并创建。需要 Chroma 已就绪（compose 里由 depends_on 保证）。
+        await registry.ensure_initialized("agent")
+
+        # reranker 单独预热：它的模型是懒加载的（首次重排才载入），
+        # enabled=false 时 warmup() 为空操作，保持"不启用则零成本"的设计。
+        reranker = registry.get("reranker")
+        if reranker.enabled:
+            # 模型加载同步阻塞，丢到线程里避免卡住事件循环
+            await asyncio.to_thread(reranker.warmup)
+
+        logger.info("预热完成，耗时 %.1fs", time.monotonic() - started)
+    except Exception as e:  # noqa: BLE001 —— 预热失败不应导致服务起不来
+        logger.error(
+            "预热失败（耗时 %.1fs），将在首次请求时重试: %s",
+            time.monotonic() - started,
+            e,
+        )
+
     logger.info("启动完成  %s:%s", settings.APP_HOST, settings.APP_PORT)
-    yield  # <- 首次请求时懒加载创建组件
+    yield
 
     logger.info("关闭中...")
     await mysql.engine.dispose()

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { filterMenuByRole, menuConfig } from "@/config/menu";
 
 describe("filterMenuByRole", () => {
-  it("admin 角色看到 chat 项 + management 分组（含 4 个子项）", () => {
+  it("admin 角色看到 chat 项 + management 分组（含 5 个子项）", () => {
     const result = filterMenuByRole(menuConfig, "admin");
     // 2 top-level entries: chat item + management group
     expect(result).toHaveLength(2);
@@ -13,9 +13,9 @@ describe("filterMenuByRole", () => {
     expect(management).toBeDefined();
     expect(management?.type).toBe("group");
     if (management?.type === "group") {
-      expect(management.children).toHaveLength(4);
+      expect(management.children).toHaveLength(5);
       expect(management.children?.map((c) => c.key).sort()).toEqual(
-        ["config", "knowledge", "tools", "users"]
+        ["config", "knowledge", "tickets", "tools", "users"]
       );
     }
   });
@@ -43,7 +43,7 @@ describe("filterMenuByRole", () => {
     const result = filterMenuByRole(entries, "user");
     // Group removed (no visible children); only public item remains
     expect(result).toHaveLength(1);
-    expect(result[0].key).toBe("public");
+    expect(result[0]?.key).toBe("public");
     expect(result.find((e) => e.key === "admin-group")).toBeUndefined();
   });
 
@@ -62,10 +62,10 @@ describe("filterMenuByRole", () => {
     const result = filterMenuByRole(entries, "user");
     expect(result).toHaveLength(1);
     const group = result[0];
-    expect(group.type).toBe("group");
-    if (group.type === "group") {
+    expect(group?.type).toBe("group");
+    if (group?.type === "group") {
       expect(group.children).toHaveLength(1);
-      expect(group.children?.[0].key).toBe("all-users");
+      expect(group.children?.[0]?.key).toBe("all-users");
     }
   });
 });

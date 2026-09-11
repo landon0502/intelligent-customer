@@ -11,6 +11,9 @@
 .env*
 *.local
 
+# 用户上传的文档：运行时由 volume 挂载，不打进镜像
+apps/service/data
+
 # VCS 与杂项
 .git
 .gitignore

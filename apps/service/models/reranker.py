@@ -190,6 +190,16 @@ class Reranker:
 
     # ---------- 对外接口 ----------
 
+    def warmup(self) -> None:
+        """预热模型：把首次加载开销提前到启动阶段。
+
+        enabled=false 时为空操作，保持"不启用则不加载、零成本"的设计。
+        同步阻塞，调用方应通过 asyncio.to_thread 执行（见 app/lifespan.py）。
+        """
+        if not self.enabled:
+            return
+        self._ensure_loaded()
+
     def rerank(self, query: str, results: list, top_k: int) -> list:
         """按查询对候选结果重排序，返回分数最高的 top_k 条。
 

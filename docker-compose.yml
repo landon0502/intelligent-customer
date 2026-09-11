@@ -10,33 +10,36 @@ services:
       - --collation-server=utf8mb4_general_ci
     environment:
       MYSQL_ROOT_PASSWORD: "00000000"
-      MYSQL_DATABASE: intellgent-customer-db   # 与后端 .env 的 DB_NAME 一致（现有库名即此）
+      MYSQL_DATABASE: intellgent-customer-db # 与后端 .env 的 DB_NAME 一致（现有库名即此）
       TZ: Asia/Shanghai
     ports:
       - "3306:3306"
     volumes:
-      - ling-diary_mysql_data:/var/lib/mysql   # external，保留现有数据
+      - mysql_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p00000000 --silent"]
+      test:
+        ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p00000000 --silent"]
       interval: 5s
       timeout: 5s
       retries: 20
       start_period: 20s
 
-  redis:
-    image: redis:7-alpine
-    container_name: intelligent-customer-redis
-    restart: unless-stopped
-    command: ["redis-server", "--appendonly", "yes"]
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
-      interval: 5s
-      timeout: 3s
-      retries: 20
+  # redis 为预留组件：后端 database/redis.py 仍是空实现，pyproject.toml 中 redis 依赖已注释。
+  # 需要启用时取消本段注释，并在下方 service 中恢复 REDIS_HOST 覆盖与 depends_on 条目。
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: intelligent-customer-redis
+  #   restart: unless-stopped
+  #   command: ["redis-server", "--appendonly", "yes"]
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis_data:/data
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+  #     interval: 5s
+  #     timeout: 3s
+  #     retries: 20
 
   chroma:
     image: chromadb/chroma:latest
@@ -45,7 +48,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - /Users/superhuan/chroma_data:/chroma/chroma   # bind mount 保留现有向量
+      - chroma_data:/chroma/chroma
     healthcheck:
       # 镜像内无 curl/wget/python（已验证），只有 bash → 用 /dev/tcp
       test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8000"]
@@ -61,35 +64,53 @@ services:
     container_name: intelligent-customer-service
     restart: unless-stopped
     env_file:
-      - apps/service/.env          # APP_PORT/DB_*/JWT/ADMIN_PASSWORD/CHROMA_* 等
-    environment:                    # compose environment 优先于 env_file
+      - apps/service/.env # APP_PORT/DB_*/JWT/ADMIN_PASSWORD/CHROMA_* 等
+    environment: # compose environment 优先于 env_file
       DB_HOST: mysql
-      REDIS_HOST: redis
       CHROMA_HOST: chroma
       EMBEDDING_DEVICE: cpu
+      # embedding / reranker 的 HuggingFace 模型缓存，配合下方 hf_cache 卷
+      HF_HOME: /app/.cache/huggingface
+    volumes:
+      # 用户上传的文档（services/knowledge.py 的 UPLOAD_DIR），容器重建不丢
+      - ./apps/service/data/uploads:/app/data/uploads
+      # 模型权重缓存，路径必须与 Dockerfile 里的 HF_HOME 一致。
+      # 镜像构建期已预下载 reranker + embedding 权重到该路径，卷首次创建时 Docker
+      # 会把镜像内容播种进来，所以首次启动无需联网。注意：卷已存在则不会重新播种，
+      # 换模型后要 docker volume rm intelligent-customer_hf_cache 让它重新播种。
+      - hf_cache:/app/.cache/huggingface
     ports:
       - "8009:8009"
     depends_on:
       mysql:
         condition: service_healthy
-      redis:
-        condition: service_healthy
       chroma:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8009/health', timeout=3)"]
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8009/health', timeout=3)",
+        ]
       interval: 10s
       timeout: 5s
       retries: 10
-      start_period: 30s
+      # 启动阶段会预热本地模型（embedding 权重 + 启用时的 reranker），
+      # 冷启动明显变长，这里给足余量，避免被误判为 unhealthy
+      start_period: 60s
 
   web:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: http://localhost:8009   # 浏览器直连宿主映射端口（CORS 模式）
+        # 浏览器直连宿主映射端口（CORS 模式）；换机器部署时用环境变量覆盖
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8009}
         NEXT_PUBLIC_API_BASE_URL: /api
+        # 后端静态挂载的上传目录，用于 PDF 预览直链
+        NEXT_PUBLIC_FILE_BASE_URL: ${NEXT_PUBLIC_FILE_BASE_URL:-http://localhost:8009/data/uploads}
     container_name: intelligent-customer-web
     restart: unless-stopped
     ports:
@@ -98,14 +119,37 @@ services:
       service:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/login').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/login').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
       interval: 10s
       timeout: 5s
       retries: 10
       start_period: 15s
 
+# 均为项目内命名卷，clone 后 docker compose up 可直接创建，无需先手工建卷。
+#
+# 若本机已有旧数据需要迁移（旧配置用的是 external 卷 ling-diary_mysql_data
+# 和宿主机目录 /Users/superhuan/chroma_data），首次 up 之前执行：
+#
+#   docker volume create intelligent-customer_mysql_data
+#   docker run --rm -v ling-diary_mysql_data:/from \
+#     -v intelligent-customer_mysql_data:/to alpine sh -c "cp -a /from/. /to/"
+#
+#   docker volume create intelligent-customer_chroma_data
+#   docker run --rm -v /Users/superhuan/chroma_data:/from \
+#     -v intelligent-customer_chroma_data:/to alpine sh -c "cp -a /from/. /to/"
+#
+# 不迁移的话 MySQL 会被 _seed_initial_data 重新初始化（只剩管理员账号和企业业务种子数据），
+# Chroma 的向量则需重新摄取知识库文档。
 volumes:
-  ling-diary_mysql_data:
-    external: true                    # 复用现有卷，保留数据
-  redis_data:
+  mysql_data:
+    driver: local
+  chroma_data:
+    driver: local
+  hf_cache:
     driver: local

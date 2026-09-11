@@ -14,12 +14,18 @@ RUN pnpm install --frozen-lockfile
 # 拷贝源码（.dockerignore 已排除 .next/node_modules/.env*）
 COPY apps/web ./apps/web
 
+# public/ 是可选的：standalone 输出不会自动带上它，且 COPY 无法条件执行。
+# 这里先补一个空目录兜底，保证下面 runner 阶段的 COPY 不会因目录缺失而失败。
+RUN mkdir -p apps/web/public
+
 # NEXT_PUBLIC_* 编译期注入，必须作为 build ARG
 ARG NEXT_PUBLIC_API_URL=http://localhost:8009
 ARG NEXT_PUBLIC_API_BASE_URL=/api
+ARG NEXT_PUBLIC_FILE_BASE_URL=http://localhost:8009/data/uploads
 ENV NODE_ENV=production \
     NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL \
-    NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
+    NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL \
+    NEXT_PUBLIC_FILE_BASE_URL=$NEXT_PUBLIC_FILE_BASE_URL
 
 RUN pnpm --filter web build
 
@@ -34,8 +40,7 @@ ENV NODE_ENV=production \
 # server.js 位于 <standalone>/apps/web/server.js，.next/static 与 public 同理
 COPY --from=builder /repo/apps/web/.next/standalone ./
 COPY --from=builder /repo/apps/web/.next/static ./apps/web/.next/static
-# 项目目录名是 pubilc（拼写如此），standalone 期望 public
-COPY --from=builder /repo/apps/web/pubilc ./apps/web/public
+COPY --from=builder /repo/apps/web/public ./apps/web/public
 WORKDIR /app/apps/web
 
 EXPOSE 3000

@@ -41,6 +41,9 @@
     "emptySession": "选择或创建一个会话开始对话",
     "selectSession": "请选择一个会话",
     "loading": "加载中...",
+    "thinking": "思考中...",
+    "toolCalling": "调用工具：{toolName}(...)",
+    "toolDenied": "工具调用被拒绝：{toolName}",
     "stop": "停止",
     "deleteSessionTitle": "删除会话",
     "deleteSessionDesc": "确定要删除会话「{title}」吗？此操作不可撤销。"

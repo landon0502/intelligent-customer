@@ -137,6 +137,9 @@ class ComponentRegistry:
             for comp_name in self._order:
                 comp_slot = self._slots[comp_name]
                 if not comp_slot._initialized:
+                    # 逐条打日志：embedding 会在这里载入本地向量模型权重（耗时数秒），
+                    # 记录下来才能区分"启动预热"和"首个请求时兜底初始化"两条路径
+                    logger.info("初始化组件: %s", comp_name)
                     config = await self._provider.get_category(comp_slot._config_category)
                     comp_slot.create(config)
                 if comp_name == name:

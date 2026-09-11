@@ -18,7 +18,8 @@ export interface Document {
  * 挂载地址通过 NEXT_PUBLIC_FILE_BASE_URL 配置，未配置时回退到 API 地址 + /data/uploads。
  */
 const FILE_BASE_URL = (
-  process.env.NEXT_PUBLIC_FILE_BASE_URL ??
+  // 用 || 而非 ??：构建期注入空串时也要能回退
+  process.env.NEXT_PUBLIC_FILE_BASE_URL ||
   `${process.env.NEXT_PUBLIC_API_URL}/data/uploads`
 ).replace(/\/+$/, "")
 

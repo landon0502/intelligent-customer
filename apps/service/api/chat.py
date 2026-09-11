@@ -99,13 +99,10 @@ async def chat_stream(
             ):
                 # 收集 AI 文本内容用于持久化（排除 ToolMessage 等非 AI 内容）
                 if isinstance(chunk, AIMessageChunk) and chunk.content:
-                    logger.info("FULL-RAW: %r", chunk.content)
                     full_response.append(chunk.content)
 
                 # 转换为 UIMessageStream 事件
                 async for event in to_ui_message_stream_chunk(chunk, state):
-                    if event.get("type") == "text-delta":
-                        logger.info("SSE-RAW: %r", event.get("delta"))
                     yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
 
             # 发送结束事件

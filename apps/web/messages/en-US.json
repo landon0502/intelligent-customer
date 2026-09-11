@@ -41,6 +41,9 @@
     "emptySession": "Select or create a session to start chatting",
     "selectSession": "Select a session",
     "loading": "Loading...",
+    "thinking": "Thinking...",
+    "toolCalling": "Calling tool: {toolName}(...)",
+    "toolDenied": "Tool call denied: {toolName}",
     "stop": "Stop",
     "deleteSessionTitle": "Delete Session",
     "deleteSessionDesc": "Delete session \"{title}\"? This cannot be undone."
