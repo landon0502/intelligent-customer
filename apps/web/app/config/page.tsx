@@ -111,7 +111,9 @@ export default function ConfigPage() {
         if (!cancelled) setLoading(false)
       }
     })()
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   // 保存配置
@@ -171,7 +173,9 @@ export default function ConfigPage() {
                   <Label>{t("llmProvider")}</Label>
                   <Input
                     value={llm.provider}
-                    onChange={(e) => setLlm({ ...llm, provider: e.target.value })}
+                    onChange={(e) =>
+                      setLlm({ ...llm, provider: e.target.value })
+                    }
                   />
                 </div>
                 <div className="space-y-2">
@@ -377,7 +381,9 @@ export default function ConfigPage() {
                   <Label>{t("embeddingProvider")}</Label>
                   <Input
                     value={embedding.provider}
-                    onChange={(e) => setEmbedding({ ...embedding, provider: e.target.value })}
+                    onChange={(e) =>
+                      setEmbedding({ ...embedding, provider: e.target.value })
+                    }
                   />
                 </div>
                 <div className="space-y-2">
@@ -496,16 +502,19 @@ export default function ConfigPage() {
         <TabsContent value="reranker" className="mt-4">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">
-                {t("rerankerTitle")}
-              </CardTitle>
+              <CardTitle className="text-base">{t("rerankerTitle")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>{t("rerankEnabled")}</Label>
                   <Select
-                    value={reranker.enabled}
+                    value={
+                      {
+                        true: t("rerankEnabledOn"),
+                        false: t("rerankDisabled"),
+                      }[reranker.enabled]
+                    }
                     onValueChange={(v) =>
                       v && setReranker({ ...reranker, enabled: v })
                     }
@@ -517,7 +526,9 @@ export default function ConfigPage() {
                       <SelectItem value="false">
                         {t("rerankDisabled")}
                       </SelectItem>
-                      <SelectItem value="true">{t("rerankEnabledOn")}</SelectItem>
+                      <SelectItem value="true">
+                        {t("rerankEnabledOn")}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

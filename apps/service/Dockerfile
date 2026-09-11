@@ -48,14 +48,6 @@ COPY apps/service/ /app/
 # app/lifespan.py 启动时 StaticFiles(directory="data") 要求该目录存在
 RUN mkdir -p /app/data/uploads
 
-# 预下载模型到 /app/.cache/huggingface/hub
-# 卷首次创建时，Docker 会把镜像里 /app/.cache/huggingface 的内容播种进 hf_cache 卷
-# RUN uv run --no-sync python -c "\
-#     import os; \
-#     os.environ['HF_ENDPOINT'] = 'https://hf-mirror.com'; \
-#     from huggingface_hub import snapshot_download; \
-#     snapshot_download('Qwen/Qwen3-Reranker-0.6B'); \
-#     snapshot_download('BAAI/bge-base-zh-v1.5')"
 
 EXPOSE 8009
 # 与 Makefile 一致；--no-sync 避免每次启动校验 lockfile
