@@ -34,6 +34,20 @@ export function toDocumentFileUrl(filePath: string): string {
   return `${FILE_BASE_URL}/${relative}`
 }
 
+export interface DocumentUploadItem {
+  filename: string
+  success: boolean
+  document_id: number | null
+  status: Document["status"] | null
+  message: string | null
+}
+
+export interface DocumentUploadResult {
+  results: DocumentUploadItem[]
+  success_count: number
+  failed_count: number
+}
+
 export interface KnowledgeQueryResult {
   chunks: Record<string, unknown>[]
   answer: string | null
@@ -46,13 +60,14 @@ export interface QueryKnowledgeParams {
 
 // ========== 知识库接口 ==========
 
-export async function uploadDocumentApi(file: File) {
+/**
+ * 批量上传文档。后端接收重复的 `files` 字段，逐文件独立处理：
+ * 单个文件校验失败不会让整个请求失败，结果里逐条给出成败。
+ */
+export async function uploadDocumentApi(files: File[]) {
   const formData = new FormData()
-  formData.append("file", file)
-  return fetchClient.post<{ document_id: number; status: string }>(
-    "/knowledge/upload",
-    formData
-  )
+  for (const file of files) formData.append("files", file)
+  return fetchClient.post<DocumentUploadResult>("/knowledge/upload", formData)
 }
 
 export async function getDocumentsApi(params: FetchPaginationParams) {

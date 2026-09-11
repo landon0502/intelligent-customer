@@ -20,10 +20,20 @@ class DocumentItem(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class DocumentUploadItem(BaseModel):
+    """批量上传中单个文件的结果"""
+    filename: str
+    success: bool
+    document_id: int | None = None
+    status: str | None = None
+    message: str | None = None
+
+
 class DocumentUploadResult(BaseModel):
-    """上传文档响应"""
-    document_id: int
-    status: str
+    """批量上传文档响应"""
+    results: list[DocumentUploadItem]
+    success_count: int
+    failed_count: int
 
 
 class KnowledgeQueryRequest(BaseModel):

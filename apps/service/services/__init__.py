@@ -12,6 +12,7 @@ from services.message import (
 )
 from services.knowledge import (
     upload_document,
+    upload_documents,
     get_documents,
     get_document_by_id,
     delete_document,

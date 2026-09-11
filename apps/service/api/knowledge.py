@@ -12,7 +12,7 @@ from schemas.document_schema import (
 )
 from auth.security import get_current_user
 from services.knowledge import (
-    upload_document,
+    upload_documents,
     get_documents,
     delete_document,
     query_knowledge,
@@ -24,23 +24,28 @@ router = APIRouter(prefix="/api/knowledge", tags=["knowledge"])
 
 @router.post("/upload")
 async def upload_knowledge_document(
-    file: UploadFile = File(..., description="上传的文档文件（PDF/Word/TXT）"),
+    files: list[UploadFile] = File(..., description="上传的文档文件（PDF/Word/TXT），支持多选"),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """上传文档到知识库（管理员权限）"""
+    """批量上传文档到知识库（管理员权限）
+
+    逐文件独立处理：单个文件校验失败只体现在 results 里，不影响其余文件，
+    整体仍返回成功，由前端按 success_count / failed_count 提示。
+    """
     if current_user.role != "admin":
         return error(code=40003, message="仅管理员可上传文档")
 
-    content = await file.read()
+    payload = [(f.filename or "", await f.read()) for f in files]
     try:
-        doc = await upload_document(db, file.filename, content, uploaded_by=current_user.id)
+        results = await upload_documents(db, payload, uploaded_by=current_user.id)
     except ValueError as e:
         return error(code=40004, message=str(e))
 
     return success(data=DocumentUploadResult(
-        document_id=doc.id,
-        status=doc.status,
+        results=results,
+        success_count=sum(1 for r in results if r.success),
+        failed_count=sum(1 for r in results if not r.success),
     ).model_dump())
 
 @router.get("/documents")

@@ -99,7 +99,7 @@ export default function KnowledgePage() {
     total,
     totalChunks,
     uploadControl,
-    uploadDocument,
+    uploadDocuments,
     deleteControl,
     removeDocument,
     queryControl,
@@ -159,15 +159,28 @@ export default function KnowledgePage() {
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
-  // 上传文档
+  // 上传文档（支持多选，一次请求提交整批）
   const handleUpload = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0]
-      if (!file) return
+      const input = e.currentTarget
+      const files = Array.from(input.files ?? [])
+      // 清空 input，否则再次选择同一批文件不会触发 onChange
+      input.value = ""
+      if (files.length === 0) return
 
       try {
-        await uploadDocument(file)
-        toast.success(t("uploadSuccess"))
+        const res = await uploadDocuments(files)
+        const okCount = res.data?.success_count ?? 0
+        const failedCount = res.data?.failed_count ?? 0
+
+        if (failedCount === 0) {
+          toast.success(t("uploadSuccess", { count: okCount }))
+        } else {
+          toast.error(
+            t("uploadPartialFailed", { count: okCount, failed: failedCount })
+          )
+        }
+
         setUploadOpen(false)
         // 服务端按上传时间倒序，新文档在第 1 页
         if (page === 1) runDocuments(fetchParams)
@@ -176,7 +189,7 @@ export default function KnowledgePage() {
         toast.error(t("uploadFailed"))
       }
     },
-    [t, uploadDocument, page, runDocuments, fetchParams]
+    [t, uploadDocuments, page, runDocuments, fetchParams]
   )
 
   // 删除文档
@@ -253,6 +266,7 @@ export default function KnowledgePage() {
                   </p>
                   <Input
                     type="file"
+                    multiple
                     accept=".pdf,.docx,.doc,.txt"
                     onChange={handleUpload}
                     disabled={uploadControl.loading}

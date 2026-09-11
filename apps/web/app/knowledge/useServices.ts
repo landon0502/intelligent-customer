@@ -21,11 +21,11 @@ export default function useKnowledgeServices() {
     [documents]
   )
 
-  // 上传文档
+  // 上传文档（支持一次提交多个文件）
   const uploadControl = useRequest(uploadDocumentApi, { manual: true })
 
-  async function uploadDocument(file: File) {
-    return uploadControl.runAsync(file)
+  async function uploadDocuments(files: File[]) {
+    return uploadControl.runAsync(files)
   }
 
   // 删除文档
@@ -59,7 +59,7 @@ export default function useKnowledgeServices() {
     totalChunks,
     // 上传
     uploadControl,
-    uploadDocument,
+    uploadDocuments,
     // 删除
     deleteControl,
     removeDocument,

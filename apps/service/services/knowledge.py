@@ -16,6 +16,7 @@ from rag.retrieval import retrieve
 from rag.generation import generate_answer
 from schemas.common import PageResult
 from schemas.document import DocumentResponse
+from schemas.document_schema import DocumentUploadItem
 
 logger = logging.getLogger("intelligent-customer.knowledge")
 
@@ -29,6 +30,9 @@ ALLOWED_EXTENSIONS = {"pdf", "docx", "doc", "txt"}
 
 # 上传大小上限（20MB）
 MAX_UPLOAD_SIZE = 20 * 1024 * 1024
+
+# 单次批量上传的文件数上限
+MAX_UPLOAD_FILES = 20
 
 # 后台文档处理任务集合 —— 保存 asyncio.create_task 引用防止任务被 GC 回收
 _pending_tasks: set[asyncio.Task] = set()
@@ -137,7 +141,7 @@ async def upload_document(
     # 创建数据库记录
     doc = Document(
         filename=filename,
-        file_path=to_relative_path(str(file_content)),
+        file_path=to_relative_path(str(file_path)),
         file_type=ext,
         chunk_count=0,
         status="processing",
@@ -153,6 +157,61 @@ async def upload_document(
     )
 
     return doc
+
+
+async def upload_documents(
+    db: AsyncSession,
+    files: list[tuple[str, bytes]],
+    uploaded_by: int | None = None,
+) -> list[DocumentUploadItem]:
+    """批量上传文档：逐个文件独立处理，单个失败不影响其余文件。
+
+    Args:
+        db: 请求级数据库会话
+        files: (filename, file_content) 列表
+        uploaded_by: 上传者用户 ID
+
+    Returns:
+        与入参等长、顺序一致的结果列表
+
+    Raises:
+        ValueError: 文件数超过 MAX_UPLOAD_FILES（整批拒绝，不落任何数据）
+    """
+    if len(files) > MAX_UPLOAD_FILES:
+        raise ValueError(
+            f"单次最多上传 {MAX_UPLOAD_FILES} 个文件，当前 {len(files)} 个"
+        )
+
+    results: list[DocumentUploadItem] = []
+    for filename, file_content in files:
+        try:
+            doc = await upload_document(
+                db, filename, file_content, uploaded_by=uploaded_by
+            )
+        except ValueError as e:
+            # 校验类错误（类型/大小/内容）—— 把原因直接给前端
+            results.append(
+                DocumentUploadItem(filename=filename, success=False, message=str(e))
+            )
+        except Exception:
+            # 未预期错误：记日志并回滚，避免会话进入不可用状态后连累后续文件
+            logger.exception("批量上传处理文件失败: %s", filename)
+            await db.rollback()
+            results.append(
+                DocumentUploadItem(
+                    filename=filename, success=False, message="文件处理失败，请重试"
+                )
+            )
+        else:
+            results.append(
+                DocumentUploadItem(
+                    filename=filename,
+                    success=True,
+                    document_id=doc.id,
+                    status=doc.status,
+                )
+            )
+    return results
 
 
 async def get_documents(db: AsyncSession, keyword: str, page:int, page_size: int) -> PageResult[DocumentResponse]:
