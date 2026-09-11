@@ -102,7 +102,6 @@ async def to_ui_message_stream_chunk(chunk, state: StreamState) -> AsyncIterator
         return
 
     # 1. 处理文本内容
-    has_text = bool(chunk.content and chunk.content.strip() != "")
     has_tool_calls = bool(getattr(chunk, "tool_calls", None))
     has_tool_call_chunks = bool(getattr(chunk, "tool_call_chunks", None))
 
@@ -123,7 +122,7 @@ async def to_ui_message_stream_chunk(chunk, state: StreamState) -> AsyncIterator
         else:
             is_incremental = True
 
-    if has_text:
+    if chunk.content:
         if not state.text_id:
             state.text_id = _new_id()
             yield {"type": "text-start", "id": state.text_id}

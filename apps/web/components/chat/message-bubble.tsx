@@ -40,6 +40,8 @@ export function MessageBubble({ message }: MessageBubbleProps) {
               <Streamdown
                 isAnimating={true}
                 key={i}
+                mode="streaming" // ← 关键：启用流式模式
+                parseIncompleteMarkdown={true} // ← 关键：自动补全不完整的 Markdown
                 controls={{ table: false, code: false }}
               >
                 {textPart.text}

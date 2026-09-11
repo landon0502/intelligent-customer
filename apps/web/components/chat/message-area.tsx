@@ -12,7 +12,6 @@ interface MessageAreaProps {
 export function MessageArea({ messages }: MessageAreaProps) {
   const t = useTranslations("chat")
   const bottomRef = useRef<HTMLDivElement>(null)
-
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages])

@@ -75,11 +75,17 @@ function ChatInner({
       }),
     [baseUrl, conversationId]
   )
-
+  console.log("initialMessages", initialMessages)
   const chat = useChat({
     id: `chat-${conversationId}`,
     transport,
     messages: initialMessages,
+    onData: (data) => {
+      console.log("raw chunk:", JSON.stringify(data))
+    },
+    onFinish: (message) => {
+      console.log("final message:", JSON.stringify(message))
+    },
   })
 
   const [input, setInput] = useState("")
@@ -88,7 +94,6 @@ function ChatInner({
     await chat.sendMessage({ text: msg })
     setInput("")
   }
-
   return (
     <>
       <MessageArea messages={chat.messages} />
